@@ -17,6 +17,14 @@ import { fsNumber, fsString } from './expr.js';
 
 const C45 = Math.SQRT1_2;
 
+// Faux text styles (the same for every font): italic slants by 12 degrees, bold
+// grows the outline by this share of the cap height, underline sizes are shares
+// of the cap height (thickness at least UNDERLINE.min mm, so it prints).
+const TEXT_SLANT = Math.tan((12 * Math.PI) / 180);
+const TEXT_BOLD = 0.045;
+const UNDERLINE = { thickness: 0.1, min: 0.8, gap: 0.15 };
+const underlineSize = (cap) => ({ thickness: Math.max(UNDERLINE.thickness * cap, UNDERLINE.min), gap: UNDERLINE.gap * cap });
+
 function circleSegments(d) {
   return Math.max(24, Math.min(256, Math.round((Math.PI * d) / 0.4)));
 }
@@ -392,41 +400,83 @@ function mgQr(context is Context, id is Id, z is number, t is number, n is numbe
   },
 
   text: {
-    description: 'Single line of text, centered. `size` is the capital letter height in mm. `font` is one of the names in engine/fonts.js.',
+    description: 'Single line of text, centered. `size` is the capital letter height in mm. `font` is one of the names in engine/fonts.js. `bold`, `italic` and `underline` style it.',
     args: {
       text: { type: 'string', default: 'Text' },
       size: { type: 'number', default: 8 },
       font: { type: 'enum', options: FONT_NAMES, default: 'regular' },
+      bold: { type: 'boolean', default: false, help: 'thicker strokes' },
+      italic: { type: 'boolean', default: false, help: 'slanted' },
+      underline: { type: 'boolean', default: false, help: 'line under the text' },
     },
     profile(a, { CrossSection, fonts }) {
       if (!a.text || !String(a.text).trim() || a.size <= 0) return null;
       const font = fonts[a.font] || fonts.regular; // a missing font (e.g. no own font file yet) falls back
-      const polys = textPolygons(font, String(a.text), a.size);
+      let polys = textPolygons(font, String(a.text), a.size);
       if (!polys.length) return null;
-      const cs = new CrossSection(polys, 'NonZero');
+      let x0 = Infinity, x1 = -Infinity;
+      for (const poly of polys) for (const [x] of poly) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); }
+      // faux styles, so they work with every font: slant around the baseline, grow the outline
+      if (a.italic) polys = polys.map((poly) => poly.map(([x, y]) => [x + y * TEXT_SLANT, y]));
+      const pieces = [];
+      let cs = new CrossSection(polys, 'NonZero');
+      const grow = a.bold ? TEXT_BOLD * a.size : 0;
+      if (grow > 0) {
+        pieces.push(cs);
+        cs = cs.offset(grow, 'Round', 2, 16);
+      }
+      if (a.underline) {
+        const { thickness, gap } = underlineSize(a.size);
+        const line = CrossSection.square([x1 - x0 + 2 * grow, thickness]).translate([x0 - grow, -gap - grow - thickness]);
+        pieces.push(cs, line);
+        cs = cs.add(line);
+      }
       const b = cs.bounds();
-      return cs.translate([-(b.min[0] + b.max[0]) / 2, -(b.min[1] + b.max[1]) / 2]);
+      const out = cs.translate([-(b.min[0] + b.max[0]) / 2, -(b.min[1] + b.max[1]) / 2]);
+      pieces.push(cs);
+      for (const p of pieces) p.delete();
+      return out;
     },
     fs: {
       helper: `
 const MG_BOLD_FONTS = [${FONT_NAMES.filter((n) => FONTS[n].fsBold).map((n) => `"${n}"`).join(', ')}];
 
 // Onshape text box height is roughly the font's em size; Open Sans caps are 0.714 em.
-// Onshape has its own font list, so every font is drawn with Open Sans here.
-function mgText(context is Context, id is Id, z is number, t is number, txt is string, capHeight is number, font is string) returns Query
+// Onshape has its own font list, so every font is drawn with Open Sans here, in
+// its Bold, Italic or BoldItalic file for bold and italic text.
+function mgText(context is Context, id is Id, z is number, t is number, txt is string, capHeight is number, font is string, bold is boolean, italic is boolean, underline is boolean) returns Query
 {
     const mm = millimeter;
     const em = capHeight / 0.714;
+    const heavy = bold || isIn(font, MG_BOLD_FONTS);
+    const fontName = "OpenSans-" ~ (heavy ? (italic ? "BoldItalic" : "Bold") : (italic ? "Italic" : "Regular")) ~ ".ttf";
     const sk = newSketchOnPlane(context, id + "sk", { "sketchPlane" : mgPlane(z) });
-    skText(sk, "t", { "text" : txt, "fontName" : isIn(font, MG_BOLD_FONTS) ? "OpenSans-Bold.ttf" : "OpenSans-Regular.ttf", "firstCorner" : vector(0, 0) * mm, "secondCorner" : vector(em, em) * mm });
+    skText(sk, "t", { "text" : txt, "fontName" : fontName, "firstCorner" : vector(0, 0) * mm, "secondCorner" : vector(em, em) * mm });
     skSolve(sk);
-    const q = mgExtrude(context, id, id + "sk", t);
+    var bodies = [];
+    if (underline)
+    {
+        // the baseline is the bottom of a capital H drawn the same way
+        const textBox = evBox3d(context, { "topology" : qSketchRegion(id + "sk", true) });
+        const ref = newSketchOnPlane(context, id + "ref", { "sketchPlane" : mgPlane(z) });
+        skText(ref, "h", { "text" : "H", "fontName" : fontName, "firstCorner" : vector(0, 0) * mm, "secondCorner" : vector(em, em) * mm });
+        skSolve(ref);
+        const baseline = evBox3d(context, { "topology" : qSketchRegion(id + "ref", true) }).minCorner[1] / mm;
+        opDeleteBodies(context, id + "refdel", { "entities" : qCreatedBy(id + "ref", EntityType.BODY) });
+        const th = max(${UNDERLINE.thickness} * capHeight, ${UNDERLINE.min});
+        const top = baseline - ${UNDERLINE.gap} * capHeight;
+        const ul = newSketchOnPlane(context, id + "ulsk", { "sketchPlane" : mgPlane(z) });
+        skRectangle(ul, "r", { "firstCorner" : vector(textBox.minCorner[0] / mm, top - th) * mm, "secondCorner" : vector(textBox.maxCorner[0] / mm, top) * mm });
+        skSolve(ul);
+        bodies = append(bodies, mgExtrude(context, id + "ul", id + "ulsk", t));
+    }
+    const q = qUnion(append(bodies, mgExtrude(context, id, id + "sk", t)));
     const box = evBox3d(context, { "topology" : q });
     const c = (box.minCorner + box.maxCorner) / 2;
     opTransform(context, id + "center", { "bodies" : q, "transform" : transform(vector(-c[0], -c[1], 0 * mm)) });
     return q;
 }`,
-      call: (f) => ({ guard: `${f.text} != ""`, code: `mgText(context, ID, Z, T, ${f.text}, ${f.size}, ${f.font})` }),
+      call: (f) => ({ guard: `${f.text} != ""`, code: `mgText(context, ID, Z, T, ${f.text}, ${f.size}, ${f.font}, ${f.bold}, ${f.italic}, ${f.underline})` }),
     },
   },
 };

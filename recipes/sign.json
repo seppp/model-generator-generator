@@ -18,8 +18,8 @@
       "label": "Text and border",
       "color": "#f8fafc"
     },
-    "border": {
-      "label": "Border and lines",
+    "lettering": {
+      "label": "Text",
       "color": "#fbbf24"
     }
   },
@@ -250,6 +250,47 @@
         }
       ],
       "group": "Text"
+    },
+    {
+      "key": "textBold",
+      "type": "boolean",
+      "label": "Bold",
+      "default": false,
+      "group": "Text",
+      "help": "Bold, italic and underline work with every font."
+    },
+    {
+      "key": "textItalic",
+      "type": "boolean",
+      "label": "Italic",
+      "default": false,
+      "group": "Text"
+    },
+    {
+      "key": "textUnderline",
+      "type": "boolean",
+      "label": "Underline",
+      "default": false,
+      "group": "Text"
+    },
+    {
+      "key": "textColor",
+      "type": "select",
+      "label": "Text color",
+      "default": "same",
+      "group": "Text",
+      "help": "Own color needs the multi-material 3MF.",
+      "showIf": "border || textLines",
+      "options": [
+        {
+          "value": "same",
+          "label": "Same as border"
+        },
+        {
+          "value": "own",
+          "label": "Own color"
+        }
+      ]
     },
     {
       "key": "raise",
@@ -521,25 +562,6 @@
       "showIf": "(border || textLines) && borderOwnHeight"
     },
     {
-      "key": "borderColor",
-      "type": "select",
-      "label": "Color",
-      "default": "text",
-      "group": "Border and lines",
-      "help": "Own color: set it under Colors. Needs multi-material.",
-      "showIf": "(border || textLines) && borderStyle != 'engraved'",
-      "options": [
-        {
-          "value": "text",
-          "label": "Same as text"
-        },
-        {
-          "value": "own",
-          "label": "Own color"
-        }
-      ]
-    },
-    {
       "key": "holes",
       "type": "boolean",
       "label": "Screw holes",
@@ -648,7 +670,6 @@
     "outerH": "height - 2 * borderInset",
     "outerR": "max(corner - borderInset, 0)",
     "holeX": "width / 2 - borderInset - borderWidth - holeDia",
-    "borderPart": "borderColor == 'own' ? 'border' : 'accent'",
     "bH": "borderOwnHeight ? borderHeight : raise",
     "borderZ": "borderStyle == 'raised' ? thickness : thickness - bH",
     "borderT": "borderStyle == 'engraved' ? bH + 1 : bH",
@@ -667,7 +688,7 @@
     },
     {
       "add": "frame",
-      "part": "borderPart",
+      "part": "accent",
       "when": "border && borderStyle != 'engraved'",
       "comment": "border",
       "shape": "roundedRect",
@@ -693,7 +714,7 @@
     },
     {
       "add": "frame",
-      "part": "borderPart",
+      "part": "accent",
       "when": "border && border2 && borderStyle != 'engraved'",
       "comment": "second border line",
       "shape": "roundedRect",
@@ -719,7 +740,7 @@
     },
     {
       "add": "line",
-      "part": "borderPart",
+      "part": "accent",
       "when": "textLines && borderStyle != 'engraved'",
       "comment": "line above the text",
       "length": "lineLength",
@@ -749,7 +770,7 @@
     },
     {
       "add": "line",
-      "part": "borderPart",
+      "part": "accent",
       "when": "textLines && borderStyle != 'engraved'",
       "comment": "line below the text",
       "length": "lineLength",
@@ -784,7 +805,25 @@
       "size": "textSize",
       "font": "font",
       "z": "thickness",
-      "thickness": "raise"
+      "thickness": "raise",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline",
+      "when": "!border || textColor != 'own'"
+    },
+    {
+      "add": "text",
+      "part": "lettering",
+      "text": "text",
+      "size": "textSize",
+      "font": "font",
+      "z": "thickness",
+      "thickness": "raise",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline",
+      "when": "border && textColor == 'own'",
+      "comment": "text in its own color"
     },
     {
       "subtract": "shape",
@@ -809,16 +848,16 @@
       "text": "Wide text runs into the screw holes. Shorten it or widen the sign."
     },
     {
+      "when": "(border || textLines) && textColor == 'own' && borderStyle != 'engraved'",
+      "text": "Text and border share layers: use the multi-material 3MF for the own text color."
+    },
+    {
       "when": "(border || textLines) && borderStyle != 'raised' && bH > thickness - 0.6",
       "text": "Border and lines are almost as deep as the plate. Make them shallower."
     },
     {
       "when": "(border || textLines) && borderStyle == 'flush'",
       "text": "A flush border needs the multi-material 3MF."
-    },
-    {
-      "when": "(border || textLines) && borderColor == 'own' && borderStyle == 'raised'",
-      "text": "Border and lines in their own color need the multi-material 3MF."
     }
   ]
 }

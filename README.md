@@ -46,6 +46,10 @@ recipes/sign.json         ┘                   dist/index.html?recipe=<id>  web
   alphabetically under style headings. The page loads a font only when it is
   used. Onshape has its own font list, so the FeatureScript draws all of them
   with Open Sans.
+- **Text styles and colors**: bold, italic and underline work with every font
+  (drawn by the engine: grown outline, 12° slant, a printable line). The
+  official generators also let the text take its own color as a separate part
+  (keychain nametag, sign text); the coaster text already has one.
 - **Share links** (`?shared#g=...`) carry the whole recipe, compressed, after
   the `#`, so nothing is stored on a server. A shared version opens with a
   banner saying it is not the official generator.
@@ -66,12 +70,12 @@ Each generator has colored parts. The page offers:
 
 **Borders and lines** (`frame` and `line` blocks): border lines along an
 outline and straight lines (solid, dashed or dotted, flat or round ends),
-raised, flush or engraved, in the color of the text or code or their own.
-The QR keychain has a border along the tag edge, around the code and a line
-between nametag and code; the coaster a ring and lines above and below the
-text; the sign a second border line and lines above and below the text. All
-are off by default (the sign's border stays on, as before). The color list
-only shows parts the current settings produce.
+raised, flush or engraved. The QR keychain has a border along the tag edge,
+around the code and a line between nametag and code (same color as the code
+or their own); the coaster a ring and lines above and below the text (same
+color as the text or their own); the sign a border style, a second border
+line and lines above and below the text (in the border color). All are off by
+default (the sign's border stays on, as before).
 
 Parts can have **chamfered or filleted** top and bottom edges, including a
 *printable fillet* for the bottom: a 45° chamfer at the bed, then a fillet

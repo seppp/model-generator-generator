@@ -204,6 +204,25 @@ no text along a curve. Rotation works with the step's `rotate`.
 | `text` | | the string |
 | `size` | 8 | capital letter height in mm |
 | `font` | `regular` | a font name, see below |
+| `bold` | `false` | thicker strokes |
+| `italic` | `false` | slanted letters |
+| `underline` | `false` | a line under the text |
+
+`bold`, `italic` and `underline` take `true`, `false` or an expression, so
+boolean params can switch them (`"bold": "textBold"`). They work with every
+font because they are drawn, not taken from the font: bold grows the outline
+by 4.5 % of `size` on every side, italic slants the letters by 12°, and the
+underline is 10 % of `size` thick (at least 0.8 mm, so it prints), 15 % of
+`size` below the baseline and as wide as the text. The text is centered with
+its underline. Bold on a heavy font makes it heavier still; small counters
+(the holes in e, a, o) can close at small sizes.
+
+**Text in its own color**: colors belong to parts, so give the text its own
+part (for example `"lettering": { "label": "Text", "color": "#fbbf24" }`)
+and let a select param choose between it and the shared part, with one text
+step per choice and `when` picking one (see the sign recipe's `textColor`).
+Text at the same height as another raised detail in another color needs the
+multi-material 3MF; add a note that says so.
 
 Fonts (open-licensed<!-- dev-only -->, in `engine/fonts.js`<!-- /dev-only -->; the browser loads each only when used):
 
@@ -223,13 +242,15 @@ too, your own font last); add `"sort": "recipe"` to keep your own order. Keep sc
 (cap height 8 mm or more) so thin strokes print.
 
 In Onshape, text is drawn with Open Sans through `skText` (regular, or bold for
-the heavier fonts), since Onshape has its own font list; sizes match closely
-but not to the tenth of a millimeter.
+the heavier fonts and for `bold`; its italic files for `italic`), since Onshape
+has its own font list; sizes match closely but not to the tenth of a
+millimeter, and bold there is Open Sans Bold rather than a grown outline.
 
 ## Borders, frames and divider lines
 
 Use `frame` for a border around something (the plate edge, a QR code, a
-label) and `line` for dividers and underlines. Give people the same styles as
+label) and `line` for dividers and decorative lines (text has its own
+`underline`). Give people the same styles as
 for text, with one step per style:
 
 ```json
@@ -294,7 +315,7 @@ Importing also accepts a single recipe or a plain array of recipes.
 
 Blocks live in `engine/blocks.js`. Each needs:
 
-1. `args`: argument schema (`number`, `string`, `enum` with `options`; `baked: true`
+1. `args`: argument schema (`number`, `string`, `boolean`, `enum` with `options`; `baked: true`
    for values that cannot be computed in FeatureScript).
 2. `profile(args, env)`: returns a manifold-3d `CrossSection` centered on the
    origin (or `null` to skip).

@@ -371,6 +371,28 @@
       "group": "Text"
     },
     {
+      "key": "labelBold",
+      "type": "boolean",
+      "label": "Bold",
+      "default": false,
+      "group": "Text",
+      "help": "Bold, italic and underline work with every font."
+    },
+    {
+      "key": "labelItalic",
+      "type": "boolean",
+      "label": "Italic",
+      "default": false,
+      "group": "Text"
+    },
+    {
+      "key": "labelUnderline",
+      "type": "boolean",
+      "label": "Underline",
+      "default": false,
+      "group": "Text"
+    },
+    {
       "key": "ring",
       "type": "boolean",
       "label": "Decorative ring",
@@ -751,7 +773,10 @@
       "size": "labelSize",
       "font": "font",
       "z": "thickness",
-      "thickness": "labelDepth"
+      "thickness": "labelDepth",
+      "bold": "labelBold",
+      "italic": "labelItalic",
+      "underline": "labelUnderline"
     },
     {
       "add": "text",
@@ -761,7 +786,10 @@
       "size": "labelSize",
       "font": "font",
       "z": "thickness - labelDepth",
-      "thickness": "labelDepth"
+      "thickness": "labelDepth",
+      "bold": "labelBold",
+      "italic": "labelItalic",
+      "underline": "labelUnderline"
     },
     {
       "subtract": "text",
@@ -771,7 +799,10 @@
       "size": "labelSize",
       "font": "font",
       "z": "thickness - labelDepth",
-      "thickness": "labelDepth + 1"
+      "thickness": "labelDepth + 1",
+      "bold": "labelBold",
+      "italic": "labelItalic",
+      "underline": "labelUnderline"
     },
     {
       "add": "frame",
