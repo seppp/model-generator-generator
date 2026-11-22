@@ -63,7 +63,7 @@ const TEMPLATE = `
         <button class="btn primary" type="button" data-ref="github">Propose on GitHub</button>
         <button class="btn" type="button" data-ref="download">Download</button>
       </div>
-      <small>GitHub opens the recipe file with the new version on your clipboard: select everything, paste, then <em>Commit changes / Propose changes</em>. That creates a pull request; once it is merged, the website updates within minutes. Needs a free GitHub account.</small>
+      <small data-ref="github-msg" role="status">Opens GitHub with the new version on your clipboard and creates a pull request; once it is merged, the website updates within minutes. Needs a free GitHub account.</small>
     </div>
   </section>
   <div class="lab-bar">
@@ -87,11 +87,12 @@ const TEMPLATE = `
  * @param container element to fill (section + generator)
  * @param opts.sourceId  id of the published recipe being changed, or null for a new one
  * @param opts.published the published recipe object (null for a new one)
+ * @param opts.publishedIds ids of all published recipes (to avoid proposing a duplicate file)
  * @param opts.start     recipe text to start a new generator from
  * @param opts.syncUrl   keep generator settings in the URL hash
  * @param opts.open      start with the section expanded
  */
-export async function mountWorkbench(container, { sourceId = null, published = null, start = '', syncUrl = true, open = false, draftKey } = {}) {
+export async function mountWorkbench(container, { sourceId = null, published = null, publishedIds = [], start = '', syncUrl = true, open = false, draftKey } = {}) {
   container.replaceChildren();
   const details = document.createElement('details');
   details.className = 'workbench';
@@ -260,18 +261,32 @@ export async function mountWorkbench(container, { sourceId = null, published = n
   });
 
   ref('github').addEventListener('click', async (e) => {
+    const out = ref('github-msg');
     const id = editedId();
+    const file = `recipes/${id}.json`;
     let url;
+    let steps;
     if (sourceId && id === sourceId) {
-      url = `https://github.com/${REPO}/edit/main/recipes/${id}.json`;
+      // Changing a published generator: edit the existing file (a new file with the same name fails).
+      url = `https://github.com/${REPO}/edit/main/${file}`;
+      steps = `On GitHub, click into the file, select all (Ctrl+A or Cmd+A) and paste (Ctrl+V or Cmd+V) to replace it. Then click "Commit changes...", pick "Create a new branch for this commit and start a pull request" and confirm.`;
+    } else if (publishedIds.includes(id)) {
+      out.className = 'bad';
+      out.textContent = `A generator with the id '${id}' already exists. Change "id" at the top of the recipe to a new name (lowercase letters, digits and dashes) so this is proposed as a new generator${sourceId ? `, or set it back to '${sourceId}' to change this one` : ''}.`;
+      return;
     } else {
-      url = `https://github.com/${REPO}/new/main?filename=${encodeURIComponent(`recipes/${id}.json`)}`;
+      url = `https://github.com/${REPO}/new/main?filename=${encodeURIComponent(file)}`;
       const withValue = `${url}&value=${encodeURIComponent(src.value)}`;
-      if (withValue.length < 7500) url = withValue;
+      const filled = withValue.length < 7500;
+      if (filled) url = withValue;
+      steps = `On GitHub, the new file ${file} is ${filled ? 'already filled in' : 'empty: paste (Ctrl+V or Cmd+V) the recipe into it'}. Click "Commit changes...", pick "Create a new branch for this commit and start a pull request" and confirm.`;
     }
-    try { await navigator.clipboard.writeText(src.value); } catch { /* still open GitHub */ }
+    let copied = true;
+    try { await navigator.clipboard.writeText(src.value); } catch { copied = false; }
     window.open(url, '_blank', 'noopener');
-    flash(e.target, 'Recipe copied');
+    flash(e.target, copied ? 'Recipe copied' : 'Opened GitHub');
+    out.className = 'ok';
+    out.textContent = copied ? `The recipe is on your clipboard. ${steps}` : `${steps} Copy the recipe first with "Copy recipe" below.`;
   });
 
   ref('reset').addEventListener('click', () => {
