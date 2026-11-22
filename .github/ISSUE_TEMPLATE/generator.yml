@@ -1,0 +1,34 @@
+name: Submit a generator
+description: A new generator or a change to one, sent from the website's "Submit to the site" button.
+title: "New generator: "
+labels: ["submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! The fields below were filled in by the website. The owner reviews submissions and adds the ones that fit to the site.
+  - type: textarea
+    id: what
+    attributes:
+      label: What does it make, or what did you change?
+      description: One or two sentences in plain words.
+    validations:
+      required: true
+  - type: input
+    id: based-on
+    attributes:
+      label: Based on
+      description: The site generator this changes, or "new".
+  - type: input
+    id: link
+    attributes:
+      label: Share link
+      description: Opens your version on the website. It contains the whole recipe.
+    validations:
+      required: true
+  - type: textarea
+    id: recipe
+    attributes:
+      label: Recipe
+      description: Filled in when it fits in the link; otherwise the share link above holds it.
+      render: json

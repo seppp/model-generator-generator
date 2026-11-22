@@ -37,8 +37,9 @@ function readHash() {
 /**
  * Mounts a generator for `recipe` into `root`.
  * options.syncUrl: keep parameter values in the URL hash (shareable links)
+ * options.shareLink: async () => URL for the Share card (default: the page URL)
  */
-export async function mountGenerator(root, recipe, { syncUrl = true, initialValues, initialColors, view } = {}) {
+export async function mountGenerator(root, recipe, { syncUrl = true, initialValues, initialColors, view, shareLink } = {}) {
   validateRecipe(recipe);
   root.replaceChildren();
   root.classList.add('generator');
@@ -181,9 +182,9 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
         }))));
     cards.push(h('div', { class: 'card' },
       h('h3', {}, 'Share'),
-      h('p', {}, 'The link contains all settings.'),
+      h('p', {}, shareLink ? 'The link contains this generator and all settings.' : 'The link contains all settings.'),
       btn('Copy link', async (e) => {
-        await navigator.clipboard.writeText(location.href);
+        await navigator.clipboard.writeText(shareLink ? await shareLink() : location.href);
         e.target.textContent = 'Copied';
         setTimeout(() => (e.target.textContent = 'Copy link'), 1500);
       })));
@@ -194,6 +195,8 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   function writeHash() {
     if (!syncUrl) return;
     const q = new URLSearchParams();
+    const shared = new URLSearchParams(location.hash.slice(1)).get('g'); // a shared recipe stays in the link
+    if (shared) q.set('g', shared);
     for (const p of recipe.params) if (values[p.key] !== p.default) q.set(p.key, String(values[p.key]));
     for (const [k, part] of Object.entries(recipe.parts)) if (colors[k] !== part.color) q.set(`color.${k}`, colors[k]);
     if (layerHeight !== 0.2) q.set('layer', String(layerHeight));

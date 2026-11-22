@@ -150,6 +150,17 @@ Hints shown under the preview. `{expression}` placeholders are filled in.
   color, extruder 1, 2, ... in `parts` order.
 - **STL**: everything, or one file per part.
 
+## Collections (many recipes in one file)
+
+The site loads its generators from `generators.json`, and *My generators* are
+exported and imported in the same format:
+
+```json
+{ "format": "generator-generator/1", "generators": [ { "id": "coaster", ... }, { "id": "sign", ... } ] }
+```
+
+Importing also accepts a single recipe or a plain array of recipes.
+
 ## Adding a block
 
 Blocks live in `engine/blocks.js`. Each needs:
