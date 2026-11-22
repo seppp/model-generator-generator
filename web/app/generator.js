@@ -16,7 +16,7 @@ const h = (tag, attrs = {}, ...children) => {
     else if (k === 'class') el.className = v;
     else el.setAttribute(k, v === true ? '' : v);
   }
-  for (const c of children.flat()) if (c !== null && c !== undefined && c !== false) el.append(c);
+  for (const c of children.flat(Infinity)) if (c !== null && c !== undefined && c !== false) el.append(c);
   return el;
 };
 

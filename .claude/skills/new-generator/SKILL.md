@@ -72,6 +72,9 @@ A new block, block argument, font, param field or website feature is not done
 until `docs/RECIPES.md` (it is pasted into the website's AI prompt), the rules
 in `web/app/prompt.js`, this skill, `review-submissions` and `README.md` say so.
 `npm run check` catches missing names in `docs/RECIPES.md`, not stale wording.
+After changing `web/`, run `npm run build && npm run test:page`: it opens every
+generator in Chromium and checks that each select lists its options and the
+console stays clean (recipes building in Node doesn't prove the page works).
 
 Keep it backwards compatible: older recipes in people's browsers, files and
 share links must still work (`npm run check` builds the ones in

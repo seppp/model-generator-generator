@@ -10,7 +10,8 @@
     "dev": "node tools/generate.mjs && node tools/serve.mjs",
     "export": "node tools/export.mjs",
     "format": "node tools/format.mjs",
-    "submission": "node tools/submission.mjs"
+    "submission": "node tools/submission.mjs",
+    "test:page": "node tools/page-check.mjs"
   },
   "dependencies": {
     "@fontsource/abril-fatface": "5.3.0",
@@ -53,5 +54,8 @@
     "opentype.js": "2.0.0",
     "qrcode-generator": "2.0.4",
     "three": "0.187.0"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
   }
 }

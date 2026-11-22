@@ -150,6 +150,7 @@ npm install
 npm run check                 # validate + build every recipe (and the older versions in tests/compat) in Node
 npm run dev                   # build to dist/ and serve on http://localhost:8080
 npm run build                 # build dist/ only
+npm run test:page             # after build: open every generator in Chromium, check the form (selects list their options) and console
 npm run export -- <id|file.json> [key=value]  # STL / 3MF / OBJ / SVG / DXF / FS to out/
 npm run submission < body.md  # check a submitted generator (issue body)
 npm run format                # canonical JSON formatting for recipes (check enforces it)

@@ -46,5 +46,5 @@ functionality. Let the user decide whether to apply it anyway.
 - New generator ideas: use the `new-generator` skill in `.claude/skills/`. Generators are JSON recipes in `recipes/`; don't hand-write pages or FeatureScript per generator.
 - Submitted generators (GitHub issues labelled `submission`): use the `review-submissions` skill.
 - Recipe format: `docs/RECIPES.md`. The build combines `recipes/*.json` into `dist/generators.json` (collection format in `engine/collection.js`, same as users' exported files). Engine code is shared between browser and Node (`engine/`), so keep it free of DOM and Node APIs.
-- Before committing run `npm run check`. `npm run export -- <id> key=value` writes STL/3MF/OBJ/SVG/DXF/FS to `out/` for inspection.
+- Before committing run `npm run check`; after changing `web/` also `npm run build && npm run test:page` (opens every generator in Chromium and checks the form; CI runs it too). `npm run export -- <id> key=value` writes STL/3MF/OBJ/SVG/DXF/FS to `out/` for inspection.
 - No bundler: the site uses native ES modules with an import map; `tools/generate.mjs` copies vendored packages from node_modules into `dist/vendor/`.
