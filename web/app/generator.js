@@ -28,6 +28,23 @@ function download(name, data, type) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 
+const SLOW_MS = 300; // above this, live update pauses itself
+
+// "Live update": rebuild while typing or dragging (default), or only on Enter / release.
+const live = {
+  get() { try { return localStorage.getItem('mgg-live') !== 'off'; } catch { return true; } },
+  set(on) { try { localStorage.setItem('mgg-live', on ? 'on' : 'off'); } catch { /* ignore */ } },
+};
+
+function liveToggle(onChange) {
+  const cb = h('input', { type: 'checkbox', id: 'live-update', checked: live.get() });
+  cb.addEventListener('change', () => { live.set(cb.checked); onChange(cb.checked); });
+  liveToggle.cb = cb;
+  return h('div', { class: 'row row-boolean live-row' },
+    h('label', { for: 'live-update', class: 'label', title: 'Rebuild the model while you type or drag. Turn it off if the page feels slow.' }, 'Live update'),
+    h('label', { class: 'switch' }, cb, h('span')));
+}
+
 function readHash() {
   const out = {};
   for (const [k, v] of new URLSearchParams(location.hash.slice(1))) out[k] = v;
@@ -58,7 +75,7 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   const notesEl = h('ul', { class: 'notes' });
   const exportsEl = h('div', { class: 'exports' });
   root.append(
-    h('aside', { class: 'sidebar' }, h('p', { class: 'lead' }, recipe.description || ''), form),
+    h('aside', { class: 'sidebar' }, h('p', { class: 'lead' }, recipe.description || ''), liveToggle(() => { paused = false; }), form),
     h('section', { class: 'stage' }, h('div', { class: 'view-wrap' }, viewport, statsEl, status,
       h('button', { class: 'icon-btn fit', type: 'button', title: 'Reset view', 'aria-label': 'Reset view', onclick: () => viewer.fit() }, '⤢'))),
     h('section', { class: 'outputs' }, notesEl, exportsEl),
@@ -109,12 +126,28 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   for (const p of recipe.params) {
     const id = `p-${p.key}`;
     let input;
-    const set = (v) => { values = normalizeValues(recipe, { ...values, [p.key]: v }); changed(); };
+    // commit = false for in-between values (typing, dragging): those rebuild only with Live update on
+    const set = (v, commit = true) => { values = normalizeValues(recipe, { ...values, [p.key]: v }); changed(commit); };
     if (p.type === 'number') {
       const step = p.step ?? (p.integer ? 1 : 0.1);
       const range = h('input', { type: 'range', min: p.min, max: p.max, step, value: values[p.key], 'aria-label': p.label });
       const num = h('input', { type: 'number', id, min: p.min, max: p.max, step, value: values[p.key] });
-      range.addEventListener('input', () => { num.value = range.value; set(range.value); });
+      range.addEventListener('input', () => { num.value = range.value; set(range.value, false); });
+      range.addEventListener('change', () => set(range.value));
+      // live: typing, arrow keys and the mouse wheel update the model without Enter
+      num.addEventListener('input', () => {
+        if (num.value === '' || !Number.isFinite(Number(num.value))) return; // half-typed
+        set(num.value, false);
+        range.value = values[p.key];
+      });
+      num.addEventListener('wheel', (e) => {
+        if (document.activeElement !== num) return; // only a focused field takes the wheel; otherwise the page scrolls
+        e.preventDefault();
+        const v = Math.min(p.max, Math.max(p.min, Number(num.value) + (e.deltaY < 0 ? step : -step)));
+        const decimals = (String(step).split('.')[1] || '').length;
+        num.value = String(Number((Math.round(v / step) * step).toFixed(decimals)));
+        num.dispatchEvent(new Event('input'));
+      }, { passive: false });
       num.addEventListener('change', () => { set(num.value); num.value = values[p.key]; range.value = values[p.key]; });
       input = h('div', { class: 'num' }, range, num, p.unit ? h('span', { class: 'unit' }, p.unit === 'deg' ? '°' : p.unit) : null);
     } else if (p.type === 'boolean') {
@@ -138,7 +171,8 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
       }
     } else {
       input = h('input', { type: 'text', id, value: values[p.key], spellcheck: 'false' });
-      input.addEventListener('input', () => set(input.value));
+      input.addEventListener('input', () => set(input.value, false));
+      input.addEventListener('change', () => set(input.value));
     }
     const row = h('div', { class: `row row-${p.type}` },
       h('label', { for: id, class: 'label' }, p.label || p.key),
@@ -228,10 +262,18 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
 
   let env;
   let timer;
-  function changed() {
+  let lastMs = 0;
+  let paused = false; // live update paused automatically because builds are slow
+  function changed(commit = true) {
     writeHash();
+    if ((!live.get() || paused) && !commit) {
+      status.textContent = 'Live update is off: press Enter, leave the field or release the slider to rebuild.';
+      status.className = 'status';
+      return;
+    }
     clearTimeout(timer);
-    timer = setTimeout(render, 60);
+    // wait a little longer when rebuilds are slow, so fast typing only builds the last value
+    timer = setTimeout(render, Math.min(600, Math.max(60, lastMs * 1.5)));
   }
 
   function updateVisibility() {
@@ -268,7 +310,11 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
     model = next;
     viewer.show(model.parts, colors);
     const ms = Math.round(performance.now() - t0);
-    status.textContent = !model.parts.length ? 'Nothing to show with these settings.'
+    lastMs = ms;
+    const slow = ms > SLOW_MS && live.get() && !paused;
+    if (slow) { paused = true; liveToggle.cb.checked = false; }
+    status.textContent = slow ? `Each rebuild takes about ${ms} ms here, so live update is paused for this generator. Values apply on Enter or when you release a slider; switch Live update on again to override.`
+      : !model.parts.length ? 'Nothing to show with these settings.'
       : fontsUsed.includes('custom') && !env.fonts.custom ? 'Choose your font file under the font setting; showing Open Sans until then.'
       : fontsUsed.some((f) => !env.fonts[f]) ? 'A font could not be loaded; showing Open Sans instead.' : '';
     status.className = 'status';
