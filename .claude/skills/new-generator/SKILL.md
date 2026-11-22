@@ -35,8 +35,9 @@ Read `docs/RECIPES.md` first. Use `recipes/qr-keychain.json`,
      same `z`
    - options: use `when` on steps and `showIf` on params
    - text: give people a `font` select param whose option values are the font
-     names in `docs/RECIPES.md` (as coaster and sign do) and use
-     `"font": "font"` on the text steps
+     names in `docs/RECIPES.md`, each with its `group` (copy the list from the
+     sign recipe), and use `"font": "font"` on the text steps. The picker sorts
+     fonts alphabetically; `"sort": "recipe"` keeps a hand-picked order
 4. **Add notes** for print advice that depends on the settings.
 5. **Check it**: `npm run check` builds every recipe with defaults and with each
    option and number extreme. Fix all problems.

@@ -103,7 +103,8 @@ Shown as the form on the website and as feature inputs in Onshape.
 | `min`, `max`, `step` | numbers only; `min`/`max` are required |
 | `unit` | numbers only: `mm`, `deg` or omitted |
 | `integer` | numbers only: round to whole numbers |
-| `options` | selects only: `[{ "value": "raised", "label": "Raised" }]`; values must be identifiers |
+| `options` | selects only: `[{ "value": "raised", "label": "Raised" }]`; values must be identifiers; optional `"group"` puts long lists under headings |
+| `sort` | selects only: `alphabetical` or `recipe` (the order written). Font pickers default to `alphabetical`, other selects to `recipe` |
 
 ## `derived`
 
@@ -174,13 +175,21 @@ no text along a curve. Rotation works with the step's `rotate`.
 | `font` | `regular` | a font name, see below |
 
 Fonts (open-licensed<!-- dev-only -->, in `engine/fonts.js`<!-- /dev-only -->; the browser loads each only when used):
-`regular` (Open Sans), `bold` (Open Sans Bold), `rounded` (Varela Round),
-`slab` (Roboto Slab Bold), `serif` (Noto Serif Bold), `condensed` (Bebas Neue,
-capitals only), `stencil` (Allerta Stencil), `script` (Pacifico), `mono`
-(Roboto Mono Bold), `custom` (a font file the visitor chooses; browser only,
-falls back to `regular` until chosen). To let people pick, use a select param
-whose option values are these names and set `"font": "font"` on the step. Keep
-script and stencil text large (cap height 8 mm or more) so thin strokes print.
+
+- Sans: `regular` (Open Sans), `bold` (Open Sans Bold), `inter` (Inter), `interBold` (Inter Bold), `interBlack` (Inter Black), `montserrat` (Montserrat Bold), `poppins` (Poppins Bold), `lato` (Lato Black), `workSans` (Work Sans Bold), `archivoBlack` (Archivo Black)
+- Rounded: `rounded` (Varela Round), `nunito` (Nunito ExtraBold), `fredoka` (Fredoka SemiBold), `comfortaa` (Comfortaa Bold), `quicksand` (Quicksand Bold)
+- Condensed: `condensed` (Bebas Neue (capitals)), `oswald` (Oswald SemiBold), `barlowCondensed` (Barlow Condensed Bold), `anton` (Anton)
+- Serif: `slab` (Roboto Slab Bold), `serif` (Noto Serif Bold), `merriweather` (Merriweather Black), `playfair` (Playfair Display Bold), `lora` (Lora Bold), `abrilFatface` (Abril Fatface)
+- Display: `stencil` (Allerta Stencil), `blackOps` (Black Ops One (stencil)), `bungee` (Bungee), `righteous` (Righteous), `orbitron` (Orbitron Bold), `pixel` (Press Start 2P (pixel)), `marker` (Permanent Marker)
+- Script: `script` (Pacifico), `lobster` (Lobster), `dancingScript` (Dancing Script Bold), `kaushan` (Kaushan Script)
+- Monospace: `mono` (Roboto Mono Bold), `jetbrainsMono` (JetBrains Mono Bold), `spaceMono` (Space Mono Bold)
+- Your own: `custom` (a font file the visitor chooses; browser only, falls back to `regular` until chosen)
+
+To let people pick, use a select param whose option values are these names
+(give each option the group above as `"group"`, so the picker has headings) and
+set `"font": "font"` on the step. The picker lists fonts alphabetically (groups
+too, your own font last); add `"sort": "recipe"` to keep your own order. Keep script, stencil and pixel text large
+(cap height 8 mm or more) so thin strokes print.
 
 In Onshape, text is drawn with Open Sans through `skText` (regular, or bold for
 the heavier fonts), since Onshape has its own font list; sizes match closely

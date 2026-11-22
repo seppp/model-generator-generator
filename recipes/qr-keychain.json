@@ -325,43 +325,203 @@
       "options": [
         {
           "value": "regular",
-          "label": "Regular (Open Sans)"
+          "label": "Open Sans",
+          "group": "Sans"
         },
         {
           "value": "bold",
-          "label": "Bold (Open Sans)"
+          "label": "Open Sans Bold",
+          "group": "Sans"
+        },
+        {
+          "value": "inter",
+          "label": "Inter",
+          "group": "Sans"
+        },
+        {
+          "value": "interBold",
+          "label": "Inter Bold",
+          "group": "Sans"
+        },
+        {
+          "value": "interBlack",
+          "label": "Inter Black",
+          "group": "Sans"
+        },
+        {
+          "value": "montserrat",
+          "label": "Montserrat Bold",
+          "group": "Sans"
+        },
+        {
+          "value": "poppins",
+          "label": "Poppins Bold",
+          "group": "Sans"
+        },
+        {
+          "value": "lato",
+          "label": "Lato Black",
+          "group": "Sans"
+        },
+        {
+          "value": "workSans",
+          "label": "Work Sans Bold",
+          "group": "Sans"
+        },
+        {
+          "value": "archivoBlack",
+          "label": "Archivo Black",
+          "group": "Sans"
         },
         {
           "value": "rounded",
-          "label": "Rounded (Varela)"
+          "label": "Varela Round",
+          "group": "Rounded"
         },
         {
-          "value": "slab",
-          "label": "Slab (Roboto Slab)"
+          "value": "nunito",
+          "label": "Nunito ExtraBold",
+          "group": "Rounded"
         },
         {
-          "value": "serif",
-          "label": "Serif (Noto Serif)"
+          "value": "fredoka",
+          "label": "Fredoka SemiBold",
+          "group": "Rounded"
+        },
+        {
+          "value": "comfortaa",
+          "label": "Comfortaa Bold",
+          "group": "Rounded"
+        },
+        {
+          "value": "quicksand",
+          "label": "Quicksand Bold",
+          "group": "Rounded"
         },
         {
           "value": "condensed",
-          "label": "Condensed (Bebas Neue)"
+          "label": "Bebas Neue (capitals)",
+          "group": "Condensed"
+        },
+        {
+          "value": "oswald",
+          "label": "Oswald SemiBold",
+          "group": "Condensed"
+        },
+        {
+          "value": "barlowCondensed",
+          "label": "Barlow Condensed Bold",
+          "group": "Condensed"
+        },
+        {
+          "value": "anton",
+          "label": "Anton",
+          "group": "Condensed"
+        },
+        {
+          "value": "slab",
+          "label": "Roboto Slab Bold",
+          "group": "Serif"
+        },
+        {
+          "value": "serif",
+          "label": "Noto Serif Bold",
+          "group": "Serif"
+        },
+        {
+          "value": "merriweather",
+          "label": "Merriweather Black",
+          "group": "Serif"
+        },
+        {
+          "value": "playfair",
+          "label": "Playfair Display Bold",
+          "group": "Serif"
+        },
+        {
+          "value": "lora",
+          "label": "Lora Bold",
+          "group": "Serif"
+        },
+        {
+          "value": "abrilFatface",
+          "label": "Abril Fatface",
+          "group": "Serif"
         },
         {
           "value": "stencil",
-          "label": "Stencil (Allerta)"
+          "label": "Allerta Stencil",
+          "group": "Display"
+        },
+        {
+          "value": "blackOps",
+          "label": "Black Ops One (stencil)",
+          "group": "Display"
+        },
+        {
+          "value": "bungee",
+          "label": "Bungee",
+          "group": "Display"
+        },
+        {
+          "value": "righteous",
+          "label": "Righteous",
+          "group": "Display"
+        },
+        {
+          "value": "orbitron",
+          "label": "Orbitron Bold",
+          "group": "Display"
+        },
+        {
+          "value": "pixel",
+          "label": "Press Start 2P (pixel)",
+          "group": "Display"
+        },
+        {
+          "value": "marker",
+          "label": "Permanent Marker",
+          "group": "Display"
         },
         {
           "value": "script",
-          "label": "Script (Pacifico)"
+          "label": "Pacifico",
+          "group": "Script"
+        },
+        {
+          "value": "lobster",
+          "label": "Lobster",
+          "group": "Script"
+        },
+        {
+          "value": "dancingScript",
+          "label": "Dancing Script Bold",
+          "group": "Script"
+        },
+        {
+          "value": "kaushan",
+          "label": "Kaushan Script",
+          "group": "Script"
         },
         {
           "value": "mono",
-          "label": "Mono (Roboto Mono)"
+          "label": "Roboto Mono Bold",
+          "group": "Monospace"
+        },
+        {
+          "value": "jetbrainsMono",
+          "label": "JetBrains Mono Bold",
+          "group": "Monospace"
+        },
+        {
+          "value": "spaceMono",
+          "label": "Space Mono Bold",
+          "group": "Monospace"
         },
         {
           "value": "custom",
-          "label": "Custom font file"
+          "label": "Your own font file",
+          "group": "Your own"
         }
       ]
     },
