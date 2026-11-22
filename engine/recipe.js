@@ -94,7 +94,11 @@ export function validateRecipe(recipe) {
     const block = BLOCKS[name];
     if (('add' in s) === ('subtract' in s)) err(`${where}: needs exactly one of "add" or "subtract"`);
     if (!block) { err(`${where}: unknown block '${name}' (known: ${Object.keys(BLOCKS).join(', ')})`); return; }
-    if ('add' in s && !parts[s.part]) err(`${where}: "part" must be one of ${Object.keys(parts).join(', ')}`);
+    if ('add' in s && !parts[s.part]) {
+      // a part name, or an expression that picks one (e.g. a color choice)
+      if (typeof s.part !== 'string' || (IDENT.test(s.part) && !known.has(s.part))) err(`${where}: "part" must be one of ${Object.keys(parts).join(', ')} (or an expression giving one)`);
+      else checkExpr(s.part, `${where} part`);
+    }
     if ('subtract' in s && s.from) {
       for (const f of [].concat(s.from)) if (!parts[f]) err(`${where}: unknown part '${f}' in "from"`);
     }
@@ -230,6 +234,13 @@ export function partEdges(part, scope, key = '?') {
   return on(out.top) || on(out.bottom) ? out : null;
 }
 
+function stepPart(recipe, s, scope, index) {
+  if (recipe.parts[s.part]) return s.part;
+  const v = evaluate(s.part, scope);
+  if (!recipe.parts[v]) throw new Error(`step ${index + 1} part: '${v}' is not one of ${Object.keys(recipe.parts).join(', ')}`);
+  return v;
+}
+
 /** Concrete list of operations for one set of values. */
 export function planSteps(recipe, scope) {
   const allParts = Object.keys(recipe.parts);
@@ -251,7 +262,7 @@ export function planSteps(recipe, scope) {
       index,
       op: 'add' in s ? 'add' : 'subtract',
       block: name,
-      part: s.part,
+      part: 'add' in s ? stepPart(recipe, s, scope, index) : undefined,
       from: s.from ? [].concat(s.from) : allParts,
       args,
       x: num(s.x, 0),

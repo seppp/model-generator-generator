@@ -50,6 +50,66 @@ function regularPolygonPoints(d, sides) {
   return pts;
 }
 
+
+// Outer and inner outline of a `frame`: the inner one is the outer one moved
+// inwards by the line width (null when the line fills the whole shape).
+function shapeProfile(a, CrossSection) {
+  switch (a.shape) {
+    case 'circle':
+      if (a.diameter <= 0) return null;
+      return CrossSection.circle(a.diameter / 2, circleSegments(a.diameter));
+    case 'polygon':
+      if (a.diameter <= 0) return null;
+      return new CrossSection([regularPolygonPoints(a.diameter, Math.max(3, Math.round(a.sides)))]);
+    case 'rect':
+      if (a.width <= 0 || a.height <= 0) return null;
+      return CrossSection.square([a.width, a.height], true);
+    default:
+      if (a.width <= 0 || a.height <= 0) return null;
+      return new CrossSection([roundedRectPoints(a.width, a.height, Math.max(0, a.radius))]);
+  }
+}
+
+export function frameInner(a) {
+  const lw = a.lineWidth;
+  if (a.shape === 'circle') return { ...a, diameter: a.diameter - 2 * lw };
+  if (a.shape === 'polygon') return { ...a, diameter: a.diameter - (2 * lw) / Math.cos(Math.PI / Math.max(3, Math.round(a.sides))) };
+  const r = Math.min(Math.max(0, a.radius), (Math.min(a.width, a.height) / 2) * 0.999);
+  return { ...a, width: a.width - 2 * lw, height: a.height - 2 * lw, radius: Math.max(r - lw, 0) };
+}
+
+function lineWarnings(a) {
+  return a.lineWidth > 0 && a.lineWidth < 0.8 ? [`Lines ${+a.lineWidth.toFixed(2)} mm wide print poorly; use 0.8 mm or more.`] : [];
+}
+
+export const LINE_PATTERNS = ['solid', 'dashed', 'dotted'];
+const MIN_GAP = 0.1;
+
+/**
+ * The pieces of a `line` along X, centered on the origin, as [center, length]:
+ * dashes are stretched so the line starts and ends with a full dash, dots
+ * (diameter = line width) are spread so the first and last sit at the ends.
+ */
+export function linePieces(a) {
+  const L = a.length;
+  const w = a.lineWidth;
+  if (L <= 0 || w <= 0) return [];
+  const g = Math.max(a.gap, MIN_GAP);
+  if (a.pattern === 'dotted') {
+    if (L <= w) return [[0, w]];
+    const n = Math.max(1, Math.floor((L - w) / (w + g)));
+    const s = (L - w) / n;
+    return Array.from({ length: n + 1 }, (_, i) => [-L / 2 + w / 2 + i * s, w]);
+  }
+  if (a.pattern === 'dashed') {
+    let n = Math.max(1, Math.floor((L + g) / (Math.max(a.dash, MIN_GAP) + g) + 0.5));
+    let d = (L + g) / n - g;
+    if (d <= 0) { n = 1; d = L; }
+    return Array.from({ length: n }, (_, i) => [-L / 2 + d / 2 + i * (d + g), d]);
+  }
+  return [[0, L]];
+}
+
 export const BLOCKS = {
   shape: {
     description: 'Basic outline: rect, roundedRect, circle or polygon (regular, first vertex pointing up).',
@@ -62,20 +122,7 @@ export const BLOCKS = {
       sides: { type: 'number', default: 6, help: 'polygon' },
     },
     profile(a, { CrossSection }) {
-      switch (a.shape) {
-        case 'circle':
-          if (a.diameter <= 0) return null;
-          return CrossSection.circle(a.diameter / 2, circleSegments(a.diameter));
-        case 'polygon':
-          if (a.diameter <= 0) return null;
-          return new CrossSection([regularPolygonPoints(a.diameter, Math.max(3, Math.round(a.sides)))]);
-        case 'rect':
-          if (a.width <= 0 || a.height <= 0) return null;
-          return CrossSection.square([a.width, a.height], true);
-        default:
-          if (a.width <= 0 || a.height <= 0) return null;
-          return new CrossSection([roundedRectPoints(a.width, a.height, Math.max(0, a.radius))]);
-      }
+      return shapeProfile(a, CrossSection);
     },
     fs: {
       helper: `
@@ -119,6 +166,152 @@ function mgShape(context is Context, id is Id, z is number, t is number, shape i
     return mgExtrude(context, id, id + "sk", t);
 }`,
       call: (f) => `mgShape(context, ID, Z, T, ${f.shape}, ${f.width}, ${f.height}, ${f.radius}, ${f.diameter}, ${f.sides})`,
+    },
+  },
+
+  frame: {
+    description: 'Border line along an outline (rect, roundedRect, circle or polygon): the outline given is the outer edge, the line goes `lineWidth` inwards.',
+    args: {
+      shape: { type: 'enum', options: ['rect', 'roundedRect', 'circle', 'polygon'], default: 'rect' },
+      width: { type: 'number', default: 10, help: 'rect / roundedRect' },
+      height: { type: 'number', default: 10, help: 'rect / roundedRect' },
+      radius: { type: 'number', default: 0, help: 'corner radius of roundedRect' },
+      diameter: { type: 'number', default: 10, help: 'circle; polygon (corner to corner)' },
+      sides: { type: 'number', default: 6, help: 'polygon' },
+      lineWidth: { type: 'number', default: 1, help: 'width of the border line, measured inwards' },
+    },
+    warnings: lineWarnings,
+    profile(a, { CrossSection }) {
+      if (a.lineWidth <= 0) return null;
+      const outer = shapeProfile(a, CrossSection);
+      if (!outer) return null;
+      const inner = shapeProfile(frameInner(a), CrossSection);
+      if (!inner) return outer;
+      const ring = outer.subtract(inner);
+      outer.delete();
+      inner.delete();
+      return ring;
+    },
+    fs: {
+      needs: ['shape'],
+      helper: `
+// Outer outline minus the same outline moved inwards by lw.
+function mgFrame(context is Context, id is Id, z is number, t is number, shape is string, w is number, h is number, r is number, d is number, sides is number, lw is number) returns Query
+{
+    const outer = mgShape(context, id + "o", z, t, shape, w, h, r, d, sides);
+    const rr = max(min(r, min(w, h) / 2 * 0.999), 0);
+    const iw = w - 2 * lw;
+    const ih = h - 2 * lw;
+    var idia = d - 2 * lw;
+    if (shape == "polygon")
+    {
+        idia = d - 2 * lw / cos(180 / max(round(sides), 3) * degree);
+    }
+    const filled = (shape == "circle" || shape == "polygon") ? idia <= 0 : (iw <= 0 || ih <= 0);
+    if (!filled)
+    {
+        const inner = mgShape(context, id + "i", z - 1, t + 2, shape, iw, ih, max(rr - lw, 0), idia, sides);
+        opBoolean(context, id + "cut", { "tools" : inner, "targets" : outer, "operationType" : BooleanOperationType.SUBTRACTION });
+    }
+    return outer;
+}`,
+      call: (f) => ({ guard: `${f.lineWidth} > 0`, code: `mgFrame(context, ID, Z, T, ${f.shape}, ${f.width}, ${f.height}, ${f.radius}, ${f.diameter}, ${f.sides}, ${f.lineWidth})` }),
+    },
+  },
+
+  line: {
+    description: 'Straight line along X, centered: solid, dashed or dotted, with flat or round ends. Turn it with the step\'s `rotate`.',
+    args: {
+      length: { type: 'number', default: 20, help: 'end to end' },
+      lineWidth: { type: 'number', default: 1 },
+      pattern: { type: 'enum', options: LINE_PATTERNS, default: 'solid' },
+      dash: { type: 'number', default: 3, help: 'dashed: dash length (adjusted so the line ends with a full dash)' },
+      gap: { type: 'number', default: 2, help: 'dashed / dotted: space between pieces' },
+      ends: { type: 'enum', options: ['flat', 'round'], default: 'flat' },
+    },
+    warnings: lineWarnings,
+    profile(a, { CrossSection }) {
+      const pieces = linePieces(a);
+      if (!pieces.length) return null;
+      const w = a.lineWidth;
+      const round = a.pattern === 'dotted' || a.ends === 'round';
+      const shapes = pieces.map(([c, len]) => {
+        if (round && len <= w + 1e-6) return CrossSection.circle(w / 2, circleSegments(w)).translate([c, 0]);
+        if (round) return new CrossSection([roundedRectPoints(len, w, w / 2)]).translate([c, 0]);
+        return CrossSection.square([len, w], true).translate([c, 0]);
+      });
+      return shapes.length === 1 ? shapes[0] : CrossSection.union(shapes);
+    },
+    fs: {
+      helper: `
+// One dash: a rectangle, or with round ends a slot (a circle when it is no longer than wide).
+function mgSlot(sk is Sketch, name is string, cx is number, len is number, w is number, roundEnds is boolean)
+{
+    const mm = millimeter;
+    const r = w / 2;
+    if (!roundEnds)
+    {
+        skRectangle(sk, name, { "firstCorner" : vector(cx - len / 2, -r) * mm, "secondCorner" : vector(cx + len / 2, r) * mm });
+    }
+    else if (len <= w + 1e-6)
+    {
+        skCircle(sk, name, { "center" : vector(cx, 0) * mm, "radius" : r * mm });
+    }
+    else
+    {
+        const x0 = cx - len / 2 + r;
+        const x1 = cx + len / 2 - r;
+        skLineSegment(sk, name ~ "b", { "start" : vector(x0, -r) * mm, "end" : vector(x1, -r) * mm });
+        skArc(sk, name ~ "r", { "start" : vector(x1, -r) * mm, "mid" : vector(x1 + r, 0) * mm, "end" : vector(x1, r) * mm });
+        skLineSegment(sk, name ~ "t", { "start" : vector(x1, r) * mm, "end" : vector(x0, r) * mm });
+        skArc(sk, name ~ "l", { "start" : vector(x0, r) * mm, "mid" : vector(x0 - r, 0) * mm, "end" : vector(x0, -r) * mm });
+    }
+}
+
+// Same layout as linePieces() in the website's engine.
+function mgLine(context is Context, id is Id, z is number, t is number, len is number, w is number, pattern is string, dash is number, gap is number, ends is string) returns Query
+{
+    const sk = newSketchOnPlane(context, id + "sk", { "sketchPlane" : mgPlane(z) });
+    const g = max(gap, ${MIN_GAP});
+    const roundEnds = ends == "round";
+    if (pattern == "dotted")
+    {
+        if (len <= w)
+        {
+            mgSlot(sk, "p0", 0, w, w, true);
+        }
+        else
+        {
+            const n = max(1, floor((len - w) / (w + g)));
+            const s = (len - w) / n;
+            for (var i = 0; i <= n; i += 1)
+            {
+                mgSlot(sk, "p" ~ i, -len / 2 + w / 2 + i * s, w, w, true);
+            }
+        }
+    }
+    else if (pattern == "dashed")
+    {
+        var n = max(1, floor((len + g) / (max(dash, ${MIN_GAP}) + g) + 0.5));
+        var d = (len + g) / n - g;
+        if (d <= 0)
+        {
+            n = 1;
+            d = len;
+        }
+        for (var i = 0; i < n; i += 1)
+        {
+            mgSlot(sk, "p" ~ i, -len / 2 + d / 2 + i * (d + g), d, w, roundEnds);
+        }
+    }
+    else
+    {
+        mgSlot(sk, "p0", 0, len, w, roundEnds);
+    }
+    skSolve(sk);
+    return mgExtrude(context, id, id + "sk", t);
+}`,
+      call: (f) => ({ guard: `${f.length} > 0 && ${f.lineWidth} > 0`, code: `mgLine(context, ID, Z, T, ${f.length}, ${f.lineWidth}, ${f.pattern}, ${f.dash}, ${f.gap}, ${f.ends})` }),
     },
   },
 

@@ -40,8 +40,8 @@ Then look at it yourself:
 
 - `npm run export -- out/submissions/<id>.json key=value ...` writes STL, 3MF,
   OBJ, SVG, DXF and FeatureScript to `out/`; render a screenshot if you can.
-- Is it printable? Use the rules of thumb in the `new-generator` skill (walls
-  >= 0.8 mm, text >= 4 mm, script and stencil fonts >= 8 mm, QR modules
+- Is it printable? Use the rules of thumb in the `new-generator` skill (walls,
+  borders and lines >= 0.8 mm, text >= 4 mm, script and stencil fonts >= 8 mm, QR modules
   >= 1 mm, holes >= 4 mm). Fonts must be names from `docs/RECIPES.md`; a
   `custom` font only works in the submitter's browser, so offer the font
   choice with a bundled default.
