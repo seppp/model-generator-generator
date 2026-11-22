@@ -26,7 +26,8 @@ ${wish}
 
 ## Rules for your answer
 
-- Reply with the COMPLETE updated recipe in a single \`\`\`json code block. Do not shorten it or leave parts out; I will paste it back as is.
+- FIRST, before any JSON: if any part of my request can't be done, or only approximately, with the blocks and fields in the reference, say so under a heading "Not possible / approximated". For each point name what is missing, what you did instead (or that you left it out), and that I can ask for the missing feature with the website's "Submit to the site" button. Never invent blocks, arguments or fields to cover it. If everything is doable, write "Everything requested is doable." instead.
+- Then reply with the COMPLETE updated recipe in a single \`\`\`json code block. Do not shorten it or leave parts out; I will paste it back as is.
 - Only use the blocks (${Object.keys(BLOCKS).join(', ')}), step keys and param fields described in the reference. If the change is impossible with them, say so and suggest the closest alternative instead of inventing fields.
 - Values in steps, "derived", "when" and "showIf" are expression strings; a literal piece of text needs inner single quotes, e.g. "'Hello'".
 - Number params need "min" and "max", and the default must lie between them. Select option values must be identifiers.

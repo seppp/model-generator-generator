@@ -50,6 +50,9 @@ Then look at it yourself:
 - For a new generator: is the `id` new, short and descriptive? Does it
   overlap an existing generator so much that it should be an option there?
 - Is anything in names, texts or defaults offensive, spam or personal data?
+- Does the submission ask for something the recipe can't do (a missing block,
+  font or feature, often in the description)? List it separately in your
+  summary as a possible engine feature, instead of approximating it silently.
 
 ## 3. Summarize for the owner and wait
 

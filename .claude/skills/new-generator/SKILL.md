@@ -57,6 +57,14 @@ look unless the request is to change it. If a new option can produce a broken
 print (e.g. a hole cutting into the QR code), add a `derived` value that
 measures it and a `note` that warns about it.
 
+## When a request can't be done (fully)
+
+Say so up front, before presenting the result: name each part of the request
+that the blocks and recipe fields can't do, or only approximate (for example
+text alignment, which can only be estimated), and what you did instead. Then
+either extend the engine (see below, if the owner wants that) or leave it out.
+Never fake it with fields the engine ignores.
+
 ## When you change the engine or the site
 
 A new block, block argument, font, param field or website feature is not done

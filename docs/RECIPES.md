@@ -202,6 +202,8 @@ Then document it here and run `npm run check`.
 <!-- chat: ## Missing features
 
 If a change needs something the blocks above can't express (an SVG logo, curved
-or multi-line text, a revolved or freeform shape...), say so plainly and offer
-the closest result that works with these blocks. Never invent new blocks,
-arguments or recipe fields: the website rejects them. -->
+or multi-line text, a revolved or freeform shape...), or can only approximate
+it (like text alignment), say so plainly before the recipe: what is missing,
+what you did instead, and that the user can request the feature with the
+website's "Submit to the site" button. Never invent new blocks, arguments or
+recipe fields: the website rejects them. -->
