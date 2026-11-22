@@ -4,6 +4,9 @@ import * as opentype from 'opentype.js';
 import { readCollection } from '../engine/collection.js';
 import { FONTS, fontFile } from '../engine/fonts.js';
 
+// this build's ?v=<version> (see tools/generate.mjs), so fetched files match the code
+const V = new URL(import.meta.url).search;
+
 export const REPO = 'seppp/model-generator-generator';
 
 const OWN_FONT_KEY = 'mgg-own-font';
@@ -45,7 +48,7 @@ export function browserEnv() {
     const fonts = {};
     const tried = new Set();
     const fetchFont = async (name) => {
-      const res = await fetch(new URL(`vendor/fonts/${fontFile(name)}`, document.baseURI));
+      const res = await fetch(new URL(`vendor/fonts/${fontFile(name)}${V}`, document.baseURI));
       if (!res.ok) throw new Error(`font ${name}: HTTP ${res.status}`);
       return parseFont(await res.arrayBuffer());
     };
@@ -66,7 +69,7 @@ export function browserEnv() {
 
 /** The site's generators, from the single collection file built from recipes/. */
 export async function loadCollection() {
-  const res = await fetch(new URL('generators.json', document.baseURI));
+  const res = await fetch(new URL(`generators.json${V}`, document.baseURI));
   if (!res.ok) throw new Error('Could not load generators.json');
   return readCollection(await res.json());
 }

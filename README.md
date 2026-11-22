@@ -83,6 +83,14 @@ the preview on smaller screens and phones) also offers:
   doesn't have. Paste the FeatureScript into Onshape and export STEP,
   Parasolid and more from there.
 
+## Backwards compatibility
+
+Saved generators, exported files and share links keep older recipe versions
+alive, so the engine never drops a name it once accepted. `tests/compat/`
+holds older versions of the official recipes and `npm run check` builds them
+all. Every deploy versions its module URLs (`?v=<build hash>`), so a browser
+never mixes files from two deploys.
+
 ## Changing a generator
 
 Generators are never edited directly: change the recipe and everything is
@@ -139,7 +147,7 @@ options remain feature inputs.
 
 ```
 npm install
-npm run check                 # validate + build every recipe in Node
+npm run check                 # validate + build every recipe (and the older versions in tests/compat) in Node
 npm run dev                   # build to dist/ and serve on http://localhost:8080
 npm run build                 # build dist/ only
 npm run export -- <id|file.json> [key=value]  # STL / 3MF / OBJ / SVG / DXF / FS to out/

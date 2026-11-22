@@ -73,6 +73,15 @@ until `docs/RECIPES.md` (it is pasted into the website's AI prompt), the rules
 in `web/app/prompt.js`, this skill, `review-submissions` and `README.md` say so.
 `npm run check` catches missing names in `docs/RECIPES.md`, not stale wording.
 
+Keep it backwards compatible: older recipes in people's browsers, files and
+share links must still work (`npm run check` builds the ones in
+`tests/compat/`; copy an official recipe's previous version there when you
+change it). Never rename or remove names; add new ones. When you change an
+official recipe's param keys or option values, keep the old ones working. If a
+change can't be compatible, don't merge: tell the user what breaks, which
+generators, whether to adjust them and what functionality that changes, and
+let them choose.
+
 ## When a block is missing
 
 If the idea needs geometry the blocks cannot express (for example an SVG logo,

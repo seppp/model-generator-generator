@@ -1,0 +1,336 @@
+{
+  "id": "coaster",
+  "name": "Coaster",
+  "description": "Round, square or hexagonal coaster with an optional rim, text and a recess for a cork pad.",
+  "parts": {
+    "base": {
+      "label": "Coaster",
+      "color": "#0f766e"
+    },
+    "accent": {
+      "label": "Text",
+      "color": "#fbbf24"
+    }
+  },
+  "params": [
+    {
+      "key": "shape",
+      "type": "select",
+      "label": "Shape",
+      "default": "round",
+      "group": "Shape",
+      "options": [
+        {
+          "value": "round",
+          "label": "Round"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "hexagon",
+          "label": "Hexagon"
+        }
+      ]
+    },
+    {
+      "key": "diameter",
+      "type": "number",
+      "unit": "mm",
+      "label": "Size",
+      "default": 95,
+      "min": 50,
+      "max": 200,
+      "step": 1,
+      "group": "Shape"
+    },
+    {
+      "key": "corner",
+      "type": "number",
+      "unit": "mm",
+      "label": "Corner radius",
+      "default": 10,
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "group": "Shape",
+      "showIf": "shape == 'square'"
+    },
+    {
+      "key": "thickness",
+      "type": "number",
+      "unit": "mm",
+      "label": "Thickness",
+      "default": 4,
+      "min": 1.5,
+      "max": 12,
+      "step": 0.2,
+      "group": "Shape"
+    },
+    {
+      "key": "rim",
+      "type": "boolean",
+      "label": "Raised rim",
+      "default": true,
+      "group": "Rim"
+    },
+    {
+      "key": "rimWidth",
+      "type": "number",
+      "unit": "mm",
+      "label": "Rim width",
+      "default": 3,
+      "min": 1,
+      "max": 15,
+      "step": 0.5,
+      "group": "Rim",
+      "showIf": "rim"
+    },
+    {
+      "key": "rimHeight",
+      "type": "number",
+      "unit": "mm",
+      "label": "Rim height",
+      "default": 1.5,
+      "min": 0.4,
+      "max": 6,
+      "step": 0.1,
+      "group": "Rim",
+      "showIf": "rim"
+    },
+    {
+      "key": "label",
+      "type": "text",
+      "label": "Text",
+      "default": "Prost!",
+      "group": "Text"
+    },
+    {
+      "key": "labelStyle",
+      "type": "select",
+      "label": "Text style",
+      "default": "raised",
+      "group": "Text",
+      "options": [
+        {
+          "value": "raised",
+          "label": "Raised (filament swap)"
+        },
+        {
+          "value": "flush",
+          "label": "Flush inlay (multi-material)"
+        },
+        {
+          "value": "engraved",
+          "label": "Engraved"
+        }
+      ]
+    },
+    {
+      "key": "labelSize",
+      "type": "number",
+      "unit": "mm",
+      "label": "Letter height",
+      "default": 14,
+      "min": 4,
+      "max": 60,
+      "step": 1,
+      "group": "Text"
+    },
+    {
+      "key": "labelDepth",
+      "type": "number",
+      "unit": "mm",
+      "label": "Text height / depth",
+      "default": 1,
+      "min": 0.2,
+      "max": 4,
+      "step": 0.1,
+      "group": "Text"
+    },
+    {
+      "key": "font",
+      "type": "select",
+      "label": "Font",
+      "default": "bold",
+      "options": [
+        {
+          "value": "regular",
+          "label": "Open Sans"
+        },
+        {
+          "value": "bold",
+          "label": "Open Sans Bold"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        },
+        {
+          "value": "slab",
+          "label": "Slab serif"
+        },
+        {
+          "value": "serif",
+          "label": "Serif"
+        },
+        {
+          "value": "condensed",
+          "label": "Tall condensed (capitals)"
+        },
+        {
+          "value": "stencil",
+          "label": "Stencil"
+        },
+        {
+          "value": "script",
+          "label": "Script"
+        },
+        {
+          "value": "mono",
+          "label": "Monospace"
+        },
+        {
+          "value": "custom",
+          "label": "Your own font file"
+        }
+      ],
+      "group": "Text"
+    },
+    {
+      "key": "recess",
+      "type": "boolean",
+      "label": "Recess for cork / felt pad",
+      "default": false,
+      "group": "Bottom"
+    },
+    {
+      "key": "recessDepth",
+      "type": "number",
+      "unit": "mm",
+      "label": "Recess depth",
+      "default": 1,
+      "min": 0.4,
+      "max": 4,
+      "step": 0.1,
+      "group": "Bottom",
+      "showIf": "recess"
+    },
+    {
+      "key": "recessInset",
+      "type": "number",
+      "unit": "mm",
+      "label": "Recess inset from edge",
+      "default": 4,
+      "min": 1,
+      "max": 20,
+      "step": 0.5,
+      "group": "Bottom",
+      "showIf": "recess"
+    }
+  ],
+  "derived": {
+    "outline": "shape == 'round' ? 'circle' : shape == 'square' ? 'roundedRect' : 'polygon'",
+    "flatFactor": "shape == 'hexagon' ? 1 / cos(30) : 1",
+    "innerSize": "diameter - 2 * rimWidth * flatFactor",
+    "recessSize": "diameter - 2 * recessInset * flatFactor"
+  },
+  "steps": [
+    {
+      "add": "shape",
+      "part": "base",
+      "comment": "plate",
+      "shape": "outline",
+      "diameter": "diameter",
+      "width": "diameter",
+      "height": "diameter",
+      "radius": "corner",
+      "sides": 6,
+      "thickness": "thickness"
+    },
+    {
+      "add": "shape",
+      "part": "base",
+      "when": "rim",
+      "comment": "rim block, hollowed out by the next step",
+      "shape": "outline",
+      "diameter": "diameter",
+      "width": "diameter",
+      "height": "diameter",
+      "radius": "corner",
+      "sides": 6,
+      "z": "thickness",
+      "thickness": "rimHeight"
+    },
+    {
+      "subtract": "shape",
+      "when": "rim",
+      "shape": "outline",
+      "diameter": "innerSize",
+      "width": "innerSize",
+      "height": "innerSize",
+      "radius": "max(corner - rimWidth, 0)",
+      "sides": 6,
+      "z": "thickness",
+      "thickness": "rimHeight + 1"
+    },
+    {
+      "subtract": "shape",
+      "when": "recess",
+      "comment": "pocket underneath",
+      "shape": "outline",
+      "diameter": "recessSize",
+      "width": "recessSize",
+      "height": "recessSize",
+      "radius": "max(corner - recessInset, 0)",
+      "sides": 6,
+      "z": -1,
+      "thickness": "recessDepth + 1"
+    },
+    {
+      "add": "text",
+      "part": "accent",
+      "when": "labelStyle == 'raised'",
+      "text": "label",
+      "size": "labelSize",
+      "font": "font",
+      "z": "thickness",
+      "thickness": "labelDepth"
+    },
+    {
+      "add": "text",
+      "part": "accent",
+      "when": "labelStyle == 'flush'",
+      "text": "label",
+      "size": "labelSize",
+      "font": "font",
+      "z": "thickness - labelDepth",
+      "thickness": "labelDepth"
+    },
+    {
+      "subtract": "text",
+      "from": "base",
+      "when": "labelStyle == 'engraved'",
+      "text": "label",
+      "size": "labelSize",
+      "font": "font",
+      "z": "thickness - labelDepth",
+      "thickness": "labelDepth + 1"
+    }
+  ],
+  "notes": [
+    {
+      "when": "rim && labelStyle == 'raised'",
+      "text": "The rim and the text overlap in height, so a single-nozzle filament swap would also color the top of the rim. Turn the rim off for a clean two-color swap print, or use the multi-material 3MF."
+    },
+    {
+      "when": "recess && recessDepth > thickness - 1",
+      "text": "The recess leaves less than 1 mm of material. Make the coaster thicker or the recess shallower."
+    },
+    {
+      "when": "labelStyle != 'raised' && labelDepth >= thickness",
+      "text": "Text depth is as deep as the coaster. Reduce the text depth."
+    }
+  ]
+}

@@ -70,6 +70,11 @@ silently: the submitter only learns the outcome from that comment.
 1. Branch, then `npm run -s submission -- --apply < body.txt` (or copy
    `out/submissions/<id>.json` to `recipes/<id>.json`). Make small fixes the
    owner agreed to, keeping the submitter's intent.
+   When it replaces an official recipe, copy the current version to
+   `tests/compat/` first, and check it keeps the old param keys and option
+   values (people's share links and saved settings use them). If it can't,
+   don't merge: tell the owner what breaks and what changes, and let them
+   decide (see "Backwards compatibility" in `CLAUDE.md`).
 2. `npm run format`, `npm run check`.
 3. Commit and open a PR whose body says `Closes #<n>` and credits the
    submitter by GitHub login (in backticks, so they aren't pinged twice).
