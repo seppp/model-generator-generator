@@ -8,8 +8,9 @@ produced from short JSON **recipes**.
 
 ```
 recipes/qr-keychain.json ─┐
-recipes/coaster.json      ├─ npm run build ─▶ dist/index.html?recipe=<id>  web generator (form, 3D preview, STL / 3MF)
-recipes/sign.json         ┘                   dist/featurescript/<id>.fs   Onshape custom feature
+recipes/coaster.json      ├─ npm run build ─▶ dist/generators.json        all generators in one collection file
+recipes/sign.json         ┘                   dist/index.html?recipe=<id>  web generator (form, 3D preview, STL / 3MF)
+                                              dist/featurescript/<id>.fs   Onshape custom feature
 ```
 
 ## How it works
@@ -22,15 +23,27 @@ recipes/sign.json         ┘                   dist/featurescript/<id>.fs   Ons
   (WASM, watertight booleans) in the browser or Node, and exports binary STL and
   3MF. The same recipe is compiled to **FeatureScript** with every expression
   translated, so the Onshape feature stays parametric.
-- The **website** (`web/`) is a single page, the *Generator Generator*: pick a
-  generator at the top (`?recipe=<id>`), and it builds the form from the
-  recipe's params, rebuilds the model on every change and shows it with
-  three.js. Settings live in the URL, so links are shareable. Nothing is
-  uploaded anywhere. Old per-generator links (`/<id>/`, `/lab.html`) redirect.
-- Under the generator, the collapsible **Change this generator** section holds
-  the recipe, an AI-chat prompt, the diff against the published version and
-  *Propose on GitHub* / *Download*. **+ New generator** starts a new recipe
-  from scratch or from a copy.
+- The **website** (`web/`) is a single page, the *Generator Generator*. It
+  loads every generator from one collection file, `generators.json`, which the
+  build makes from `recipes/`. Pick a generator at the top (`?recipe=<id>`);
+  the page builds the form from the recipe's params, rebuilds the model on
+  every change and shows it with three.js. Settings live in the URL, so links
+  are shareable. Nothing is uploaded anywhere. Old per-generator links
+  (`/<id>/`, `/lab.html`) redirect.
+- Under the generator, the collapsible **Change this generator** section is a
+  guided flow: describe a change, copy a prompt for any AI chat, paste the
+  answer back and preview it. The recipe code itself stays behind a *Recipe
+  code* toggle. **+ New generator** starts from scratch or from a copy.
+- **My generators**: *Save to my generators* keeps your version in this
+  browser (localStorage, `?mine=<id>`). *Export all to a file* writes them to
+  one `my-generators.json` in the same format as the site's `generators.json`,
+  and *Import a file* reads either back.
+- **Share links** (`?shared#g=...`) carry the whole recipe, compressed, after
+  the `#`, so nothing is stored on a server. A shared version opens with a
+  banner saying it is not the official generator.
+- **Submit to the site** opens a prefilled GitHub issue (label `submission`)
+  with the share link and, when it fits, the recipe. The owner reviews these
+  with the `review-submissions` skill.
 
 ## Multi-color printing (Prusa Core One and friends)
 
@@ -48,20 +61,21 @@ Each generator has colored parts. The page offers:
 Generators are never edited directly: change the recipe and everything is
 regenerated (web page, exports, FeatureScript).
 
-1. Change `recipes/<id>.json`, for example add a param and use it in a step.
-   - **No setup, any AI chat:** open *Change this generator* below the
-     generator, describe the change, click *Copy prompt for an AI chat* (it
-     contains the recipe, the format reference and your current settings),
-     paste it into ChatGPT, Claude, Gemini..., paste the answer back and click
-     *Apply to preview*. The page extracts and checks the recipe and tells you
-     what to send back to the AI if something is wrong.
-   - **Edit it yourself:** the same section has the recipe text; the generator
-     rebuilds live in your browser, keeping your settings and camera. The diff
-     shows changes against the published version, drafts survive a reload,
-     and *Propose on GitHub* copies the recipe and opens the file so you can
-     paste it and start a pull request.
-   - Or ask Claude ("on the QR keychain, make the corner hole position
-     adjustable"); it uses the `new-generator` skill.
+**Anyone, on the website:** open *Change this generator*, describe the change,
+click *Copy prompt for an AI chat* (it contains the recipe, the format
+reference and your current settings), paste it into ChatGPT, Claude,
+Gemini..., paste the answer back and click *Apply to preview*. The page
+checks the recipe and tells you what to send back to the AI if something is
+wrong. Then *Save to my generators*, *Copy share link*, or *Submit to the
+site*. The recipe code is under *Recipe code* for editing by hand.
+
+**The owner, in the repo:**
+
+1. Change `recipes/<id>.json`, or ask Claude ("on the QR keychain, make the
+   corner hole position adjustable"; it uses the `new-generator` skill).
+   Submissions from visitors: ask Claude to review them (the
+   `review-submissions` skill lists the issues, checks each recipe with
+   `npm run submission` and adds the ones you accept).
 2. `npm run check` (CI runs it too) builds the recipe with every option and
    extreme value.
 3. Merge to `main`. GitHub Actions rebuilds and redeploys the site within a
@@ -73,7 +87,7 @@ values fall back to the defaults, unknown ones are ignored.
 ## Adding a generator
 
 1. Write `recipes/<id>.json` (copy one of the existing ones, or start with
-   *+ New generator* on the site and download it).
+   *+ New generator* on the site and download it from *Recipe code*).
 2. `npm run check` validates it and builds it with many parameter combinations.
 3. `npm run dev` and open http://localhost:8080/?recipe=<id>.
 4. Commit. On `main` the GitHub Action rebuilds and publishes the site.
@@ -101,8 +115,9 @@ npm install
 npm run check                 # validate + build every recipe in Node
 npm run dev                   # build to dist/ and serve on http://localhost:8080
 npm run build                 # build dist/ only
+npm run export -- <id|file.json> [key=value]  # STL / 3MF / FS to out/
+npm run submission < body.md  # check a submitted generator (issue body)
 npm run format                # canonical JSON formatting for recipes (check enforces it)
-npm run export -- qr-keychain content=https://example.com style=flush   # files to out/
 ```
 
 ## Deploying

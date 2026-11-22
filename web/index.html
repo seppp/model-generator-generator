@@ -10,6 +10,21 @@
 <main class="gg">
   <p class="tagline">We heard you like generators, so we put a generator in your generator. Pick one, tune it, download STL, multi-color 3MF or Onshape FeatureScript. Everything is computed in your browser.</p>
   <nav class="picker" id="picker" aria-label="Generators"></nav>
+  <details class="mine-bar">
+    <summary>My generators: <span id="mine-count"></span></summary>
+    <p>Generators you save stay in this browser only. Export them as one file to keep a backup or move them to another computer; the file uses the same format as the site's own <a href="generators.json">generators.json</a>, so you can import either.</p>
+    <div class="btns">
+      <button class="btn" type="button" id="export">Export all to a file</button>
+      <button class="btn" type="button" id="import">Import a file</button>
+      <input type="file" id="import-file" accept=".json,application/json" hidden>
+    </div>
+    <small id="mine-msg" role="status"></small>
+  </details>
+  <div class="banner" id="banner" hidden>
+    <span id="banner-text"></span>
+    <button class="btn primary" type="button" id="banner-save">Save to my generators</button>
+    <button class="btn" type="button" id="banner-official">Open the official one</button>
+  </div>
   <div class="page-title">
     <h1 id="title"></h1>
     <label class="pick" id="start-wrap" hidden>Start from <select id="start" aria-label="Start from"></select></label>

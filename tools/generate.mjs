@@ -1,12 +1,14 @@
 // The generator generator: validates every recipe in recipes/ and produces the
-// static website in dist/ (one page that runs every recipe, plus each recipe's
-// default Onshape FeatureScript). GitHub Actions publishes dist/ to GitHub Pages.
+// static website in dist/: one page that runs every recipe, the collection file
+// generators.json it loads them from (same format as a user's exported file),
+// and each recipe's default Onshape FeatureScript. GitHub Actions publishes
+// dist/ to GitHub Pages.
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadRecipes, FONT_FILES, fontPath } from './node-env.mjs';
 import { validateRecipe } from '../engine/recipe.js';
 import { compileFeatureScript } from '../engine/featurescript.js';
-import { formatRecipe } from '../engine/format.js';
+import { makeCollection } from '../engine/collection.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const dist = path.join(root, 'dist');
@@ -47,26 +49,17 @@ const write = (rel, data) => {
   fs.writeFileSync(path.join(dist, rel), data);
 };
 
-const index = [];
-for (const recipe of loadRecipes()) {
+const recipes = loadRecipes();
+for (const recipe of recipes) {
   validateRecipe(recipe);
-  write(`recipes/${recipe.id}.json`, formatRecipe(recipe));
   // old per-generator URLs now open the single page
   write(`${recipe.id}/index.html`, page('redirect.html', { target: `../?recipe=${recipe.id}` }));
   write(`featurescript/${recipe.id}.fs`, compileFeatureScript(recipe));
-  index.push({
-    id: recipe.id,
-    name: recipe.name,
-    description: recipe.description || '',
-    params: recipe.params.length,
-    parts: Object.keys(recipe.parts).length,
-    colors: Object.values(recipe.parts).map((p) => p.color || '#cccccc'),
-  });
   console.log(`generated ?recipe=${recipe.id} and featurescript/${recipe.id}.fs`);
 }
-write('recipes/index.json', JSON.stringify(index, null, 2));
+write('generators.json', `${JSON.stringify(makeCollection(recipes), null, 2)}\n`);
 write('index.html', page('index.html'));
 // the old Recipe lab URL (lab.html?recipe=<id>) uses the same query
 write('lab.html', page('redirect.html', { target: './' }).replace("location.replace('./' + location.hash)", "location.replace('./' + location.search + location.hash)"));
 write('.nojekyll', '');
-console.log(`\n${index.length} generators -> dist/`);
+console.log(`\n${recipes.length} generators -> dist/generators.json`);

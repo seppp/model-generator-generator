@@ -1,6 +1,7 @@
 // Engine environment for the browser: manifold WASM + fonts, loaded once.
 import Module from 'manifold-3d';
 import * as opentype from 'opentype.js';
+import { readCollection } from '../engine/collection.js';
 
 const FONT_FILES = {
   regular: 'vendor/fonts/open-sans-latin-400-normal.woff',
@@ -27,13 +28,9 @@ export function browserEnv() {
   return envPromise;
 }
 
-export async function loadRecipe(id) {
-  const res = await fetch(new URL(`recipes/${id}.json`, document.baseURI));
-  if (!res.ok) throw new Error(`Recipe '${id}' not found`);
-  return res.json();
-}
-
-export async function loadIndex() {
-  const res = await fetch(new URL('recipes/index.json', document.baseURI));
-  return res.json();
+/** The site's generators, from the single collection file built from recipes/. */
+export async function loadCollection() {
+  const res = await fetch(new URL('generators.json', document.baseURI));
+  if (!res.ok) throw new Error('Could not load generators.json');
+  return readCollection(await res.json());
 }
