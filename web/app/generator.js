@@ -6,6 +6,7 @@ import { toSTL, to3MF, colorChangeLayer } from '../engine/export.js';
 import { compileFeatureScript } from '../engine/featurescript.js';
 import { browserEnv } from './env.js';
 import { Viewer } from './viewer.js';
+import { onThemeChange } from './theme.js';
 
 const h = (tag, attrs = {}, ...children) => {
   const el = document.createElement(tag);
@@ -62,10 +63,12 @@ export async function mountGenerator(root, recipe, { syncUrl = true } = {}) {
     h('section', { class: 'outputs' }, notesEl, exportsEl),
   );
   const viewer = new Viewer(viewport);
-  const dark = matchMedia('(prefers-color-scheme: dark)');
-  const setBg = () => viewer.setBackground(dark.matches ? '#1b1f24' : '#eef1f4');
-  setBg();
-  dark.addEventListener('change', setBg);
+  const applyTheme = () => {
+    const css = getComputedStyle(document.documentElement);
+    viewer.setTheme(css.getPropertyValue('--view-bg').trim(), css.getPropertyValue('--view-grid').trim());
+  };
+  applyTheme();
+  onThemeChange(applyTheme);
 
   // ------------------------------------------------------------ form
   const rows = [];

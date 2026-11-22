@@ -25,7 +25,7 @@ export class Viewer {
     fill.position.set(-100, 80, 40);
     this.scene.add(fill);
 
-    this.grid = new THREE.GridHelper(250, 25, 0x888888, 0x888888);
+    this.grid = new THREE.GridHelper(250, 25, 0xffffff, 0xffffff);
     this.grid.rotation.x = Math.PI / 2;
     this.grid.material.transparent = true;
     this.grid.material.opacity = 0.25;
@@ -53,8 +53,9 @@ export class Viewer {
     this.camera.updateProjectionMatrix();
   }
 
-  setBackground(color) {
-    this.scene.background = new THREE.Color(color);
+  setTheme(background, grid) {
+    this.scene.background = new THREE.Color(background || '#eef1f4');
+    this.grid.material.color.set(grid || '#888888');
   }
 
   show(parts, colors = {}) {
