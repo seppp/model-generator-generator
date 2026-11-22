@@ -9,8 +9,8 @@ const IDENT = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const FS_RESERVED = new Set(('annotation as break case catch const default else enum export false for function if import ' +
   'in inf is new operator precondition predicate return switch throw true try type typecheck undefined var while ' +
   'context id definition').split(' '));
-const PARAM_TYPES = ['number', 'text', 'select', 'boolean'];
-const STEP_KEYS = new Set(['add', 'subtract', 'part', 'from', 'when', 'x', 'y', 'z', 'rotate', 'thickness', 'through', 'comment']);
+export const PARAM_TYPES = ['number', 'text', 'select', 'boolean'];
+export const STEP_KEYS = new Set(['add', 'subtract', 'part', 'from', 'when', 'x', 'y', 'z', 'rotate', 'thickness', 'through', 'comment']);
 
 export function stepBlock(step) {
   return step.add ?? step.subtract;

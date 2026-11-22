@@ -17,7 +17,7 @@
 //   unary     - !
 //   primary   number | 'string' | "string" | true | false | name | fn(args) | ( expr )
 
-const FUNCTIONS = {
+export const FUNCTIONS = {
   min: { js: Math.min, fs: (a) => nest('min', a) },
   max: { js: Math.max, fs: (a) => nest('max', a) },
   abs: { js: Math.abs, fs: (a) => `abs(${a[0]})`, arity: 1 },
@@ -36,7 +36,7 @@ function nest(name, args) {
   return args.slice(1).reduce((acc, a) => `${name}(${acc}, ${a})`, args[0]);
 }
 
-const CONSTANTS = { pi: { js: Math.PI, fs: 'PI' } };
+export const CONSTANTS = { pi: { js: Math.PI, fs: 'PI' } };
 
 export const RESERVED = new Set(['true', 'false', ...Object.keys(CONSTANTS), ...Object.keys(FUNCTIONS)]);
 

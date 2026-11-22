@@ -1,5 +1,9 @@
 // Builds a self-contained prompt for any AI chat (ChatGPT, Claude, Gemini...)
 // to change a recipe, and pulls the updated recipe back out of the answer.
+// The prompt = these rules + docs/RECIPES.md, so keep both in step with the
+// engine (npm run check fails when RECIPES.md misses a block, option or font).
+import { BLOCKS } from '../engine/blocks.js';
+import { FONTS } from '../engine/fonts.js';
 
 let referencePromise;
 function reference() {
@@ -21,10 +25,11 @@ ${wish}
 ## Rules for your answer
 
 - Reply with the COMPLETE updated recipe in a single \`\`\`json code block. Do not shorten it or leave parts out; I will paste it back as is.
-- Only use the blocks (shape, qr, text), step keys and param fields described in the reference. If the change is impossible with them, say so and suggest the closest alternative instead of inventing fields.
+- Only use the blocks (${Object.keys(BLOCKS).join(', ')}), step keys and param fields described in the reference. If the change is impossible with them, say so and suggest the closest alternative instead of inventing fields.
 - Values in steps, "derived", "when" and "showIf" are expression strings; a literal piece of text needs inner single quotes, e.g. "'Hello'".
 - Number params need "min" and "max", and the default must lie between them. Select option values must be identifiers.
 - Keep existing param "key"s and the recipe "id" unless the change requires otherwise (shared links use the keys).
+- Text fonts: ${Object.keys(FONTS).map((f) => `'${f}'`).join(', ')}. To let people choose, add a select param whose option values are these names and set the text step's "font" to that param.
 - Keep it printable on an FDM printer with a 0.4 mm nozzle (walls and raised lines >= 0.8 mm, text >= 4 mm tall, QR modules >= 1 mm).
 - After the JSON block, list what you changed in 2 to 4 short bullet points.
 

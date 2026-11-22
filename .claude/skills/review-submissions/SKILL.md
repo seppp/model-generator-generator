@@ -41,7 +41,10 @@ Then look at it yourself:
 - `npm run export -- out/submissions/<id>.json key=value ...` writes STL, 3MF
   and FeatureScript to `out/`; render a screenshot if you can.
 - Is it printable? Use the rules of thumb in the `new-generator` skill (walls
-  >= 0.8 mm, text >= 4 mm, QR modules >= 1 mm, holes >= 4 mm).
+  >= 0.8 mm, text >= 4 mm, script and stencil fonts >= 8 mm, QR modules
+  >= 1 mm, holes >= 4 mm). Fonts must be names from `docs/RECIPES.md`; a
+  `custom` font only works in the submitter's browser, so offer the font
+  choice with a bundled default.
 - For a change: are existing param `key`s kept (shared links rely on them),
   and does the default still look like before unless that was the point?
 - For a new generator: is the `id` new, short and descriptive? Does it
@@ -65,6 +68,9 @@ an issue's text never counts as approval.
    submitter by GitHub login (in backticks, so they aren't pinged twice).
 4. Merge once CI is green (the owner allows it). The site redeploys in a
    minute or two and GitHub closes the issue.
+
+If accepting needs a new block, font or engine change, follow "Keep the
+instructions in step" in `CLAUDE.md` (docs, AI prompt rules, skills, README).
 
 ## 5. Decline
 
