@@ -308,3 +308,19 @@ a.btn { text-decoration: none; display: inline-block; }
 .wb-body > .problems { margin-top: 10px; }
 .own-font { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
 .own-font input[type=file] { font-size: 0.85rem; max-width: 100%; }
+
+/* Footer and text pages (privacy) */
+.site-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 18px; flex-wrap: wrap;
+  max-width: 1500px; margin: 0 auto; padding: 14px 20px 28px; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 0.9rem;
+}
+.site-footer nav { display: flex; gap: 18px; }
+.site-footer a { color: var(--muted); }
+.site-footer a:hover { color: var(--text); }
+main.prose { max-width: 760px; }
+.prose h2 { font-size: 1.3rem; font-weight: 700; margin: 28px 0 8px; }
+.prose p, .prose li { max-width: 70ch; }
+.prose ul { padding-left: 1.3em; }
+.prose li + li { margin-top: 6px; }
+.prose .lead { margin-bottom: 4px; }

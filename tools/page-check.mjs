@@ -43,6 +43,19 @@ try {
     await page.close();
     console.log(`${failures.length ? '…' : '✓'} ${recipe.id}`);
   }
+  // the privacy page, linked from every page's footer
+  {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+    await page.goto(`http://localhost:${port}/`);
+    await page.click('.site-footer a[href="privacy.html"]');
+    await page.waitForSelector('main.prose h1', { timeout: 10000 });
+    for (const e of errors) failures.push(`privacy: ${e}`);
+    await page.close();
+    console.log(`${failures.length ? '…' : '✓'} privacy page`);
+  }
   await browser.close();
 } finally {
   server.kill();
@@ -52,4 +65,4 @@ if (failures.length) {
   console.error(failures.map((f) => `✗ ${f}`).join('\n'));
   process.exit(1);
 }
-console.log('✓ every generator page loads and its selects list their options');
+console.log('✓ every generator page loads and its selects list their options; the privacy page opens from the footer');

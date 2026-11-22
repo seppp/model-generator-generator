@@ -56,7 +56,7 @@ for (const dir of ['engine', 'app']) {
 const partial = (name) => fs.readFileSync(path.join(root, 'web', name), 'utf8').trim();
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const page = (file, vars = {}) => {
-  let html = partial(file).replace('{{head}}', partial('_head.html')).replace('{{header}}', partial('_header.html'));
+  let html = partial(file).replace('{{head}}', partial('_head.html')).replace('{{header}}', partial('_header.html')).replace('{{footer}}', partial('_footer.html'));
   html = html.replace(/((?:src|href)="|": ")(\.?\/?(?:app\/[^"?]+\.js|style\.css|vendor\/[^"?]+\.m?js))"/g, `$1$2?v=${VERSION}"`);
   for (const [k, v] of Object.entries(vars)) html = html.replaceAll(`{{${k}}}`, esc(v));
   return html + '\n';
@@ -76,6 +76,7 @@ for (const recipe of recipes) {
 }
 write('generators.json', `${JSON.stringify(makeCollection(recipes), null, 2)}\n`);
 write('index.html', page('index.html'));
+write('privacy.html', page('privacy.html'));
 // the old Recipe lab URL (lab.html?recipe=<id>) uses the same query
 write('lab.html', page('redirect.html', { target: './' }).replace("location.replace('./' + location.hash)", "location.replace('./' + location.search + location.hash)"));
 write('.nojekyll', '');

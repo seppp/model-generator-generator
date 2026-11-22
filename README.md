@@ -30,7 +30,8 @@ recipes/sign.json         ┘                   dist/index.html?recipe=<id>  web
   every change (*Live update* while typing or dragging; it pauses itself when a
   rebuild takes over 300 ms) and shows it with three.js in a preview that stays
   in view while you scroll. Settings live in the URL, so links
-  are shareable. Nothing is uploaded anywhere. Old per-generator links
+  are shareable. Nothing is uploaded anywhere (see the [privacy notice](web/privacy.html),
+  linked from the footer). Old per-generator links
   (`/<id>/`, `/lab.html`) redirect.
 - Under the generator, the collapsible **Change this generator** section is a
   guided flow: describe a change, copy a prompt for any AI chat, paste the
