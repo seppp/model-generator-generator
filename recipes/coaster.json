@@ -1,7 +1,7 @@
 {
   "id": "coaster",
   "name": "Coaster",
-  "description": "Round, square or hexagonal coaster with an optional rim, text and a recess for a cork pad.",
+  "description": "Round, square or hex coaster with rim, text and cork recess.",
   "parts": {
     "base": {
       "label": "Coaster",
@@ -122,17 +122,18 @@
       "options": [
         {
           "value": "raised",
-          "label": "Raised (filament swap)"
+          "label": "Raised"
         },
         {
           "value": "flush",
-          "label": "Flush inlay (multi-material)"
+          "label": "Flush inlay"
         },
         {
           "value": "engraved",
           "label": "Engraved"
         }
-      ]
+      ],
+      "help": "Raised: filament swap. Flush: multi-material. Engraved: one color."
     },
     {
       "key": "labelSize",
@@ -275,7 +276,7 @@
       "label": "Bottom edges",
       "default": "none",
       "group": "Edges",
-      "help": "Printable fillet: a 45° chamfer at the bed, then a fillet above it, so nothing overhangs more than 45°. A plain fillet at the bed needs supports or droops.",
+      "help": "Printable fillet: 45° chamfer, then a fillet. Prints without supports.",
       "options": [
         {
           "value": "none",
@@ -413,15 +414,15 @@
   "notes": [
     {
       "when": "rim && labelStyle == 'raised'",
-      "text": "The rim and the text overlap in height, so a single-nozzle filament swap would also color the top of the rim. Turn the rim off for a clean two-color swap print, or use the multi-material 3MF."
+      "text": "A filament swap would also color the rim top. Turn the rim off or use the multi-material 3MF."
     },
     {
       "when": "recess && recessDepth > thickness - 1",
-      "text": "The recess leaves less than 1 mm of material. Make the coaster thicker or the recess shallower."
+      "text": "Less than 1 mm left above the recess. Go thicker or shallower."
     },
     {
       "when": "labelStyle != 'raised' && labelDepth >= thickness",
-      "text": "Text depth is as deep as the coaster. Reduce the text depth."
+      "text": "Text is as deep as the coaster. Reduce the depth."
     }
   ]
 }

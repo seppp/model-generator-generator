@@ -98,7 +98,7 @@ Shown as the form on the website and as feature inputs in Onshape.
 | `label` | form label |
 | `default` | initial value |
 | `group` | form section (fieldset) |
-| `help` | small hint under the input |
+| `help` | hint behind the input's info button; one short sentence |
 | `showIf` | expression; the input is hidden when false |
 | `min`, `max`, `step` | numbers only; `min`/`max` are required |
 | `unit` | numbers only: `mm`, `deg` or omitted |
@@ -188,7 +188,8 @@ but not to the tenth of a millimeter.
 
 ## `notes`
 
-Hints shown under the preview. `{expression}` placeholders are filled in.
+Hints shown in the Download panel. `{expression}` placeholders are filled in.
+Keep each to one short sentence: what's wrong and what to change.
 
 ```json
 { "when": "style == 'raised'", "text": "Swap filament at {thickness} mm." }

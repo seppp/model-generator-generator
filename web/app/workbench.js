@@ -280,7 +280,7 @@ export async function mountWorkbench(container, {
     } catch (err) {
       msg.className = 'bad';
       msg.textContent = err.problems
-        ? `The AI's recipe has problems. Send these lines back to the AI and ask for a corrected complete recipe:\n${err.problems.map((p) => `- ${p}`).join('\n')}`
+        ? `Problems found. Send these back to the AI:\n${err.problems.map((p) => `- ${p}`).join('\n')}`
         : err.message;
       return;
     }
@@ -288,8 +288,8 @@ export async function mountWorkbench(container, {
     saveDraft();
     msg.className = 'ok';
     msg.textContent = base && recipe.id !== base.id
-      ? `Loaded. Note: the AI changed the id to '${recipe.id}', so this becomes a separate generator.`
-      : 'Loaded into the preview below. Check it, then keep it (step 3).';
+      ? `Loaded. The id changed to '${recipe.id}', so this is a separate generator.`
+      : 'Loaded. Check the preview, then keep it (step 3).';
     updateState();
     await apply();
     app.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -299,7 +299,7 @@ export async function mountWorkbench(container, {
     const recipe = validRecipe();
     if (!recipe) return;
     const replacing = mine.get(recipe.id);
-    if (!mine.save(recipe)) { say('This browser does not allow saving (private window or storage blocked). Use Download .json under Recipe code instead.', false); return; }
+    if (!mine.save(recipe)) { say('This browser blocks saving. Use Download .json under Recipe code.', false); return; }
     if (draftKey) store.del(draftKey);
     onSave(recipe, { replaced: !!replacing });
   });
@@ -317,7 +317,7 @@ export async function mountWorkbench(container, {
       out.value = link;
       out.select();
     }
-    say(`Share link copied (${link.length} characters). It contains this version of the generator and your current settings; anyone who opens it can use it, save it or submit it.`);
+    say('Link copied. It holds this version and your settings.');
   });
 
   ref('submit').addEventListener('click', async () => {
@@ -336,9 +336,9 @@ export async function mountWorkbench(container, {
     const url = () => `https://github.com/${REPO}/issues/new?${q}`;
     q.set('recipe', JSON.stringify(recipe));
     if (url().length > MAX_URL) q.delete('recipe'); // the share link holds the recipe anyway
-    if (url().length > MAX_URL) { say('This recipe is too large to submit by link. Download it (Recipe code > Download .json) and attach it to a new issue on GitHub.', false); return; }
+    if (url().length > MAX_URL) { say('Too large to submit by link. Download the .json and attach it to a GitHub issue.', false); return; }
     window.open(url(), '_blank', 'noopener');
-    say(`GitHub opened a submission form with your ${change ? 'change' : 'generator'} filled in. The description is filled in from your wish and a summary of the changes; edit it if you like, then click "Create". The owner reviews it and, if it fits, adds it to the site.`);
+    say('Submission form opened on GitHub. Check it, then click Create.');
   });
 
   let removeArmed = false;

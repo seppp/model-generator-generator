@@ -134,7 +134,7 @@ function mgShape(context is Context, id is Id, z is number, t is number, shape i
       const n = qrMatrix(a.content, a.ecc).length;
       const module = a.size / n;
       return module < 1
-        ? [`QR modules are only ${module.toFixed(2)} mm (${n}×${n}). Aim for 1 mm or more: make the code bigger, the content shorter or the error correction lower.`]
+        ? [`QR modules are ${module.toFixed(2)} mm; aim for 1 mm. Make the code bigger or the content shorter.`]
         : [];
     },
     profile(a, { CrossSection }) {

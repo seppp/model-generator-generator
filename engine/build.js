@@ -65,7 +65,7 @@ export function buildModel(recipe, rawValues, env) {
     const { solid, scaled } = smooth || edgedExtrude(Manifold, outline, height, edges, 0.05);
     const placed = keep(keep(solid).translate([0, 0, bb.min[2]]));
     solids[key] = smooth && prismatic ? placed : keep(m.intersect(placed));
-    const w = `${def.label || key}: the chamfers or fillets were taller than the part and were made smaller to fit.`;
+    const w = `${def.label || key}: edges shrunk to fit the height.`;
     if (scaled && !warnings.includes(w)) warnings.push(w);
   }
 

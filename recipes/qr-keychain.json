@@ -1,7 +1,7 @@
 {
   "id": "qr-keychain",
   "name": "QR code keychain",
-  "description": "Tag with a QR code (raised, engraved or flush inlay), variable keyring hole with optional 2D fillets, and optional custom nametag.",
+  "description": "QR code tag: raised, engraved or inlaid, with a keyring hole and optional nametag.",
   "parts": {
     "base": {
       "label": "Tag",
@@ -36,17 +36,18 @@
       "options": [
         {
           "value": "raised",
-          "label": "Raised (filament swap)"
+          "label": "Raised"
         },
         {
           "value": "flush",
-          "label": "Flush inlay (multi-material)"
+          "label": "Flush inlay"
         },
         {
           "value": "engraved",
-          "label": "Engraved (single color)"
+          "label": "Engraved"
         }
-      ]
+      ],
+      "help": "Raised: filament swap. Flush: multi-material. Engraved: one color."
     },
     {
       "key": "ecc",
@@ -54,7 +55,7 @@
       "label": "Error correction",
       "default": "M",
       "group": "Code",
-      "help": "Higher levels survive more damage but need more, smaller modules.",
+      "help": "Higher survives damage but needs smaller modules.",
       "options": [
         {
           "value": "L",
@@ -164,7 +165,7 @@
       "max": 360,
       "step": 1,
       "group": "Keyring",
-      "help": "0° = top, 90° = right, 180° = bottom, 270° = left.",
+      "help": "0° top, 90° right, 180° bottom, 270° left.",
       "showIf": "holeStyle == 'perimeter'"
     },
     {
@@ -203,7 +204,7 @@
       "max": 360,
       "step": 1,
       "group": "Keyring",
-      "help": "0° = up, 90° = right, 180° = down, 270° = left.",
+      "help": "0° up, 90° right, 180° down, 270° left.",
       "showIf": "holeStyle == 'perimeter' && holeDirMode == 'custom'"
     },
     {
@@ -216,7 +217,7 @@
       "max": 20,
       "step": 0.5,
       "group": "Keyring",
-      "help": "Distance along the tab direction from the tag edge to the hole center.",
+      "help": "From the tag edge to the hole center.",
       "showIf": "holeStyle == 'perimeter'"
     },
     {
@@ -253,7 +254,7 @@
       "max": 8,
       "step": 0.5,
       "group": "Keyring",
-      "help": "How far the hole sits inside the tag's corner. Negative values move it out onto the ear, away from the code.",
+      "help": "Negative moves it out onto the ear.",
       "showIf": "holeStyle == 'corner'"
     },
     {
@@ -262,7 +263,7 @@
       "label": "Fillet tab/ear corners",
       "default": true,
       "group": "Keyring",
-      "help": "Rounds the inside corners where the tab or ear meets the tag's straight edges.",
+      "help": "Rounds the corners where the tab meets the tag.",
       "showIf": "holeStyle != 'none'"
     },
     {
@@ -374,7 +375,7 @@
       "max": 24,
       "step": 0.5,
       "group": "Nametag",
-      "help": "Capital letter height. Keep script and stencil at 8 mm or larger.",
+      "help": "Capital height. Script and stencil: 8 mm or more.",
       "showIf": "textSide != 'none'"
     },
     {
@@ -407,7 +408,7 @@
       "label": "Alignment (approx.)",
       "default": "center",
       "group": "Nametag",
-      "help": "Approximate shift along the side; use Fine offset to adjust.",
+      "help": "Approximate; fine-tune with Fine offset.",
       "showIf": "textSide != 'none'",
       "options": [
         {
@@ -475,7 +476,7 @@
       "label": "Bottom edges",
       "default": "none",
       "group": "Edges",
-      "help": "Printable fillet: a 45° chamfer at the bed, then a fillet above it, so nothing overhangs more than 45°. A plain fillet at the bed needs supports or droops.",
+      "help": "Printable fillet: 45° chamfer, then a fillet. Prints without supports.",
       "options": [
         {
           "value": "none",
@@ -896,43 +897,43 @@
   "notes": [
     {
       "when": "style == 'raised'",
-      "text": "Print the tag in a light color and swap to a dark one at {thickness} mm. The 3MF 'filament swap' export inserts the color change for you."
+      "text": "Light tag, swap to dark at {thickness} mm. The filament swap 3MF does it for you."
     },
     {
       "when": "style == 'flush'",
-      "text": "Flush inlay needs a multi-material printer (MMU / tool changer). Use the 3MF 'multi-material' export."
+      "text": "Flush inlay needs an MMU or tool changer: use the multi-material 3MF."
     },
     {
       "when": "style == 'engraved'",
-      "text": "Engraved codes are one color. Fill the pocket with paint or a marker so phones can read it."
+      "text": "Fill the engraved code with paint or marker so phones can read it."
     },
     {
       "when": "corner > margin + 2",
-      "text": "Large corner radius: keep it below the margin so the QR finder squares stay intact."
+      "text": "Keep the corner radius below the margin to keep the QR corners intact."
     },
     {
       "when": "holeStyle == 'corner' && holeClearance < 0.5",
-      "text": "The keyring hole is too close to the QR code ({holeClearance} mm gap). Move it further out (lower 'Hole position from corner') or increase the margin."
+      "text": "Hole is {holeClearance} mm from the code. Move it out or increase the margin."
     },
     {
       "when": "holeFillet && (holeStyle == 'tab' || holeStyle == 'corner') && filletR < holeFilletR - 0.01",
-      "text": "Keyring fillet radius was reduced to {filletR} mm to fit between the tab/ear and the tag's straight edge."
+      "text": "Keyring fillet reduced to {filletR} mm to fit."
     },
     {
       "when": "holeFillet && holeStyle == 'perimeter' && (pFilletR < holeFilletR - 0.01 || pFilletL < holeFilletR - 0.01)",
-      "text": "Perimeter fillet radius was reduced or skipped on one or both sides ({pFilletL} mm / {pFilletR} mm) to fit the straight edge and tab angle."
+      "text": "Keyring fillets reduced to fit ({pFilletL} / {pFilletR} mm)."
     },
     {
       "when": "goesInward",
-      "text": "Warning: the keyring tab is pointing inward into the tag body. Switch 'Tab direction' to 'Straight out from edge' or 'Away from center', or adjust the custom angle."
+      "text": "The keyring tab points into the tag. Change the tab direction."
     },
     {
       "when": "holeStyle == 'perimeter' && holeQrGap < 0.8",
-      "text": "Warning: the keyring hole is too close to or overlaps the QR code ({holeQrGap} mm gap). Increase 'Hole distance from edge' or adjust the tab direction."
+      "text": "Hole overlaps or nearly touches the code ({holeQrGap} mm). Move it further out."
     },
     {
       "when": "textSide != 'none' && (textFont == 'script' || textFont == 'stencil') && textSize < 8",
-      "text": "Script and stencil fonts have thin strokes; use a font size of at least 8 mm for reliable 0.4 mm nozzle printing."
+      "text": "Script and stencil need 8 mm text or more."
     }
   ]
 }

@@ -36,6 +36,7 @@ ${wish}
 - Text is one centered line per text step and its width is unknown in expressions, so alignment to an edge can only be approximated; say so instead of pretending it is exact.
 - Rounded or chamfered top/bottom edges: use the part's "edges" (see the reference); for bottom edges prefer 'printable' over 'fillet'.
 - Keep it printable on an FDM printer with a 0.4 mm nozzle (walls and raised lines >= 0.8 mm, text >= 4 mm tall, QR modules >= 1 mm).
+- Keep the description, "help" texts and notes short: one brief sentence each.
 - After the JSON block, list what you changed in 2 to 4 short bullet points.
 
 ## My current settings (for context; these are form values, not defaults)
