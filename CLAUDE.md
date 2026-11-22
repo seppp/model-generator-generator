@@ -7,6 +7,9 @@ to the generator generator is not done until these match it:
 
 - `docs/RECIPES.md`: the recipe reference. The website pastes it into the
   *Copy prompt for an AI chat* prompt, so it is what other people's AIs know.
+  Wrap repo-only details (paths, npm commands, engine internals) in
+  `<!-- dev-only -->` markers; `<!-- chat: ... -->` text appears only in the
+  prompt (`engine/docs.js`).
 - `web/app/prompt.js`: the rules at the top of that prompt.
 - `.claude/skills/new-generator/SKILL.md` and
   `.claude/skills/review-submissions/SKILL.md`.
@@ -14,7 +17,8 @@ to the generator generator is not done until these match it:
 
 `npm run check` fails when `docs/RECIPES.md` misses a block, block argument,
 enum option, font, param type, step key or expression function, or the README
-misses an npm script (`tools/docs-check.mjs`). It can't judge wording or
+misses an npm script, and when the chat version mentions repo paths or npm
+commands (`tools/docs-check.mjs`). It can't judge wording or
 workflows, so read the files above whenever you change behaviour.
 
 ## Repo notes
