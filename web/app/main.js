@@ -66,14 +66,14 @@ async function show(id, { push = false, edit = false } = {}) {
     title.textContent = 'New generator';
     document.title = 'New generator · Generator Generator';
     startWrap.hidden = false;
-    bench = await mountWorkbench(box, { start: formatRecipe(BLANK), syncUrl: false, open: true });
+    bench = await mountWorkbench(box, { start: formatRecipe(BLANK), publishedIds: index.map((r) => r.id), syncUrl: false, open: true });
     bench.details.querySelector('.wb-title').textContent = 'Build your generator';
   } else {
     const entry = index.find((r) => r.id === id);
     title.textContent = entry.name;
     document.title = `${entry.name} · Generator Generator`;
     startWrap.hidden = true;
-    bench = await mountWorkbench(box, { sourceId: id, published: await loadRecipe(id), syncUrl: true, open: edit });
+    bench = await mountWorkbench(box, { sourceId: id, published: await loadRecipe(id), publishedIds: index.map((r) => r.id), syncUrl: true, open: edit });
   }
 }
 
