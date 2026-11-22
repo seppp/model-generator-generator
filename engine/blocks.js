@@ -12,6 +12,7 @@
 
 import { qrMatrix, qrRuns } from './qr.js';
 import { textPolygons } from './text.js';
+import { FONT_NAMES, FONTS } from './fonts.js';
 import { fsNumber, fsString } from './expr.js';
 
 const C45 = Math.SQRT1_2;
@@ -198,15 +199,15 @@ function mgQr(context is Context, id is Id, z is number, t is number, n is numbe
   },
 
   text: {
-    description: 'Single line of text, centered. `size` is the capital letter height in mm.',
+    description: 'Single line of text, centered. `size` is the capital letter height in mm. `font` is one of the names in engine/fonts.js.',
     args: {
       text: { type: 'string', default: 'Text' },
       size: { type: 'number', default: 8 },
-      font: { type: 'enum', options: ['regular', 'bold'], default: 'regular' },
+      font: { type: 'enum', options: FONT_NAMES, default: 'regular' },
     },
     profile(a, { CrossSection, fonts }) {
       if (!a.text || !String(a.text).trim() || a.size <= 0) return null;
-      const font = fonts[a.font] || fonts.regular;
+      const font = fonts[a.font] || fonts.regular; // a missing font (e.g. no own font file yet) falls back
       const polys = textPolygons(font, String(a.text), a.size);
       if (!polys.length) return null;
       const cs = new CrossSection(polys, 'NonZero');
@@ -215,13 +216,16 @@ function mgQr(context is Context, id is Id, z is number, t is number, n is numbe
     },
     fs: {
       helper: `
+const MG_BOLD_FONTS = [${FONT_NAMES.filter((n) => FONTS[n].fsBold).map((n) => `"${n}"`).join(', ')}];
+
 // Onshape text box height is roughly the font's em size; Open Sans caps are 0.714 em.
+// Onshape has its own font list, so every font is drawn with Open Sans here.
 function mgText(context is Context, id is Id, z is number, t is number, txt is string, capHeight is number, font is string) returns Query
 {
     const mm = millimeter;
     const em = capHeight / 0.714;
     const sk = newSketchOnPlane(context, id + "sk", { "sketchPlane" : mgPlane(z) });
-    skText(sk, "t", { "text" : txt, "fontName" : font == "bold" ? "OpenSans-Bold.ttf" : "OpenSans-Regular.ttf", "firstCorner" : vector(0, 0) * mm, "secondCorner" : vector(em, em) * mm });
+    skText(sk, "t", { "text" : txt, "fontName" : isIn(font, MG_BOLD_FONTS) ? "OpenSans-Bold.ttf" : "OpenSans-Regular.ttf", "firstCorner" : vector(0, 0) * mm, "secondCorner" : vector(em, em) * mm });
     skSolve(sk);
     const q = mgExtrude(context, id, id + "sk", t);
     const box = evBox3d(context, { "topology" : q });

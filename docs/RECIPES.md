@@ -122,16 +122,26 @@ All blocks are centered on the origin before `x`/`y` move them.
 encoder), everything else stays parametric. The page warns when modules get
 smaller than 1 mm.
 
-**`text`**: one line of Open Sans, centered on its bounding box.
+**`text`**: one line of text, centered on its bounding box.
 
 | arg | default | |
 | --- | --- | --- |
 | `text` | | the string |
 | `size` | 8 | capital letter height in mm |
-| `font` | `regular` | `regular` or `bold` |
+| `font` | `regular` | a font name, see below |
 
-In Onshape the same font is used through `skText`; sizes match closely but not
-to the tenth of a millimeter.
+Fonts (open-licensed, in `engine/fonts.js`; the browser loads each only when used):
+`regular` (Open Sans), `bold` (Open Sans Bold), `rounded` (Varela Round),
+`slab` (Roboto Slab Bold), `serif` (Noto Serif Bold), `condensed` (Bebas Neue,
+capitals only), `stencil` (Allerta Stencil), `script` (Pacifico), `mono`
+(Roboto Mono Bold), `custom` (a font file the visitor chooses; browser only,
+falls back to `regular` until chosen). To let people pick, use a select param
+whose option values are these names and set `"font": "font"` on the step. Keep
+script and stencil text large (cap height 8 mm or more) so thin strokes print.
+
+In Onshape, text is drawn with Open Sans through `skText` (regular, or bold for
+the heavier fonts), since Onshape has its own font list; sizes match closely
+but not to the tenth of a millimeter.
 
 ## `notes`
 

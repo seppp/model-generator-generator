@@ -253,3 +253,5 @@ a.btn { text-decoration: none; display: inline-block; }
 .code > summary { cursor: pointer; font-weight: 600; font-size: 0.92rem; padding: 6px 0; }
 .code > summary .wb-hint { font-weight: 400; margin-left: 6px; }
 .wb-body > .problems { margin-top: 10px; }
+.own-font { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.own-font input[type=file] { font-size: 0.85rem; max-width: 100%; }

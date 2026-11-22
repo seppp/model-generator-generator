@@ -7,8 +7,16 @@ import { computeScope, normalizeValues, planSteps } from './recipe.js';
 /**
  * @param recipe validated recipe
  * @param rawValues parameter values (missing ones fall back to defaults)
- * @param env { wasm: initialised manifold-3d module, fonts: { regular, bold } opentype fonts }
+ * @param env { wasm: initialised manifold-3d module, fonts: { <name>: opentype font } }
+ *   (see engine/fonts.js; load the ones fontsNeeded() lists first, missing ones fall back to regular)
  */
+/** Font names the text steps use with these values (so a browser can load them before building). */
+export function fontsNeeded(recipe, rawValues) {
+  const scope = computeScope(recipe, normalizeValues(recipe, rawValues));
+  const names = planSteps(recipe, scope).filter((s) => s.block === 'text' && String(s.args.text ?? '').trim()).map((s) => s.args.font);
+  return [...new Set(names)];
+}
+
 export function buildModel(recipe, rawValues, env) {
   const { Manifold, CrossSection } = env.wasm;
   const values = normalizeValues(recipe, rawValues);

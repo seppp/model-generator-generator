@@ -5,7 +5,8 @@
 // dist/ to GitHub Pages.
 import fs from 'node:fs';
 import path from 'node:path';
-import { loadRecipes, FONT_FILES, fontPath } from './node-env.mjs';
+import { loadRecipes, BUNDLED_FONTS, fontPath } from './node-env.mjs';
+import { FONTS, fontFile } from '../engine/fonts.js';
 import { validateRecipe } from '../engine/recipe.js';
 import { compileFeatureScript } from '../engine/featurescript.js';
 import { makeCollection } from '../engine/collection.js';
@@ -29,7 +30,8 @@ copy(path.join(pkgDir('manifold-3d'), 'manifold.js'), 'vendor/manifold/manifold.
 copy(path.join(pkgDir('manifold-3d'), 'manifold.wasm'), 'vendor/manifold/manifold.wasm');
 copy(path.join(pkgDir('qrcode-generator'), 'dist/qrcode.mjs'), 'vendor/qrcode/qrcode.mjs');
 copy(path.join(pkgDir('opentype.js'), 'dist/opentype.mjs'), 'vendor/opentype/opentype.mjs');
-for (const f of Object.values(FONT_FILES)) copy(fontPath(f), `vendor/fonts/${f}`);
+for (const n of BUNDLED_FONTS) copy(fontPath(n), `vendor/fonts/${fontFile(n)}`);
+for (const pkg of new Set(BUNDLED_FONTS.map((n) => FONTS[n].pkg))) copy(pkgDir(`@fontsource/${pkg}/LICENSE`), `vendor/fonts/LICENSE-${pkg}.txt`);
 
 // Engine (shared with Node) and the web app
 copy(path.join(root, 'engine'), 'engine');

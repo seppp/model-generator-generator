@@ -1,10 +1,10 @@
 // The generic generator page: builds the form from a recipe, rebuilds the
 // model on every change, previews it and offers the exports.
 import { validateRecipe, normalizeValues, computeScope, isVisible } from '../engine/recipe.js';
-import { buildModel, disposeModel } from '../engine/build.js';
+import { buildModel, disposeModel, fontsNeeded } from '../engine/build.js';
 import { toSTL, to3MF, colorChangeLayer } from '../engine/export.js';
 import { compileFeatureScript } from '../engine/featurescript.js';
-import { browserEnv } from './env.js';
+import { browserEnv, ownFont } from './env.js';
 import { Viewer } from './viewer.js';
 import { onThemeChange } from './theme.js';
 
@@ -85,6 +85,27 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
     return groups.get(name);
   };
 
+  // A select with a 'custom' option (fonts) gets a file picker for your own font.
+  const fontPickers = [];
+  function ownFontPicker(key) {
+    const note = h('small', { class: 'help' }, ownFont.name() ? `Your font: ${ownFont.name()}` : 'Choose a .ttf, .otf or .woff file. It stays in this browser; Onshape uses Open Sans instead.');
+    const file = h('input', { type: 'file', accept: '.ttf,.otf,.woff,font/ttf,font/otf,font/woff', 'aria-label': 'Your own font file' });
+    file.addEventListener('change', async () => {
+      const f = file.files[0];
+      if (!f || !env) return;
+      try {
+        const { family, kept } = await ownFont.set(f, env);
+        note.textContent = `Your font: ${family}${kept ? '' : ' (too big to keep in this browser; choose it again next visit)'}`;
+        render();
+      } catch {
+        note.textContent = `${f.name} is not a font file this page can read (use .ttf, .otf or .woff).`;
+      }
+    });
+    const el = h('div', { class: 'own-font' }, file, note);
+    fontPickers.push({ key, el });
+    return el;
+  }
+
   for (const p of recipe.params) {
     const id = `p-${p.key}`;
     let input;
@@ -122,7 +143,8 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
     const row = h('div', { class: `row row-${p.type}` },
       h('label', { for: id, class: 'label' }, p.label || p.key),
       input,
-      p.help ? h('small', { class: 'help' }, p.help) : null);
+      p.help ? h('small', { class: 'help' }, p.help) : null,
+      p.type === 'select' && p.options.some((o) => o.value === 'custom') ? ownFontPicker(p.key) : null);
     rows.push({ p, row });
     groupEl(p.group || 'Settings').append(row);
   }
@@ -213,14 +235,26 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   }
 
   function updateVisibility() {
+    for (const { key, el } of fontPickers) el.hidden = values[key] !== 'custom';
     let scope;
     try { scope = computeScope(recipe, values); } catch { return; }
     for (const { p, row } of rows) row.hidden = !isVisible(p, scope);
   }
 
-  function render() {
+  let renderSeq = 0;
+  async function render() {
     updateVisibility();
     if (!env) return;
+    const n = ++renderSeq;
+    let fontsUsed = [];
+    try { fontsUsed = fontsNeeded(recipe, values); } catch { /* build reports it */ }
+    const missing = fontsUsed.filter((f) => !env.fonts[f]);
+    if (missing.length && env.loadFont) {
+      status.textContent = 'Loading font...';
+      status.className = 'status';
+      await Promise.all(missing.map((f) => env.loadFont(f)));
+      if (n !== renderSeq) return; // settings changed meanwhile
+    }
     const t0 = performance.now();
     let next;
     try {
@@ -234,7 +268,9 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
     model = next;
     viewer.show(model.parts, colors);
     const ms = Math.round(performance.now() - t0);
-    status.textContent = model.parts.length ? '' : 'Nothing to show with these settings.';
+    status.textContent = !model.parts.length ? 'Nothing to show with these settings.'
+      : fontsUsed.includes('custom') && !env.fonts.custom ? 'Choose your font file under the font setting; showing Open Sans until then.'
+      : fontsUsed.some((f) => !env.fonts[f]) ? 'A font could not be loaded; showing Open Sans instead.' : '';
     status.className = 'status';
     const s = model.stats;
     statsEl.textContent = s
