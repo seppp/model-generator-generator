@@ -32,7 +32,7 @@ ${wish}
 - Values in steps, "derived", "when" and "showIf" are expression strings; a literal piece of text needs inner single quotes, e.g. "'Hello'".
 - Number params need "min" and "max", and the default must lie between them. Select option values must be identifiers.
 - Keep existing param "key"s and the recipe "id" unless the change requires otherwise (shared links use the keys).
-- Text fonts: ${Object.keys(FONTS).map((f) => `'${f}'`).join(', ')}. To let people choose, add a select param whose option values are these names and set the text step's "font" to that param.
+- Text fonts: ${Object.keys(FONTS).map((f) => `'${f}'`).join(', ')}. To let people choose, add a select param whose option values are these names (each with its "group" from the reference) and set the text step's "font" to that param. Font pickers are listed alphabetically unless the param has "sort": "recipe".
 - Text is one centered line per text step and its width is unknown in expressions, so alignment to an edge can only be approximated; say so instead of pretending it is exact.
 - Rounded or chamfered top/bottom edges: use the part's "edges" (see the reference); for bottom edges prefer 'printable' over 'fillet'.
 - Keep it printable on an FDM printer with a 0.4 mm nozzle (walls and raised lines >= 0.8 mm, text >= 4 mm tall, QR modules >= 1 mm).

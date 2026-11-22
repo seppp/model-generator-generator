@@ -3,6 +3,7 @@
 
 import { BLOCKS } from './blocks.js';
 import { compile, evaluate, refs, RESERVED } from './expr.js';
+import { FONTS } from './fonts.js';
 import { EDGE_KEYS, TOP_EDGES, BOTTOM_EDGES, DEFAULT_PRINTABLE_CHAMFER } from './edges.js';
 
 const IDENT = /^[A-Za-z_][A-Za-z0-9_]*$/;
@@ -48,6 +49,8 @@ export function validateRecipe(recipe) {
       if (!Array.isArray(p.options) || !p.options.length) err(`${where}: select params need options`);
       for (const o of p.options || []) if (!IDENT.test(o.value)) err(`${where}: option value '${o.value}' must be an identifier`);
       if (!(p.options || []).some((o) => o.value === p.default)) err(`${where}: default must be one of the options`);
+      if (p.sort !== undefined && !SELECT_SORTS.includes(p.sort)) err(`${where}: sort must be ${SELECT_SORTS.join(' or ')}`);
+      for (const o of p.options || []) if (o.group !== undefined && typeof o.group !== 'string') err(`${where}: option group must be a string`);
     }
     if (p.type === 'boolean' && typeof p.default !== 'boolean') err(`${where}: default must be true or false`);
     if (p.type === 'text' && typeof p.default !== 'string') err(`${where}: default must be a string`);
@@ -120,6 +123,41 @@ export function validateRecipe(recipe) {
     throw e;
   }
   return recipe;
+}
+
+export const SELECT_SORTS = ['alphabetical', 'recipe'];
+
+/** True when every option of a select is a font name (a font picker). */
+export function isFontSelect(param) {
+  return param.type === 'select' && param.options.every((o) => o.value in FONTS);
+}
+
+/**
+ * The options of a select in display order, as [{ group, options }] (group is
+ * null for options without one). Font pickers are alphabetical by default, with
+ * the visitor's own font last; other selects keep the recipe's order. A param's
+ * "sort" ('alphabetical' or 'recipe') overrides that. Alphabetical also sorts the
+ * groups; otherwise groups appear in the order of their first option.
+ */
+export function selectOptions(param) {
+  const sort = param.sort ?? (isFontSelect(param) ? 'alphabetical' : 'recipe');
+  let opts = [...param.options];
+  if (sort === 'alphabetical') {
+    const name = (o) => String(o.label || o.value);
+    opts.sort((a, b) => (a.value === 'custom') - (b.value === 'custom') || name(a).localeCompare(name(b), 'en', { sensitivity: 'base' }));
+  }
+  const groups = [];
+  for (const o of opts) {
+    const g = o.group ?? null;
+    let entry = groups.find((x) => x.group === g);
+    if (!entry) groups.push(entry = { group: g, options: [] });
+    entry.options.push(o);
+  }
+  if (sort === 'alphabetical') {
+    const last = (g) => g.options.some((o) => o.value === 'custom');
+    groups.sort((a, b) => last(a) - last(b) || (a.group === null ? -1 : b.group === null ? 1 : a.group.localeCompare(b.group, 'en')));
+  }
+  return groups;
 }
 
 export function defaultValues(recipe) {

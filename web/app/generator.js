@@ -1,6 +1,6 @@
 // The generic generator page: builds the form from a recipe, rebuilds the
 // model on every change, previews it and offers the exports.
-import { validateRecipe, normalizeValues, computeScope, isVisible } from '../engine/recipe.js';
+import { validateRecipe, normalizeValues, computeScope, isVisible, selectOptions } from '../engine/recipe.js';
 import { buildModel, disposeModel, fontsNeeded } from '../engine/build.js';
 import { toSTL, to3MF, toOBJ, toSVG, toDXF, colorChangeLayer } from '../engine/export.js';
 import { compileFeatureScript } from '../engine/featurescript.js';
@@ -194,7 +194,8 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
           input.append(b);
         }
       } else {
-        input = h('select', { id }, p.options.map((o) => h('option', { value: o.value, selected: values[p.key] === o.value }, o.label || o.value)));
+        const option = (o) => h('option', { value: o.value, selected: values[p.key] === o.value }, o.label || o.value);
+        input = h('select', { id }, selectOptions(p).map(({ group, options }) => (group ? h('optgroup', { label: group }, options.map(option)) : options.map(option))));
         input.addEventListener('change', () => set(input.value));
       }
     } else {
