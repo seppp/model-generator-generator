@@ -8,7 +8,7 @@ import { chatReference } from '../engine/docs.js';
 
 let referencePromise;
 function reference() {
-  referencePromise ??= fetch(new URL('docs/RECIPES.md', document.baseURI))
+  referencePromise ??= fetch(new URL(`docs/RECIPES.md${new URL(import.meta.url).search}`, document.baseURI))
     .then((r) => (r.ok ? r.text() : ''))
     .then(chatReference)
     .catch(() => '');

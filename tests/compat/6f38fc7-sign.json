@@ -1,0 +1,261 @@
+{
+  "id": "sign",
+  "name": "Name sign",
+  "description": "Rectangular sign with raised text, an optional border and screw holes.",
+  "parts": {
+    "base": {
+      "label": "Plate",
+      "color": "#1e3a8a"
+    },
+    "accent": {
+      "label": "Text and border",
+      "color": "#f8fafc"
+    }
+  },
+  "params": [
+    {
+      "key": "text",
+      "type": "text",
+      "label": "Text",
+      "default": "Werkstatt",
+      "group": "Text"
+    },
+    {
+      "key": "textSize",
+      "type": "number",
+      "unit": "mm",
+      "label": "Letter height",
+      "default": 16,
+      "min": 4,
+      "max": 100,
+      "step": 1,
+      "group": "Text"
+    },
+    {
+      "key": "font",
+      "type": "select",
+      "label": "Font",
+      "default": "bold",
+      "options": [
+        {
+          "value": "regular",
+          "label": "Open Sans"
+        },
+        {
+          "value": "bold",
+          "label": "Open Sans Bold"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        },
+        {
+          "value": "slab",
+          "label": "Slab serif"
+        },
+        {
+          "value": "serif",
+          "label": "Serif"
+        },
+        {
+          "value": "condensed",
+          "label": "Tall condensed (capitals)"
+        },
+        {
+          "value": "stencil",
+          "label": "Stencil"
+        },
+        {
+          "value": "script",
+          "label": "Script"
+        },
+        {
+          "value": "mono",
+          "label": "Monospace"
+        },
+        {
+          "value": "custom",
+          "label": "Your own font file"
+        }
+      ],
+      "group": "Text"
+    },
+    {
+      "key": "raise",
+      "type": "number",
+      "unit": "mm",
+      "label": "Text and border height",
+      "default": 1,
+      "min": 0.2,
+      "max": 5,
+      "step": 0.1,
+      "group": "Text"
+    },
+    {
+      "key": "width",
+      "type": "number",
+      "unit": "mm",
+      "label": "Width",
+      "default": 140,
+      "min": 30,
+      "max": 250,
+      "step": 1,
+      "group": "Plate"
+    },
+    {
+      "key": "height",
+      "type": "number",
+      "unit": "mm",
+      "label": "Height",
+      "default": 40,
+      "min": 15,
+      "max": 200,
+      "step": 1,
+      "group": "Plate"
+    },
+    {
+      "key": "corner",
+      "type": "number",
+      "unit": "mm",
+      "label": "Corner radius",
+      "default": 5,
+      "min": 0,
+      "max": 40,
+      "step": 0.5,
+      "group": "Plate"
+    },
+    {
+      "key": "thickness",
+      "type": "number",
+      "unit": "mm",
+      "label": "Thickness",
+      "default": 3,
+      "min": 1,
+      "max": 10,
+      "step": 0.2,
+      "group": "Plate"
+    },
+    {
+      "key": "border",
+      "type": "boolean",
+      "label": "Border",
+      "default": true,
+      "group": "Border"
+    },
+    {
+      "key": "borderWidth",
+      "type": "number",
+      "unit": "mm",
+      "label": "Border width",
+      "default": 2,
+      "min": 0.8,
+      "max": 10,
+      "step": 0.2,
+      "group": "Border",
+      "showIf": "border"
+    },
+    {
+      "key": "borderInset",
+      "type": "number",
+      "unit": "mm",
+      "label": "Border inset",
+      "default": 3,
+      "min": 0,
+      "max": 20,
+      "step": 0.5,
+      "group": "Border",
+      "showIf": "border"
+    },
+    {
+      "key": "holes",
+      "type": "boolean",
+      "label": "Screw holes",
+      "default": false,
+      "group": "Mounting"
+    },
+    {
+      "key": "holeDia",
+      "type": "number",
+      "unit": "mm",
+      "label": "Hole diameter",
+      "default": 4,
+      "min": 2,
+      "max": 10,
+      "step": 0.5,
+      "group": "Mounting",
+      "showIf": "holes"
+    }
+  ],
+  "derived": {
+    "outerW": "width - 2 * borderInset",
+    "outerH": "height - 2 * borderInset",
+    "outerR": "max(corner - borderInset, 0)",
+    "holeX": "width / 2 - borderInset - borderWidth - holeDia"
+  },
+  "steps": [
+    {
+      "add": "shape",
+      "part": "base",
+      "shape": "roundedRect",
+      "width": "width",
+      "height": "height",
+      "radius": "corner",
+      "thickness": "thickness"
+    },
+    {
+      "add": "shape",
+      "part": "accent",
+      "when": "border",
+      "comment": "border frame (outer)",
+      "shape": "roundedRect",
+      "width": "outerW",
+      "height": "outerH",
+      "radius": "outerR",
+      "z": "thickness",
+      "thickness": "raise"
+    },
+    {
+      "subtract": "shape",
+      "from": "accent",
+      "when": "border",
+      "comment": "border frame (inner)",
+      "shape": "roundedRect",
+      "width": "outerW - 2 * borderWidth",
+      "height": "outerH - 2 * borderWidth",
+      "radius": "max(outerR - borderWidth, 0)",
+      "z": "thickness",
+      "thickness": "raise + 1"
+    },
+    {
+      "add": "text",
+      "part": "accent",
+      "text": "text",
+      "size": "textSize",
+      "font": "font",
+      "z": "thickness",
+      "thickness": "raise"
+    },
+    {
+      "subtract": "shape",
+      "when": "holes",
+      "shape": "circle",
+      "diameter": "holeDia",
+      "x": "-holeX",
+      "through": true
+    },
+    {
+      "subtract": "shape",
+      "when": "holes",
+      "shape": "circle",
+      "diameter": "holeDia",
+      "x": "holeX",
+      "through": true
+    }
+  ],
+  "notes": [
+    {
+      "when": "holes",
+      "text": "Screw holes cut through the text if it is wide. Shorten the text or move to a wider sign."
+    }
+  ]
+}

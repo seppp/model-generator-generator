@@ -21,6 +21,26 @@ misses an npm script, and when the chat version mentions repo paths or npm
 commands (`tools/docs-check.mjs`). It can't judge wording or
 workflows, so read the files above whenever you change behaviour.
 
+## Backwards compatibility (every change)
+
+People keep generators in their browser, in exported files and in share links,
+built on older versions of the recipe format and of the official recipes.
+Changes must keep those working:
+
+- Don't rename or remove blocks, block arguments, enum options, fonts, param
+  types, step keys, expression functions or param keys of official recipes;
+  add new ones instead and keep the old names working (map them if needed).
+- `tests/compat/` holds older recipe versions; `npm run check` builds them all.
+  When you change an official recipe, copy its previous version there.
+- Deploys must load as a whole: `tools/generate.mjs` versions every module URL
+  (`?v=<build hash>`); keep new imports and fetches inside that scheme.
+
+If a change can't be backwards compatible, **don't merge it**, even with
+standing permission to merge. Stop and tell the user first: what breaks,
+which generators (official ones, and what kind of saved or shared ones),
+whether they should be adjusted, and if adjusting them changes any
+functionality. Let the user decide whether to apply it anyway.
+
 ## Repo notes
 
 - New generator ideas: use the `new-generator` skill in `.claude/skills/`. Generators are JSON recipes in `recipes/`; don't hand-write pages or FeatureScript per generator.
