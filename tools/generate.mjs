@@ -1,6 +1,6 @@
 // The generator generator: validates every recipe in recipes/ and produces the
-// static website in dist/ (one generator page per recipe plus its default
-// Onshape FeatureScript). GitHub Actions publishes dist/ to GitHub Pages.
+// static website in dist/ (one page that runs every recipe, plus each recipe's
+// default Onshape FeatureScript). GitHub Actions publishes dist/ to GitHub Pages.
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadRecipes, FONT_FILES, fontPath } from './node-env.mjs';
@@ -51,7 +51,8 @@ const index = [];
 for (const recipe of loadRecipes()) {
   validateRecipe(recipe);
   write(`recipes/${recipe.id}.json`, formatRecipe(recipe));
-  write(`${recipe.id}/index.html`, page('generator.html', recipe));
+  // old per-generator URLs now open the single page
+  write(`${recipe.id}/index.html`, page('redirect.html', { target: `../?recipe=${recipe.id}` }));
   write(`featurescript/${recipe.id}.fs`, compileFeatureScript(recipe));
   index.push({
     id: recipe.id,
@@ -61,10 +62,11 @@ for (const recipe of loadRecipes()) {
     parts: Object.keys(recipe.parts).length,
     colors: Object.values(recipe.parts).map((p) => p.color || '#cccccc'),
   });
-  console.log(`generated ${recipe.id}/ and featurescript/${recipe.id}.fs`);
+  console.log(`generated ?recipe=${recipe.id} and featurescript/${recipe.id}.fs`);
 }
 write('recipes/index.json', JSON.stringify(index, null, 2));
 write('index.html', page('index.html'));
-write('lab.html', page('lab.html'));
+// the old Recipe lab URL (lab.html?recipe=<id>) uses the same query
+write('lab.html', page('redirect.html', { target: './' }).replace("location.replace('./' + location.hash)", "location.replace('./' + location.search + location.hash)"));
 write('.nojekyll', '');
 console.log(`\n${index.length} generators -> dist/`);

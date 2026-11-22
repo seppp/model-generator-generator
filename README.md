@@ -8,7 +8,7 @@ produced from short JSON **recipes**.
 
 ```
 recipes/qr-keychain.json ─┐
-recipes/coaster.json      ├─ npm run build ─▶ dist/<id>/index.html     web generator (form, 3D preview, STL / 3MF)
+recipes/coaster.json      ├─ npm run build ─▶ dist/index.html?recipe=<id>  web generator (form, 3D preview, STL / 3MF)
 recipes/sign.json         ┘                   dist/featurescript/<id>.fs   Onshape custom feature
 ```
 
@@ -22,11 +22,15 @@ recipes/sign.json         ┘                   dist/featurescript/<id>.fs   Ons
   (WASM, watertight booleans) in the browser or Node, and exports binary STL and
   3MF. The same recipe is compiled to **FeatureScript** with every expression
   translated, so the Onshape feature stays parametric.
-- The **website** (`web/`) builds the form from the recipe's params, rebuilds
-  the model on every change and shows it with three.js. Settings live in the URL,
-  so links are shareable. Nothing is uploaded anywhere.
-- The **Recipe lab** page lets you edit a recipe and see the generator update
-  live, then download the JSON.
+- The **website** (`web/`) is a single page, the *Generator Generator*: pick a
+  generator at the top (`?recipe=<id>`), and it builds the form from the
+  recipe's params, rebuilds the model on every change and shows it with
+  three.js. Settings live in the URL, so links are shareable. Nothing is
+  uploaded anywhere. Old per-generator links (`/<id>/`, `/lab.html`) redirect.
+- Under the generator, the collapsible **Change this generator** section holds
+  the recipe, an AI-chat prompt, the diff against the published version and
+  *Propose on GitHub* / *Download*. **+ New generator** starts a new recipe
+  from scratch or from a copy.
 
 ## Multi-color printing (Prusa Core One and friends)
 
@@ -45,18 +49,17 @@ Generators are never edited directly: change the recipe and everything is
 regenerated (web page, exports, FeatureScript).
 
 1. Change `recipes/<id>.json`, for example add a param and use it in a step.
-   - **No setup, any AI chat:** click *Change this generator* on a generator
-     page. In the Recipe lab, describe the change, click *Copy prompt for an AI
-     chat* (it contains the recipe, the format reference and your current
-     settings), paste it into ChatGPT, Claude, Gemini..., paste the answer back
-     and click *Apply to preview*. The lab extracts and checks the recipe and
-     tells you what to send back to the AI if something is wrong.
-   - **Try it first in the Recipe lab** (*Change this generator* on every
-     generator page): edit the recipe and the generator rebuilds live in your
-     browser, keeping your settings and camera. *Changes* shows the diff
-     against the published version, drafts survive a reload, and
-     *Edit on GitHub* copies the recipe and opens the file so you can paste it
-     and start a pull request.
+   - **No setup, any AI chat:** open *Change this generator* below the
+     generator, describe the change, click *Copy prompt for an AI chat* (it
+     contains the recipe, the format reference and your current settings),
+     paste it into ChatGPT, Claude, Gemini..., paste the answer back and click
+     *Apply to preview*. The page extracts and checks the recipe and tells you
+     what to send back to the AI if something is wrong.
+   - **Edit it yourself:** the same section has the recipe text; the generator
+     rebuilds live in your browser, keeping your settings and camera. The diff
+     shows changes against the published version, drafts survive a reload,
+     and *Propose on GitHub* copies the recipe and opens the file so you can
+     paste it and start a pull request.
    - Or ask Claude ("on the QR keychain, make the corner hole position
      adjustable"); it uses the `new-generator` skill.
 2. `npm run check` (CI runs it too) builds the recipe with every option and
@@ -69,10 +72,10 @@ values fall back to the defaults, unknown ones are ignored.
 
 ## Adding a generator
 
-1. Write `recipes/<id>.json` (copy one of the existing ones, or start in the
-   Recipe lab on the site and download it).
+1. Write `recipes/<id>.json` (copy one of the existing ones, or start with
+   *+ New generator* on the site and download it).
 2. `npm run check` validates it and builds it with many parameter combinations.
-3. `npm run dev` and open http://localhost:8080/<id>/.
+3. `npm run dev` and open http://localhost:8080/?recipe=<id>.
 4. Commit. On `main` the GitHub Action rebuilds and publishes the site.
 
 The repo includes a Claude Code skill, [`.claude/skills/new-generator`](.claude/skills/new-generator/SKILL.md),
@@ -81,7 +84,7 @@ name and a spike") and it writes the recipe, adding a block if needed.
 
 ## Using the FeatureScript in Onshape
 
-1. Download the `.fs` from a generator page (it uses the current settings as
+1. Download the `.fs` from the generator (it uses the current settings as
    defaults) or take `dist/featurescript/<id>.fs`.
 2. In Onshape, create a Feature Studio, replace its contents with the file and
    commit. If Onshape complains about the version on the first two lines, keep
