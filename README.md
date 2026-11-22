@@ -39,6 +39,24 @@ Each generator has colored parts. The page offers:
   assigned, for MMU / INDX / tool changers (needed for flush inlays).
 - **STL**: all parts in one file or one file per part.
 
+## Changing a generator
+
+Generators are never edited directly: change the recipe and everything is
+regenerated (web page, exports, FeatureScript).
+
+1. Change `recipes/<id>.json`, for example add a param and use it in a step.
+   Easiest: ask Claude ("on the QR keychain, make the corner hole position
+   adjustable"); it uses the `new-generator` skill. Or open the generator in
+   the **Recipe lab**, edit, check the preview, download the JSON and replace
+   the file on GitHub.
+2. `npm run check` (CI runs it too) builds the recipe with every option and
+   extreme value.
+3. Merge to `main`. GitHub Actions rebuilds and redeploys the site within a
+   minute or two; download a fresh `.fs` for Onshape.
+
+Shared links keep working as long as param `key`s stay the same: missing
+values fall back to the defaults, unknown ones are ignored.
+
 ## Adding a generator
 
 1. Write `recipes/<id>.json` (copy one of the existing ones, or start in the
