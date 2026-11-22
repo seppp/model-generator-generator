@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<base href="../">
+{{head}}
+<title>{{name}} · Print generators</title>
+<meta name="description" content="{{description}}">
+</head>
+<body>
+{{header}}
+<main>
+  <div class="page-title"><h1>{{name}}</h1></div>
+  <div id="app" data-recipe="{{id}}"></div>
+</main>
+<script type="module">
+  import { mountGenerator } from './app/generator.js';
+  import { loadRecipe } from './app/env.js';
+  const root = document.getElementById('app');
+  try {
+    window.generator = await mountGenerator(root, await loadRecipe(root.dataset.recipe));
+  } catch (e) {
+    root.append(Object.assign(document.createElement('pre'), { className: 'fatal', textContent: e.message }));
+    throw e;
+  }
+</script>
+</body>
+</html>

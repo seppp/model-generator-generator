@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+{{head}}
+<title>Print generators</title>
+<meta name="description" content="Parametric generators for 3D printing that run entirely in your browser.">
+</head>
+<body>
+{{header}}
+<main class="home">
+  <section class="hero">
+    <h1>Parametric 3D print generators</h1>
+    <p>Pick a generator, change the settings and download STL, multi-color 3MF for PrusaSlicer or an Onshape FeatureScript. Everything is computed in your browser.</p>
+  </section>
+  <section id="gallery" class="gallery"></section>
+  <section class="howto">
+    <h2>Add your own</h2>
+    <p>Every generator here is produced from a short JSON recipe: parameters plus a list of blocks (shape, QR code, text) that are added to or cut from colored parts. Try one in the <a href="lab.html">Recipe lab</a>, then save it as <code>recipes/&lt;id&gt;.json</code> in the repository.</p>
+  </section>
+</main>
+<script type="module">
+  import { loadIndex } from './app/env.js';
+  const g = document.getElementById('gallery');
+  for (const r of await loadIndex()) {
+    const a = document.createElement('a');
+    a.className = 'tile';
+    a.href = `${r.id}/`;
+    a.innerHTML = `<span class="swatches">${r.colors.map((c) => `<i style="background:${c}"></i>`).join('')}</span><h2></h2><p></p><span class="meta"></span>`;
+    a.querySelector('h2').textContent = r.name;
+    a.querySelector('p').textContent = r.description;
+    a.querySelector('.meta').textContent = `${r.params} settings · ${r.parts} color${r.parts > 1 ? 's' : ''}`;
+    g.append(a);
+  }
+</script>
+</body>
+</html>

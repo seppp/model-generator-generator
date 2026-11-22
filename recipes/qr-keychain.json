@@ -1,0 +1,66 @@
+{
+  "id": "qr-keychain",
+  "name": "QR code keychain",
+  "description": "Square tag with a QR code (raised, engraved or flush inlay) and a keyring hole.",
+  "parts": {
+    "base": { "label": "Tag", "color": "#f5f5f4" },
+    "code": { "label": "QR code", "color": "#111827" }
+  },
+  "params": [
+    { "key": "content", "type": "text", "label": "QR content (URL or text)", "default": "https://github.com/seppp/model-generator-generator", "group": "Code" },
+    { "key": "style", "type": "select", "label": "Code style", "default": "raised", "group": "Code",
+      "options": [
+        { "value": "raised", "label": "Raised (filament swap)" },
+        { "value": "flush", "label": "Flush inlay (multi-material)" },
+        { "value": "engraved", "label": "Engraved (single color)" }
+      ] },
+    { "key": "ecc", "type": "select", "label": "Error correction", "default": "M", "group": "Code",
+      "help": "Higher levels survive more damage but need more, smaller modules.",
+      "options": [
+        { "value": "L", "label": "L (7%)" }, { "value": "M", "label": "M (15%)" },
+        { "value": "Q", "label": "Q (25%)" }, { "value": "H", "label": "H (30%)" }
+      ] },
+    { "key": "codeHeight", "type": "number", "unit": "mm", "label": "Code height / depth", "default": 1, "min": 0.2, "max": 3, "step": 0.1, "group": "Code" },
+    { "key": "width", "type": "number", "unit": "mm", "label": "Tag width", "default": 40, "min": 20, "max": 120, "step": 1, "group": "Tag" },
+    { "key": "margin", "type": "number", "unit": "mm", "label": "Margin around code", "default": 3, "min": 1, "max": 15, "step": 0.5, "group": "Tag" },
+    { "key": "corner", "type": "number", "unit": "mm", "label": "Corner radius", "default": 4, "min": 0, "max": 20, "step": 0.5, "group": "Tag" },
+    { "key": "thickness", "type": "number", "unit": "mm", "label": "Tag thickness", "default": 3, "min": 1, "max": 10, "step": 0.2, "group": "Tag" },
+    { "key": "holeStyle", "type": "select", "label": "Keyring hole", "default": "tab", "group": "Keyring",
+      "options": [
+        { "value": "tab", "label": "Tab on top" },
+        { "value": "corner", "label": "Corner" },
+        { "value": "none", "label": "None" }
+      ] },
+    { "key": "holeDia", "type": "number", "unit": "mm", "label": "Hole diameter", "default": 5, "min": 2, "max": 15, "step": 0.5, "group": "Keyring", "showIf": "holeStyle != 'none'" },
+    { "key": "holeRim", "type": "number", "unit": "mm", "label": "Material around hole", "default": 2.5, "min": 1.5, "max": 8, "step": 0.5, "group": "Keyring", "showIf": "holeStyle != 'none'" }
+  ],
+  "derived": {
+    "qrSize": "width - 2 * margin",
+    "earDia": "holeDia + 2 * holeRim",
+    "holeX": "holeStyle == 'corner' ? width / 2 - holeRim / 2 : 0",
+    "holeY": "holeStyle == 'corner' ? width / 2 - holeRim / 2 : width / 2 + earDia / 2"
+  },
+  "steps": [
+    { "add": "shape", "part": "base", "comment": "tag body",
+      "shape": "roundedRect", "width": "width", "height": "width", "radius": "corner", "thickness": "thickness" },
+    { "add": "shape", "part": "base", "when": "holeStyle == 'tab'", "comment": "keyring tab",
+      "shape": "roundedRect", "width": "earDia", "height": "earDia * 2", "radius": "earDia / 2",
+      "y": "width / 2", "thickness": "thickness" },
+    { "add": "shape", "part": "base", "when": "holeStyle == 'corner'", "comment": "round ear around the corner hole",
+      "shape": "circle", "diameter": "earDia", "x": "holeX", "y": "holeY", "thickness": "thickness" },
+    { "subtract": "shape", "when": "holeStyle != 'none'", "comment": "keyring hole",
+      "shape": "circle", "diameter": "holeDia", "x": "holeX", "y": "holeY", "through": true },
+    { "add": "qr", "part": "code", "when": "style == 'raised'",
+      "content": "content", "ecc": "ecc", "size": "qrSize", "z": "thickness", "thickness": "codeHeight" },
+    { "add": "qr", "part": "code", "when": "style == 'flush'", "comment": "adding to 'code' carves the pocket out of the tag",
+      "content": "content", "ecc": "ecc", "size": "qrSize", "z": "thickness - codeHeight", "thickness": "codeHeight" },
+    { "subtract": "qr", "from": "base", "when": "style == 'engraved'",
+      "content": "content", "ecc": "ecc", "size": "qrSize", "z": "thickness - codeHeight", "thickness": "codeHeight + 1" }
+  ],
+  "notes": [
+    { "when": "style == 'raised'", "text": "Print the tag in a light color and swap to a dark one at {thickness} mm. The 3MF 'filament swap' export inserts the color change for you." },
+    { "when": "style == 'flush'", "text": "Flush inlay needs a multi-material printer (MMU / tool changer). Use the 3MF 'multi-material' export." },
+    { "when": "style == 'engraved'", "text": "Engraved codes are one color. Fill the pocket with paint or a marker so phones can read it." },
+    { "when": "corner > margin + 2", "text": "Large corner radius: keep it below the margin so the QR finder squares stay intact." }
+  ]
+}
