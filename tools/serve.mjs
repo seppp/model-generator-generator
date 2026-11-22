@@ -6,7 +6,7 @@ import path from 'node:path';
 const dist = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../dist');
 const port = Number(process.env.PORT) || 8080;
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
-  '.wasm': 'application/wasm', '.woff': 'font/woff', '.fs': 'text/plain', '.svg': 'image/svg+xml' };
+  '.wasm': 'application/wasm', '.woff': 'font/woff', '.fs': 'text/plain', '.svg': 'image/svg+xml', '.md': 'text/markdown; charset=utf-8' };
 
 http.createServer((req, res) => {
   let p = path.join(dist, decodeURIComponent(new URL(req.url, 'http://x').pathname));

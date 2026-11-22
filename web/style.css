@@ -211,3 +211,17 @@ input[type=color] { width: 44px; height: 30px; padding: 2px; border: 1px solid v
 .diff .ctx { color: var(--muted); }
 .diff .gap { color: var(--muted); text-align: center; }
 .diff p { margin: 4px 10px; color: var(--muted); font-family: system-ui, sans-serif; }
+
+/* lab: three-step flow */
+.flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 6px 0 14px; }
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.step h2 { font-size: 0.98rem; margin: 0; display: flex; align-items: center; gap: 8px; }
+.step h2 span { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-text); font-size: 0.8rem; }
+.step textarea { width: 100%; font: inherit; font-size: 0.9rem; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; resize: vertical; }
+.step p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.step small { color: var(--muted); font-size: 0.8rem; }
+.step small.ok { color: var(--accent); }
+.step small.bad { color: var(--error); }
+.step .btn { align-self: flex-start; }
+a.btn { text-decoration: none; display: inline-block; }
+@media (max-width: 900px) { .flow { grid-template-columns: 1fr; } }
