@@ -22,8 +22,8 @@ Read `docs/RECIPES.md` first. Use `recipes/qr-keychain.json`,
 2. **Choose the parts** (one per color, in the order a filament swap would
    happen, bottom first) and the **params** (only what people actually change,
    with realistic `min`/`max` and `group`s for the form).
-3. **Express the geometry as steps** using the existing blocks (`shape`, `qr`,
-   `text`; see `docs/RECIPES.md` for the current list). Typical patterns:
+3. **Express the geometry as steps** using the existing blocks (`shape`,
+   `frame`, `line`, `qr`, `text`; see `docs/RECIPES.md` for the current list). Typical patterns:
    - plate: `add shape` to `base` from `z: 0`
    - raised detail: `add` to an accent part at `z: "thickness"` (stacked, so a
      single-nozzle filament swap works)
@@ -31,8 +31,12 @@ Read `docs/RECIPES.md` first. Use `recipes/qr-keychain.json`,
      never overlap, so this also cuts the pocket)
    - engraving: `subtract` with `from: "base"`
    - holes: `subtract` with `through: true`
-   - rims and frames: `add` an outline, then `subtract` a smaller one at the
-     same `z`
+   - borders and frames: the `frame` block (outline, line width inwards);
+     dividers and underlines: the `line` block (solid / dashed / dotted).
+     Offer raised / flush / engraved like for text, and a color choice via
+     `"part": "<derived that picks a part name>"` (see "Borders, frames and
+     divider lines" in `docs/RECIPES.md`). A raised rim that should stay part
+     of the plate is still `add` an outline + `subtract` a smaller one
    - options: use `when` on steps and `showIf` on params
    - text: give people a `font` select param whose option values are the font
      names in `docs/RECIPES.md`, each with its `group` (copy the list from the
@@ -105,7 +109,9 @@ Keep the description, param `help` and notes to one short sentence each
 
 ## Printability rules of thumb (FDM, 0.4 mm nozzle)
 
-- Walls and raised lines at least 0.8 mm wide; text at least 4 mm cap height.
+- Walls, borders and raised lines at least 0.8 mm wide; text at least 4 mm cap height.
+- Borders near a QR code: leave at least 1 mm between code and border, and
+  make room for borders instead of drawing them over other features.
 - Raised or inlaid detail at least 0.4 mm (two layers) high; 0.8 to 1 mm reads well.
 - QR modules at least 1 mm (the page warns below that); keep a margin of at
   least 2 mm around the code.

@@ -1,0 +1,579 @@
+{
+  "id": "sign",
+  "name": "Name sign",
+  "description": "Sign with raised text, border and screw holes.",
+  "parts": {
+    "base": {
+      "label": "Plate",
+      "color": "#1e3a8a",
+      "edges": {
+        "top": "edgeTop",
+        "topSize": "edgeTopSize",
+        "bottom": "edgeBottom",
+        "bottomSize": "edgeBottomSize",
+        "bottomChamfer": "edgeBottomChamfer"
+      }
+    },
+    "accent": {
+      "label": "Text and border",
+      "color": "#f8fafc"
+    },
+    "lettering": {
+      "label": "Text",
+      "color": "#fbbf24"
+    }
+  },
+  "params": [
+    {
+      "key": "text",
+      "type": "text",
+      "label": "Text",
+      "default": "Werkstatt",
+      "group": "Text"
+    },
+    {
+      "key": "textSize",
+      "type": "number",
+      "unit": "mm",
+      "label": "Letter height",
+      "default": 16,
+      "min": 4,
+      "max": 100,
+      "step": 1,
+      "group": "Text"
+    },
+    {
+      "key": "font",
+      "type": "select",
+      "label": "Font",
+      "default": "bold",
+      "options": [
+        {
+          "value": "regular",
+          "label": "Open Sans",
+          "group": "Sans"
+        },
+        {
+          "value": "bold",
+          "label": "Open Sans Bold",
+          "group": "Sans"
+        },
+        {
+          "value": "inter",
+          "label": "Inter",
+          "group": "Sans"
+        },
+        {
+          "value": "interBold",
+          "label": "Inter Bold",
+          "group": "Sans"
+        },
+        {
+          "value": "interBlack",
+          "label": "Inter Black",
+          "group": "Sans"
+        },
+        {
+          "value": "montserrat",
+          "label": "Montserrat Bold",
+          "group": "Sans"
+        },
+        {
+          "value": "poppins",
+          "label": "Poppins Bold",
+          "group": "Sans"
+        },
+        {
+          "value": "lato",
+          "label": "Lato Black",
+          "group": "Sans"
+        },
+        {
+          "value": "workSans",
+          "label": "Work Sans Bold",
+          "group": "Sans"
+        },
+        {
+          "value": "archivoBlack",
+          "label": "Archivo Black",
+          "group": "Sans"
+        },
+        {
+          "value": "rounded",
+          "label": "Varela Round",
+          "group": "Rounded"
+        },
+        {
+          "value": "nunito",
+          "label": "Nunito ExtraBold",
+          "group": "Rounded"
+        },
+        {
+          "value": "fredoka",
+          "label": "Fredoka SemiBold",
+          "group": "Rounded"
+        },
+        {
+          "value": "comfortaa",
+          "label": "Comfortaa Bold",
+          "group": "Rounded"
+        },
+        {
+          "value": "quicksand",
+          "label": "Quicksand Bold",
+          "group": "Rounded"
+        },
+        {
+          "value": "condensed",
+          "label": "Bebas Neue (capitals)",
+          "group": "Condensed"
+        },
+        {
+          "value": "oswald",
+          "label": "Oswald SemiBold",
+          "group": "Condensed"
+        },
+        {
+          "value": "barlowCondensed",
+          "label": "Barlow Condensed Bold",
+          "group": "Condensed"
+        },
+        {
+          "value": "anton",
+          "label": "Anton",
+          "group": "Condensed"
+        },
+        {
+          "value": "slab",
+          "label": "Roboto Slab Bold",
+          "group": "Serif"
+        },
+        {
+          "value": "serif",
+          "label": "Noto Serif Bold",
+          "group": "Serif"
+        },
+        {
+          "value": "merriweather",
+          "label": "Merriweather Black",
+          "group": "Serif"
+        },
+        {
+          "value": "playfair",
+          "label": "Playfair Display Bold",
+          "group": "Serif"
+        },
+        {
+          "value": "lora",
+          "label": "Lora Bold",
+          "group": "Serif"
+        },
+        {
+          "value": "abrilFatface",
+          "label": "Abril Fatface",
+          "group": "Serif"
+        },
+        {
+          "value": "stencil",
+          "label": "Allerta Stencil",
+          "group": "Display"
+        },
+        {
+          "value": "blackOps",
+          "label": "Black Ops One (stencil)",
+          "group": "Display"
+        },
+        {
+          "value": "bungee",
+          "label": "Bungee",
+          "group": "Display"
+        },
+        {
+          "value": "righteous",
+          "label": "Righteous",
+          "group": "Display"
+        },
+        {
+          "value": "orbitron",
+          "label": "Orbitron Bold",
+          "group": "Display"
+        },
+        {
+          "value": "pixel",
+          "label": "Press Start 2P (pixel)",
+          "group": "Display"
+        },
+        {
+          "value": "marker",
+          "label": "Permanent Marker",
+          "group": "Display"
+        },
+        {
+          "value": "script",
+          "label": "Pacifico",
+          "group": "Script"
+        },
+        {
+          "value": "lobster",
+          "label": "Lobster",
+          "group": "Script"
+        },
+        {
+          "value": "dancingScript",
+          "label": "Dancing Script Bold",
+          "group": "Script"
+        },
+        {
+          "value": "kaushan",
+          "label": "Kaushan Script",
+          "group": "Script"
+        },
+        {
+          "value": "mono",
+          "label": "Roboto Mono Bold",
+          "group": "Monospace"
+        },
+        {
+          "value": "jetbrainsMono",
+          "label": "JetBrains Mono Bold",
+          "group": "Monospace"
+        },
+        {
+          "value": "spaceMono",
+          "label": "Space Mono Bold",
+          "group": "Monospace"
+        },
+        {
+          "value": "custom",
+          "label": "Your own font file",
+          "group": "Your own"
+        }
+      ],
+      "group": "Text"
+    },
+    {
+      "key": "textBold",
+      "type": "boolean",
+      "label": "Bold",
+      "default": false,
+      "group": "Text",
+      "help": "Bold, italic and underline work with every font."
+    },
+    {
+      "key": "textItalic",
+      "type": "boolean",
+      "label": "Italic",
+      "default": false,
+      "group": "Text"
+    },
+    {
+      "key": "textUnderline",
+      "type": "boolean",
+      "label": "Underline",
+      "default": false,
+      "group": "Text"
+    },
+    {
+      "key": "textColor",
+      "type": "select",
+      "label": "Text color",
+      "default": "same",
+      "group": "Text",
+      "help": "Own color needs the multi-material 3MF.",
+      "showIf": "border",
+      "options": [
+        {
+          "value": "same",
+          "label": "Same as border"
+        },
+        {
+          "value": "own",
+          "label": "Own color"
+        }
+      ]
+    },
+    {
+      "key": "raise",
+      "type": "number",
+      "unit": "mm",
+      "label": "Text and border height",
+      "default": 1,
+      "min": 0.2,
+      "max": 5,
+      "step": 0.1,
+      "group": "Text"
+    },
+    {
+      "key": "width",
+      "type": "number",
+      "unit": "mm",
+      "label": "Width",
+      "default": 140,
+      "min": 30,
+      "max": 250,
+      "step": 1,
+      "group": "Plate"
+    },
+    {
+      "key": "height",
+      "type": "number",
+      "unit": "mm",
+      "label": "Height",
+      "default": 40,
+      "min": 15,
+      "max": 200,
+      "step": 1,
+      "group": "Plate"
+    },
+    {
+      "key": "corner",
+      "type": "number",
+      "unit": "mm",
+      "label": "Corner radius",
+      "default": 5,
+      "min": 0,
+      "max": 40,
+      "step": 0.5,
+      "group": "Plate"
+    },
+    {
+      "key": "thickness",
+      "type": "number",
+      "unit": "mm",
+      "label": "Thickness",
+      "default": 3,
+      "min": 1,
+      "max": 10,
+      "step": 0.2,
+      "group": "Plate"
+    },
+    {
+      "key": "border",
+      "type": "boolean",
+      "label": "Border",
+      "default": true,
+      "group": "Border"
+    },
+    {
+      "key": "borderWidth",
+      "type": "number",
+      "unit": "mm",
+      "label": "Border width",
+      "default": 2,
+      "min": 0.8,
+      "max": 10,
+      "step": 0.2,
+      "group": "Border",
+      "showIf": "border"
+    },
+    {
+      "key": "borderInset",
+      "type": "number",
+      "unit": "mm",
+      "label": "Border inset",
+      "default": 3,
+      "min": 0,
+      "max": 20,
+      "step": 0.5,
+      "group": "Border",
+      "showIf": "border"
+    },
+    {
+      "key": "holes",
+      "type": "boolean",
+      "label": "Screw holes",
+      "default": false,
+      "group": "Mounting"
+    },
+    {
+      "key": "holeDia",
+      "type": "number",
+      "unit": "mm",
+      "label": "Hole diameter",
+      "default": 4,
+      "min": 2,
+      "max": 10,
+      "step": 0.5,
+      "group": "Mounting",
+      "showIf": "holes"
+    },
+    {
+      "key": "edgeTop",
+      "type": "select",
+      "label": "Top edges",
+      "default": "none",
+      "group": "Edges",
+      "options": [
+        {
+          "value": "none",
+          "label": "Sharp"
+        },
+        {
+          "value": "chamfer",
+          "label": "Chamfer"
+        },
+        {
+          "value": "fillet",
+          "label": "Fillet"
+        }
+      ]
+    },
+    {
+      "key": "edgeTopSize",
+      "type": "number",
+      "unit": "mm",
+      "label": "Top edge size",
+      "default": 0.8,
+      "min": 0.2,
+      "max": 3,
+      "step": 0.1,
+      "group": "Edges",
+      "showIf": "edgeTop != 'none'"
+    },
+    {
+      "key": "edgeBottom",
+      "type": "select",
+      "label": "Bottom edges",
+      "default": "none",
+      "group": "Edges",
+      "help": "Printable fillet: 45° chamfer, then a fillet. Prints without supports.",
+      "options": [
+        {
+          "value": "none",
+          "label": "Sharp"
+        },
+        {
+          "value": "chamfer",
+          "label": "Chamfer"
+        },
+        {
+          "value": "fillet",
+          "label": "Fillet"
+        },
+        {
+          "value": "printable",
+          "label": "Printable fillet"
+        }
+      ]
+    },
+    {
+      "key": "edgeBottomSize",
+      "type": "number",
+      "unit": "mm",
+      "label": "Bottom edge size",
+      "default": 1,
+      "min": 0.2,
+      "max": 3,
+      "step": 0.1,
+      "group": "Edges",
+      "help": "Chamfer width or fillet radius.",
+      "showIf": "edgeBottom != 'none'"
+    },
+    {
+      "key": "edgeBottomChamfer",
+      "type": "number",
+      "unit": "mm",
+      "label": "45° chamfer height",
+      "default": 1,
+      "min": 0.2,
+      "max": 3,
+      "step": 0.1,
+      "group": "Edges",
+      "showIf": "edgeBottom == 'printable'"
+    }
+  ],
+  "derived": {
+    "outerW": "width - 2 * borderInset",
+    "outerH": "height - 2 * borderInset",
+    "outerR": "max(corner - borderInset, 0)",
+    "holeX": "width / 2 - borderInset - borderWidth - holeDia"
+  },
+  "steps": [
+    {
+      "add": "shape",
+      "part": "base",
+      "shape": "roundedRect",
+      "width": "width",
+      "height": "height",
+      "radius": "corner",
+      "thickness": "thickness"
+    },
+    {
+      "add": "shape",
+      "part": "accent",
+      "when": "border",
+      "comment": "border frame (outer)",
+      "shape": "roundedRect",
+      "width": "outerW",
+      "height": "outerH",
+      "radius": "outerR",
+      "z": "thickness",
+      "thickness": "raise"
+    },
+    {
+      "subtract": "shape",
+      "from": "accent",
+      "when": "border",
+      "comment": "border frame (inner)",
+      "shape": "roundedRect",
+      "width": "outerW - 2 * borderWidth",
+      "height": "outerH - 2 * borderWidth",
+      "radius": "max(outerR - borderWidth, 0)",
+      "z": "thickness",
+      "thickness": "raise + 1"
+    },
+    {
+      "add": "text",
+      "part": "accent",
+      "text": "text",
+      "size": "textSize",
+      "font": "font",
+      "z": "thickness",
+      "thickness": "raise",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline",
+      "when": "!border || textColor != 'own'"
+    },
+    {
+      "add": "text",
+      "part": "lettering",
+      "text": "text",
+      "size": "textSize",
+      "font": "font",
+      "z": "thickness",
+      "thickness": "raise",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline",
+      "when": "border && textColor == 'own'",
+      "comment": "text in its own color"
+    },
+    {
+      "subtract": "shape",
+      "when": "holes",
+      "shape": "circle",
+      "diameter": "holeDia",
+      "x": "-holeX",
+      "through": true
+    },
+    {
+      "subtract": "shape",
+      "when": "holes",
+      "shape": "circle",
+      "diameter": "holeDia",
+      "x": "holeX",
+      "through": true
+    }
+  ],
+  "notes": [
+    {
+      "when": "holes",
+      "text": "Wide text runs into the screw holes. Shorten it or widen the sign."
+    },
+    {
+      "when": "border && textColor == 'own'",
+      "text": "Text and border share layers: use the multi-material 3MF for the own text color."
+    }
+  ]
+}

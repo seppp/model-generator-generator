@@ -16,7 +16,7 @@ recipes/sign.json         ┘                   dist/index.html?recipe=<id>  web
 ## How it works
 
 - A **recipe** lists parameters and steps. Each step takes a 2D block (`shape`,
-  `qr`, `text`), extrudes it and adds it to a colored part or cuts it away. Values
+  `frame`, `line`, `qr`, `text`), extrudes it and adds it to a colored part or cuts it away. Values
   are small expressions like `"width - 2 * margin"`. See
   [docs/RECIPES.md](docs/RECIPES.md).
 - The **engine** (`engine/`) runs a recipe with [manifold-3d](https://github.com/elalish/manifold)
@@ -67,6 +67,15 @@ Each generator has colored parts. The page offers:
 - **3MF, multi-material**: one object with one part per color and extruders
   assigned, for MMU / INDX / tool changers (needed for flush inlays).
 - **STL**: all parts in one file or one file per part.
+
+**Borders and lines** (`frame` and `line` blocks): border lines along an
+outline and straight lines (solid, dashed or dotted, flat or round ends),
+raised, flush or engraved. The QR keychain has a border along the tag edge,
+around the code and a line between nametag and code (same color as the code
+or their own); the coaster a ring and lines above and below the text (same
+color as the text or their own); the sign a border style, a second border
+line and lines above and below the text (in the border color). All are off by
+default (the sign's border stays on, as before).
 
 Parts can have **chamfered or filleted** top and bottom edges, including a
 *printable fillet* for the bottom: a 45° chamfer at the bed, then a fillet

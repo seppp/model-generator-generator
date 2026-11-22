@@ -280,7 +280,7 @@
       "default": "same",
       "group": "Text",
       "help": "Own color needs the multi-material 3MF.",
-      "showIf": "border",
+      "showIf": "border || textLines",
       "options": [
         {
           "value": "same",
@@ -352,7 +352,7 @@
       "type": "boolean",
       "label": "Border",
       "default": true,
-      "group": "Border"
+      "group": "Border and lines"
     },
     {
       "key": "borderWidth",
@@ -363,7 +363,7 @@
       "min": 0.8,
       "max": 10,
       "step": 0.2,
-      "group": "Border",
+      "group": "Border and lines",
       "showIf": "border"
     },
     {
@@ -375,8 +375,191 @@
       "min": 0,
       "max": 20,
       "step": 0.5,
-      "group": "Border",
+      "group": "Border and lines",
       "showIf": "border"
+    },
+    {
+      "key": "border2",
+      "type": "boolean",
+      "label": "Second line inside",
+      "default": false,
+      "group": "Border and lines",
+      "showIf": "border"
+    },
+    {
+      "key": "border2Width",
+      "type": "number",
+      "unit": "mm",
+      "label": "Second line width",
+      "default": 1,
+      "min": 0.4,
+      "max": 10,
+      "step": 0.2,
+      "group": "Border and lines",
+      "showIf": "border && border2"
+    },
+    {
+      "key": "border2Gap",
+      "type": "number",
+      "unit": "mm",
+      "label": "Gap between the lines",
+      "default": 1.5,
+      "min": 0.4,
+      "max": 10,
+      "step": 0.1,
+      "group": "Border and lines",
+      "showIf": "border && border2"
+    },
+    {
+      "key": "textLines",
+      "type": "boolean",
+      "label": "Lines above and below the text",
+      "default": false,
+      "group": "Border and lines"
+    },
+    {
+      "key": "lineWidth",
+      "type": "number",
+      "unit": "mm",
+      "label": "Line width",
+      "default": 1.5,
+      "min": 0.4,
+      "max": 6,
+      "step": 0.1,
+      "group": "Border and lines",
+      "showIf": "textLines"
+    },
+    {
+      "key": "lineLength",
+      "type": "number",
+      "unit": "mm",
+      "label": "Line length",
+      "default": 60,
+      "min": 5,
+      "max": 240,
+      "step": 1,
+      "group": "Border and lines",
+      "showIf": "textLines"
+    },
+    {
+      "key": "lineGap",
+      "type": "number",
+      "unit": "mm",
+      "label": "Distance to text",
+      "default": 3,
+      "min": 0.5,
+      "max": 40,
+      "step": 0.5,
+      "group": "Border and lines",
+      "showIf": "textLines"
+    },
+    {
+      "key": "linePattern",
+      "type": "select",
+      "label": "Line pattern",
+      "default": "solid",
+      "group": "Border and lines",
+      "showIf": "textLines",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ]
+    },
+    {
+      "key": "lineDash",
+      "type": "number",
+      "unit": "mm",
+      "label": "Dash length",
+      "default": 3,
+      "min": 0.5,
+      "max": 20,
+      "step": 0.5,
+      "group": "Border and lines",
+      "showIf": "textLines && linePattern == 'dashed'"
+    },
+    {
+      "key": "lineSpace",
+      "type": "number",
+      "unit": "mm",
+      "label": "Space between dashes",
+      "default": 2,
+      "min": 0.4,
+      "max": 10,
+      "step": 0.2,
+      "group": "Border and lines",
+      "showIf": "textLines && linePattern != 'solid'"
+    },
+    {
+      "key": "lineEnds",
+      "type": "select",
+      "label": "Line ends",
+      "default": "flat",
+      "group": "Border and lines",
+      "showIf": "textLines && linePattern != 'dotted'",
+      "options": [
+        {
+          "value": "flat",
+          "label": "Flat"
+        },
+        {
+          "value": "round",
+          "label": "Round"
+        }
+      ]
+    },
+    {
+      "key": "borderStyle",
+      "type": "select",
+      "label": "Style",
+      "default": "raised",
+      "group": "Border and lines",
+      "help": "Raised: on top. Flush: inlaid, multi-material. Engraved: cut in.",
+      "showIf": "(border || textLines)",
+      "options": [
+        {
+          "value": "raised",
+          "label": "Raised"
+        },
+        {
+          "value": "flush",
+          "label": "Flush inlay"
+        },
+        {
+          "value": "engraved",
+          "label": "Engraved"
+        }
+      ]
+    },
+    {
+      "key": "borderOwnHeight",
+      "type": "boolean",
+      "label": "Own height / depth",
+      "default": false,
+      "group": "Border and lines",
+      "help": "Off: same as the text height.",
+      "showIf": "(border || textLines)"
+    },
+    {
+      "key": "borderHeight",
+      "type": "number",
+      "unit": "mm",
+      "label": "Height / depth",
+      "default": 1,
+      "min": 0.2,
+      "max": 5,
+      "step": 0.1,
+      "group": "Border and lines",
+      "showIf": "(border || textLines) && borderOwnHeight"
     },
     {
       "key": "holes",
@@ -486,7 +669,12 @@
     "outerW": "width - 2 * borderInset",
     "outerH": "height - 2 * borderInset",
     "outerR": "max(corner - borderInset, 0)",
-    "holeX": "width / 2 - borderInset - borderWidth - holeDia"
+    "holeX": "width / 2 - borderInset - borderWidth - holeDia",
+    "bH": "borderOwnHeight ? borderHeight : raise",
+    "borderZ": "borderStyle == 'raised' ? thickness : thickness - bH",
+    "borderT": "borderStyle == 'engraved' ? bH + 1 : bH",
+    "inner2": "borderWidth + border2Gap",
+    "lineY": "textSize / 2 + lineGap + lineWidth / 2"
   },
   "steps": [
     {
@@ -499,28 +687,116 @@
       "thickness": "thickness"
     },
     {
-      "add": "shape",
+      "add": "frame",
       "part": "accent",
-      "when": "border",
-      "comment": "border frame (outer)",
+      "when": "border && borderStyle != 'engraved'",
+      "comment": "border",
       "shape": "roundedRect",
       "width": "outerW",
       "height": "outerH",
       "radius": "outerR",
-      "z": "thickness",
-      "thickness": "raise"
+      "lineWidth": "borderWidth",
+      "z": "borderZ",
+      "thickness": "borderT"
     },
     {
-      "subtract": "shape",
-      "from": "accent",
-      "when": "border",
-      "comment": "border frame (inner)",
+      "subtract": "frame",
+      "from": "base",
+      "when": "border && borderStyle == 'engraved'",
+      "comment": "engraved border",
       "shape": "roundedRect",
-      "width": "outerW - 2 * borderWidth",
-      "height": "outerH - 2 * borderWidth",
-      "radius": "max(outerR - borderWidth, 0)",
-      "z": "thickness",
-      "thickness": "raise + 1"
+      "width": "outerW",
+      "height": "outerH",
+      "radius": "outerR",
+      "lineWidth": "borderWidth",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "add": "frame",
+      "part": "accent",
+      "when": "border && border2 && borderStyle != 'engraved'",
+      "comment": "second border line",
+      "shape": "roundedRect",
+      "width": "outerW - 2 * inner2",
+      "height": "outerH - 2 * inner2",
+      "radius": "max(outerR - inner2, 0)",
+      "lineWidth": "border2Width",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "subtract": "frame",
+      "from": "base",
+      "when": "border && border2 && borderStyle == 'engraved'",
+      "comment": "engraved second border line",
+      "shape": "roundedRect",
+      "width": "outerW - 2 * inner2",
+      "height": "outerH - 2 * inner2",
+      "radius": "max(outerR - inner2, 0)",
+      "lineWidth": "border2Width",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "add": "line",
+      "part": "accent",
+      "when": "textLines && borderStyle != 'engraved'",
+      "comment": "line above the text",
+      "length": "lineLength",
+      "lineWidth": "lineWidth",
+      "pattern": "linePattern",
+      "dash": "lineDash",
+      "gap": "lineSpace",
+      "ends": "lineEnds",
+      "y": "lineY",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "subtract": "line",
+      "from": "base",
+      "when": "textLines && borderStyle == 'engraved'",
+      "comment": "engraved line above the text",
+      "length": "lineLength",
+      "lineWidth": "lineWidth",
+      "pattern": "linePattern",
+      "dash": "lineDash",
+      "gap": "lineSpace",
+      "ends": "lineEnds",
+      "y": "lineY",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "add": "line",
+      "part": "accent",
+      "when": "textLines && borderStyle != 'engraved'",
+      "comment": "line below the text",
+      "length": "lineLength",
+      "lineWidth": "lineWidth",
+      "pattern": "linePattern",
+      "dash": "lineDash",
+      "gap": "lineSpace",
+      "ends": "lineEnds",
+      "y": "-lineY",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "subtract": "line",
+      "from": "base",
+      "when": "textLines && borderStyle == 'engraved'",
+      "comment": "engraved line below the text",
+      "length": "lineLength",
+      "lineWidth": "lineWidth",
+      "pattern": "linePattern",
+      "dash": "lineDash",
+      "gap": "lineSpace",
+      "ends": "lineEnds",
+      "y": "-lineY",
+      "z": "borderZ",
+      "thickness": "borderT"
     },
     {
       "add": "text",
@@ -572,8 +848,16 @@
       "text": "Wide text runs into the screw holes. Shorten it or widen the sign."
     },
     {
-      "when": "border && textColor == 'own'",
+      "when": "(border || textLines) && textColor == 'own' && borderStyle != 'engraved'",
       "text": "Text and border share layers: use the multi-material 3MF for the own text color."
+    },
+    {
+      "when": "(border || textLines) && borderStyle != 'raised' && bH > thickness - 0.6",
+      "text": "Border and lines are almost as deep as the plate. Make them shallower."
+    },
+    {
+      "when": "(border || textLines) && borderStyle == 'flush'",
+      "text": "A flush border needs the multi-material 3MF."
     }
   ]
 }

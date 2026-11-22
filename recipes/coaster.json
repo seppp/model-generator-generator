@@ -17,6 +17,10 @@
     "accent": {
       "label": "Text",
       "color": "#fbbf24"
+    },
+    "border": {
+      "label": "Ring and lines",
+      "color": "#f8fafc"
     }
   },
   "params": [
@@ -389,6 +393,199 @@
       "group": "Text"
     },
     {
+      "key": "ring",
+      "type": "boolean",
+      "label": "Decorative ring",
+      "default": false,
+      "group": "Ring and lines",
+      "help": "A line that follows the coaster outline."
+    },
+    {
+      "key": "ringWidth",
+      "type": "number",
+      "unit": "mm",
+      "label": "Ring width",
+      "default": 2,
+      "min": 0.4,
+      "max": 10,
+      "step": 0.1,
+      "group": "Ring and lines",
+      "showIf": "ring"
+    },
+    {
+      "key": "ringInset",
+      "type": "number",
+      "unit": "mm",
+      "label": "Ring distance from edge",
+      "default": 6,
+      "min": 0,
+      "max": 40,
+      "step": 0.5,
+      "group": "Ring and lines",
+      "showIf": "ring"
+    },
+    {
+      "key": "textLines",
+      "type": "boolean",
+      "label": "Lines above and below the text",
+      "default": false,
+      "group": "Ring and lines"
+    },
+    {
+      "key": "lineWidth",
+      "type": "number",
+      "unit": "mm",
+      "label": "Line width",
+      "default": 1.5,
+      "min": 0.4,
+      "max": 6,
+      "step": 0.1,
+      "group": "Ring and lines",
+      "showIf": "textLines"
+    },
+    {
+      "key": "lineLength",
+      "type": "number",
+      "unit": "mm",
+      "label": "Line length",
+      "default": 50,
+      "min": 5,
+      "max": 180,
+      "step": 1,
+      "group": "Ring and lines",
+      "showIf": "textLines"
+    },
+    {
+      "key": "lineGap",
+      "type": "number",
+      "unit": "mm",
+      "label": "Distance to text",
+      "default": 3,
+      "min": 0.5,
+      "max": 30,
+      "step": 0.5,
+      "group": "Ring and lines",
+      "showIf": "textLines"
+    },
+    {
+      "key": "linePattern",
+      "type": "select",
+      "label": "Line pattern",
+      "default": "solid",
+      "group": "Ring and lines",
+      "showIf": "textLines",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ]
+    },
+    {
+      "key": "lineDash",
+      "type": "number",
+      "unit": "mm",
+      "label": "Dash length",
+      "default": 3,
+      "min": 0.5,
+      "max": 20,
+      "step": 0.5,
+      "group": "Ring and lines",
+      "showIf": "textLines && linePattern == 'dashed'"
+    },
+    {
+      "key": "lineSpace",
+      "type": "number",
+      "unit": "mm",
+      "label": "Space between dashes",
+      "default": 2,
+      "min": 0.4,
+      "max": 10,
+      "step": 0.2,
+      "group": "Ring and lines",
+      "showIf": "textLines && linePattern != 'solid'"
+    },
+    {
+      "key": "lineEnds",
+      "type": "select",
+      "label": "Line ends",
+      "default": "flat",
+      "group": "Ring and lines",
+      "showIf": "textLines && linePattern != 'dotted'",
+      "options": [
+        {
+          "value": "flat",
+          "label": "Flat"
+        },
+        {
+          "value": "round",
+          "label": "Round"
+        }
+      ]
+    },
+    {
+      "key": "decorStyle",
+      "type": "select",
+      "label": "Style",
+      "default": "raised",
+      "group": "Ring and lines",
+      "help": "Raised: on top. Flush: inlaid, multi-material. Engraved: cut in.",
+      "showIf": "(ring || textLines)",
+      "options": [
+        {
+          "value": "raised",
+          "label": "Raised"
+        },
+        {
+          "value": "flush",
+          "label": "Flush inlay"
+        },
+        {
+          "value": "engraved",
+          "label": "Engraved"
+        }
+      ]
+    },
+    {
+      "key": "decorHeight",
+      "type": "number",
+      "unit": "mm",
+      "label": "Height / depth",
+      "default": 1,
+      "min": 0.2,
+      "max": 4,
+      "step": 0.1,
+      "group": "Ring and lines",
+      "showIf": "(ring || textLines)"
+    },
+    {
+      "key": "decorColor",
+      "type": "select",
+      "label": "Color",
+      "default": "text",
+      "group": "Ring and lines",
+      "help": "Own color: set it under Colors. Needs multi-material.",
+      "showIf": "(ring || textLines) && decorStyle != 'engraved'",
+      "options": [
+        {
+          "value": "text",
+          "label": "Same as text"
+        },
+        {
+          "value": "own",
+          "label": "Own color"
+        }
+      ]
+    },
+    {
       "key": "recess",
       "type": "boolean",
       "label": "Recess for cork / felt pad",
@@ -508,7 +705,13 @@
     "outline": "shape == 'round' ? 'circle' : shape == 'square' ? 'roundedRect' : 'polygon'",
     "flatFactor": "shape == 'hexagon' ? 1 / cos(30) : 1",
     "innerSize": "diameter - 2 * rimWidth * flatFactor",
-    "recessSize": "diameter - 2 * recessInset * flatFactor"
+    "recessSize": "diameter - 2 * recessInset * flatFactor",
+    "decorPart": "decorColor == 'own' ? 'border' : 'accent'",
+    "decorZ": "decorStyle == 'raised' ? thickness : thickness - decorHeight",
+    "decorT": "decorStyle == 'engraved' ? decorHeight + 1 : decorHeight",
+    "ringSize": "diameter - 2 * ringInset * flatFactor",
+    "ringR": "max(corner - ringInset, 0)",
+    "lineY": "labelSize / 2 + lineGap + lineWidth / 2"
   },
   "steps": [
     {
@@ -600,6 +803,96 @@
       "bold": "labelBold",
       "italic": "labelItalic",
       "underline": "labelUnderline"
+    },
+    {
+      "add": "frame",
+      "part": "decorPart",
+      "when": "ring && decorStyle != 'engraved'",
+      "comment": "decorative ring",
+      "shape": "outline",
+      "diameter": "ringSize",
+      "width": "ringSize",
+      "height": "ringSize",
+      "radius": "ringR",
+      "sides": 6,
+      "lineWidth": "ringWidth",
+      "z": "decorZ",
+      "thickness": "decorT"
+    },
+    {
+      "subtract": "frame",
+      "from": "base",
+      "when": "ring && decorStyle == 'engraved'",
+      "comment": "engraved decorative ring",
+      "shape": "outline",
+      "diameter": "ringSize",
+      "width": "ringSize",
+      "height": "ringSize",
+      "radius": "ringR",
+      "sides": 6,
+      "lineWidth": "ringWidth",
+      "z": "decorZ",
+      "thickness": "decorT"
+    },
+    {
+      "add": "line",
+      "part": "decorPart",
+      "when": "textLines && decorStyle != 'engraved'",
+      "comment": "line above the text",
+      "length": "lineLength",
+      "lineWidth": "lineWidth",
+      "pattern": "linePattern",
+      "dash": "lineDash",
+      "gap": "lineSpace",
+      "ends": "lineEnds",
+      "y": "lineY",
+      "z": "decorZ",
+      "thickness": "decorT"
+    },
+    {
+      "subtract": "line",
+      "from": "base",
+      "when": "textLines && decorStyle == 'engraved'",
+      "comment": "engraved line above the text",
+      "length": "lineLength",
+      "lineWidth": "lineWidth",
+      "pattern": "linePattern",
+      "dash": "lineDash",
+      "gap": "lineSpace",
+      "ends": "lineEnds",
+      "y": "lineY",
+      "z": "decorZ",
+      "thickness": "decorT"
+    },
+    {
+      "add": "line",
+      "part": "decorPart",
+      "when": "textLines && decorStyle != 'engraved'",
+      "comment": "line below the text",
+      "length": "lineLength",
+      "lineWidth": "lineWidth",
+      "pattern": "linePattern",
+      "dash": "lineDash",
+      "gap": "lineSpace",
+      "ends": "lineEnds",
+      "y": "-lineY",
+      "z": "decorZ",
+      "thickness": "decorT"
+    },
+    {
+      "subtract": "line",
+      "from": "base",
+      "when": "textLines && decorStyle == 'engraved'",
+      "comment": "engraved line below the text",
+      "length": "lineLength",
+      "lineWidth": "lineWidth",
+      "pattern": "linePattern",
+      "dash": "lineDash",
+      "gap": "lineSpace",
+      "ends": "lineEnds",
+      "y": "-lineY",
+      "z": "decorZ",
+      "thickness": "decorT"
     }
   ],
   "notes": [
@@ -614,6 +907,26 @@
     {
       "when": "labelStyle != 'raised' && labelDepth >= thickness",
       "text": "Text is as deep as the coaster. Reduce the depth."
+    },
+    {
+      "when": "ring && rim && ringInset < rimWidth + 0.5",
+      "text": "The ring runs into the rim. Move it in past {rimWidth} mm."
+    },
+    {
+      "when": "(ring || textLines) && decorStyle != 'raised' && decorHeight > thickness - 1",
+      "text": "Ring and lines are almost as deep as the coaster. Make them shallower."
+    },
+    {
+      "when": "(ring || textLines) && decorStyle == 'flush' && labelStyle != 'flush'",
+      "text": "Flush ring and lines need the multi-material 3MF."
+    },
+    {
+      "when": "(ring || textLines) && decorColor == 'own' && decorStyle == 'raised' && labelStyle == 'raised'",
+      "text": "Ring and lines in their own color need the multi-material 3MF."
+    },
+    {
+      "when": "rim && (ring || textLines) && decorStyle == 'raised' && labelStyle != 'raised'",
+      "text": "A filament swap would also color the rim top. Turn the rim off or use the multi-material 3MF."
     }
   ]
 }

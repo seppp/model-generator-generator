@@ -21,6 +21,10 @@
     "nametag": {
       "label": "Nametag",
       "color": "#dc2626"
+    },
+    "border": {
+      "label": "Borders",
+      "color": "#2563eb"
     }
   },
   "params": [
@@ -110,7 +114,8 @@
       "min": 1,
       "max": 15,
       "step": 0.5,
-      "group": "Tag"
+      "group": "Tag",
+      "help": "Space around the code, inside any borders."
     },
     {
       "key": "corner",
@@ -646,6 +651,233 @@
       "showIf": "textSide != 'none'"
     },
     {
+      "key": "borderEdge",
+      "type": "boolean",
+      "label": "Border along the tag edge",
+      "default": false,
+      "group": "Borders"
+    },
+    {
+      "key": "edgeBorderWidth",
+      "type": "number",
+      "unit": "mm",
+      "label": "Edge border width",
+      "default": 1.5,
+      "min": 0.4,
+      "max": 6,
+      "step": 0.1,
+      "group": "Borders",
+      "showIf": "borderEdge"
+    },
+    {
+      "key": "edgeBorderInset",
+      "type": "number",
+      "unit": "mm",
+      "label": "Distance from tag edge",
+      "default": 1,
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "group": "Borders",
+      "showIf": "borderEdge",
+      "help": "Borders take their room from the code, the tag keeps its size."
+    },
+    {
+      "key": "borderQr",
+      "type": "boolean",
+      "label": "Border around the QR code",
+      "default": false,
+      "group": "Borders"
+    },
+    {
+      "key": "qrBorderWidth",
+      "type": "number",
+      "unit": "mm",
+      "label": "QR border width",
+      "default": 1,
+      "min": 0.4,
+      "max": 5,
+      "step": 0.1,
+      "group": "Borders",
+      "showIf": "borderQr"
+    },
+    {
+      "key": "qrBorderGap",
+      "type": "number",
+      "unit": "mm",
+      "label": "Gap to the code",
+      "default": 1,
+      "min": 0,
+      "max": 10,
+      "step": 0.1,
+      "group": "Borders",
+      "help": "Space between the code and the border.",
+      "showIf": "borderQr"
+    },
+    {
+      "key": "qrBorderCorner",
+      "type": "number",
+      "unit": "mm",
+      "label": "QR border corner radius",
+      "default": 0,
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "group": "Borders",
+      "showIf": "borderQr"
+    },
+    {
+      "key": "divider",
+      "type": "boolean",
+      "label": "Line between nametag and code",
+      "default": false,
+      "group": "Borders",
+      "showIf": "textSide != 'none'"
+    },
+    {
+      "key": "dividerWidth",
+      "type": "number",
+      "unit": "mm",
+      "label": "Line width",
+      "default": 1,
+      "min": 0.4,
+      "max": 5,
+      "step": 0.1,
+      "group": "Borders",
+      "showIf": "textSide != 'none' && divider"
+    },
+    {
+      "key": "dividerInset",
+      "type": "number",
+      "unit": "mm",
+      "label": "Line distance from tag edges",
+      "default": 3,
+      "min": 0,
+      "max": 20,
+      "step": 0.5,
+      "group": "Borders",
+      "help": "Shortens the line at both ends.",
+      "showIf": "textSide != 'none' && divider"
+    },
+    {
+      "key": "dividerPattern",
+      "type": "select",
+      "label": "Line pattern",
+      "default": "solid",
+      "group": "Borders",
+      "showIf": "textSide != 'none' && divider",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ]
+    },
+    {
+      "key": "dividerDash",
+      "type": "number",
+      "unit": "mm",
+      "label": "Dash length",
+      "default": 3,
+      "min": 0.5,
+      "max": 20,
+      "step": 0.5,
+      "group": "Borders",
+      "showIf": "textSide != 'none' && divider && dividerPattern == 'dashed'"
+    },
+    {
+      "key": "dividerSpace",
+      "type": "number",
+      "unit": "mm",
+      "label": "Space between dashes",
+      "default": 2,
+      "min": 0.4,
+      "max": 10,
+      "step": 0.2,
+      "group": "Borders",
+      "showIf": "textSide != 'none' && divider && dividerPattern != 'solid'"
+    },
+    {
+      "key": "dividerEnds",
+      "type": "select",
+      "label": "Line ends",
+      "default": "flat",
+      "group": "Borders",
+      "showIf": "textSide != 'none' && divider && dividerPattern != 'dotted'",
+      "options": [
+        {
+          "value": "flat",
+          "label": "Flat"
+        },
+        {
+          "value": "round",
+          "label": "Round"
+        }
+      ]
+    },
+    {
+      "key": "borderStyle",
+      "type": "select",
+      "label": "Border style",
+      "default": "raised",
+      "group": "Borders",
+      "help": "Raised: on top. Flush: inlaid, multi-material. Engraved: cut in.",
+      "showIf": "(borderEdge || borderQr || (divider && textSide != 'none'))",
+      "options": [
+        {
+          "value": "raised",
+          "label": "Raised"
+        },
+        {
+          "value": "flush",
+          "label": "Flush inlay"
+        },
+        {
+          "value": "engraved",
+          "label": "Engraved"
+        }
+      ]
+    },
+    {
+      "key": "borderHeight",
+      "type": "number",
+      "unit": "mm",
+      "label": "Border height / depth",
+      "default": 1,
+      "min": 0.2,
+      "max": 3,
+      "step": 0.1,
+      "group": "Borders",
+      "showIf": "(borderEdge || borderQr || (divider && textSide != 'none'))"
+    },
+    {
+      "key": "borderColor",
+      "type": "select",
+      "label": "Border color",
+      "default": "code",
+      "group": "Borders",
+      "help": "Own color: set it under Colors. Needs multi-material.",
+      "showIf": "(borderEdge || borderQr || (divider && textSide != 'none')) && borderStyle != 'engraved'",
+      "options": [
+        {
+          "value": "code",
+          "label": "Same as code"
+        },
+        {
+          "value": "own",
+          "label": "Own color"
+        }
+      ]
+    },
+    {
       "key": "edgeTop",
       "type": "select",
       "label": "Top edges",
@@ -731,10 +963,15 @@
     }
   ],
   "derived": {
-    "qrSize": "width - 2 * margin",
+    "edgeRoom": "borderEdge ? edgeBorderInset + edgeBorderWidth : 0",
+    "qrRoom": "borderQr ? qrBorderGap + qrBorderWidth : 0",
+    "m": "margin + edgeRoom + qrRoom",
+    "tEdge": "textEdge + edgeRoom",
+    "tGap": "textGap + qrRoom",
+    "qrSize": "width - 2 * m",
     "earDia": "holeDia + 2 * holeRim",
-    "textBand": "textGap + textSize + textEdge",
-    "textExtra": "textSide != 'none' ? max(textBand - margin, 0) : 0",
+    "textBand": "tGap + textSize + tEdge",
+    "textExtra": "textSide != 'none' ? max(textBand - m, 0) : 0",
     "tagW": "(textSide == 'left' || textSide == 'right') ? width + textExtra : width",
     "tagH": "(textSide == 'top' || textSide == 'bottom') ? width + textExtra : width",
     "hx": "tagW / 2",
@@ -742,8 +979,8 @@
     "qrX": "textSide == 'right' ? -textExtra / 2 : (textSide == 'left' ? textExtra / 2 : 0)",
     "qrY": "textSide == 'top' ? -textExtra / 2 : (textSide == 'bottom' ? textExtra / 2 : 0)",
     "textAlongShift": "(textAlign == 'left' ? -qrSize / 4 : (textAlign == 'right' ? qrSize / 4 : 0)) + textOffset",
-    "textX": "textSide == 'left' ? -hx + textEdge + textSize / 2 : (textSide == 'right' ? hx - textEdge - textSize / 2 : textAlongShift)",
-    "textY": "textSide == 'bottom' ? -hy + textEdge + textSize / 2 : (textSide == 'top' ? hy - textEdge - textSize / 2 : textAlongShift)",
+    "textX": "textSide == 'left' ? -hx + tEdge + textSize / 2 : (textSide == 'right' ? hx - tEdge - textSize / 2 : textAlongShift)",
+    "textY": "textSide == 'bottom' ? -hy + tEdge + textSize / 2 : (textSide == 'top' ? hy - tEdge - textSize / 2 : textAlongShift)",
     "textRot": "textSide == 'left' ? 90 : (textSide == 'right' ? -90 : 0)",
     "ux": "sin(holePos)",
     "uy": "cos(holePos)",
@@ -815,11 +1052,24 @@
     "cFilStep": "cFilT / sqrt(2)",
     "holeX": "holeStyle == 'perimeter' ? pHoleX : (holeStyle == 'corner' ? hx - holeInset : 0)",
     "holeY": "holeStyle == 'perimeter' ? pHoleY : (holeStyle == 'corner' ? hy - holeInset : hy + earDia / 2)",
-    "holeClearance": "sqrt(2) * (margin - holeInset) - holeDia / 2",
+    "holeClearance": "sqrt(2) * (m - holeInset) - holeDia / 2",
     "qrDx": "max(abs(holeX - qrX) - qrSize / 2, 0)",
     "qrDy": "max(abs(holeY - qrY) - qrSize / 2, 0)",
     "holeQrGap": "sqrt(qrDx * qrDx + qrDy * qrDy) - holeDia / 2",
-    "goesInward": "holeStyle == 'perimeter' && ((dirDot < -0.05 && holeExtend > 0) || (dirDot > 0.05 && holeExtend < 0))"
+    "goesInward": "holeStyle == 'perimeter' && ((dirDot < -0.05 && holeExtend > 0) || (dirDot > 0.05 && holeExtend < 0))",
+    "borderPart": "borderColor == 'own' ? 'border' : 'code'",
+    "borderZ": "borderStyle == 'raised' ? thickness : thickness - borderHeight",
+    "borderT": "borderStyle == 'engraved' ? borderHeight + 1 : borderHeight",
+    "edgeBorderW": "tagW - 2 * edgeBorderInset",
+    "edgeBorderH": "tagH - 2 * edgeBorderInset",
+    "edgeBorderR": "max(corner - edgeBorderInset, 0)",
+    "qrBorderSize": "qrSize + 2 * qrRoom",
+    "textDist": "textExtra + m - tEdge - textSize",
+    "divOff": "qrSize / 2 + qrRoom + (textDist - qrRoom) / 2",
+    "divX": "textSide == 'left' ? qrX - divOff : (textSide == 'right' ? qrX + divOff : 0)",
+    "divY": "textSide == 'top' ? qrY + divOff : (textSide == 'bottom' ? qrY - divOff : 0)",
+    "divLen": "(textSide == 'top' || textSide == 'bottom') ? tagW - 2 * dividerInset : tagH - 2 * dividerInset",
+    "divRot": "(textSide == 'left' || textSide == 'right') ? 90 : 0"
   },
   "steps": [
     {
@@ -1143,6 +1393,96 @@
       "bold": "textBold",
       "italic": "textItalic",
       "underline": "textUnderline"
+    },
+    {
+      "add": "frame",
+      "part": "borderPart",
+      "when": "borderEdge && borderStyle != 'engraved'",
+      "comment": "border along the tag edge",
+      "shape": "roundedRect",
+      "width": "edgeBorderW",
+      "height": "edgeBorderH",
+      "radius": "edgeBorderR",
+      "lineWidth": "edgeBorderWidth",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "subtract": "frame",
+      "from": "base",
+      "when": "borderEdge && borderStyle == 'engraved'",
+      "comment": "engraved border along the tag edge",
+      "shape": "roundedRect",
+      "width": "edgeBorderW",
+      "height": "edgeBorderH",
+      "radius": "edgeBorderR",
+      "lineWidth": "edgeBorderWidth",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "add": "frame",
+      "part": "borderPart",
+      "when": "borderQr && borderStyle != 'engraved'",
+      "comment": "border around the QR code",
+      "shape": "roundedRect",
+      "width": "qrBorderSize",
+      "height": "qrBorderSize",
+      "radius": "qrBorderCorner",
+      "lineWidth": "qrBorderWidth",
+      "x": "qrX",
+      "y": "qrY",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "subtract": "frame",
+      "from": "base",
+      "when": "borderQr && borderStyle == 'engraved'",
+      "comment": "engraved border around the QR code",
+      "shape": "roundedRect",
+      "width": "qrBorderSize",
+      "height": "qrBorderSize",
+      "radius": "qrBorderCorner",
+      "lineWidth": "qrBorderWidth",
+      "x": "qrX",
+      "y": "qrY",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "add": "line",
+      "part": "borderPart",
+      "when": "divider && textSide != 'none' && borderStyle != 'engraved'",
+      "comment": "line between nametag and code",
+      "length": "divLen",
+      "lineWidth": "dividerWidth",
+      "pattern": "dividerPattern",
+      "dash": "dividerDash",
+      "gap": "dividerSpace",
+      "ends": "dividerEnds",
+      "x": "divX",
+      "y": "divY",
+      "rotate": "divRot",
+      "z": "borderZ",
+      "thickness": "borderT"
+    },
+    {
+      "subtract": "line",
+      "from": "base",
+      "when": "divider && textSide != 'none' && borderStyle == 'engraved'",
+      "comment": "engraved line between nametag and code",
+      "length": "divLen",
+      "lineWidth": "dividerWidth",
+      "pattern": "dividerPattern",
+      "dash": "dividerDash",
+      "gap": "dividerSpace",
+      "ends": "dividerEnds",
+      "x": "divX",
+      "y": "divY",
+      "rotate": "divRot",
+      "z": "borderZ",
+      "thickness": "borderT"
     }
   ],
   "notes": [
@@ -1189,6 +1529,30 @@
     {
       "when": "textSide != 'none' && style == 'raised' && textColor == 'own'",
       "text": "A filament swap colors the code and nametag alike. Use the multi-material 3MF for the own nametag color."
+    },
+    {
+      "when": "borderQr && qrBorderGap < 1",
+      "text": "Leave 1 mm or more between code and border so phones read it."
+    },
+    {
+      "when": "borderEdge && borderStyle == 'raised' && edgeTop != 'none' && edgeBorderInset < edgeTopSize",
+      "text": "The edge border sits on the rounded top edge. Move it in by {edgeTopSize} mm or more."
+    },
+    {
+      "when": "divider && textSide != 'none' && dividerWidth > textDist - qrRoom - 1",
+      "text": "The line barely fits between code and text. Raise Distance to QR code."
+    },
+    {
+      "when": "(borderEdge || borderQr || (divider && textSide != 'none')) && borderStyle != 'raised' && borderHeight > thickness - 0.6",
+      "text": "Borders are almost as deep as the tag. Make them shallower."
+    },
+    {
+      "when": "(borderEdge || borderQr || (divider && textSide != 'none')) && borderStyle == 'flush' && style != 'flush'",
+      "text": "Flush borders need the multi-material 3MF."
+    },
+    {
+      "when": "(borderEdge || borderQr || (divider && textSide != 'none')) && borderColor == 'own' && borderStyle == 'raised' && style == 'raised'",
+      "text": "Borders in their own color need the multi-material 3MF."
     }
   ]
 }

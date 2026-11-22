@@ -95,6 +95,7 @@ export function compileFeatureScript(recipe, rawValues = {}, { colors = {} } = {
   }
   for (const s of recipe.steps) {
     ['when', 'x', 'y', 'z', 'rotate', 'thickness'].forEach((k) => use(s[k]));
+    if ('add' in s && !recipe.parts[s.part]) use(s.part);
     const block = BLOCKS[stepBlock(s)];
     for (const [k, spec] of Object.entries(block.args)) {
       if (spec.baked || s[k] === undefined) continue;
@@ -221,7 +222,7 @@ export function compileFeatureScript(recipe, rawValues = {}, { colors = {} } = {
     const r = s.rotate === undefined ? '0' : toFeatureScript(s.rotate, names);
     w(`            mgPlace(context, id + "s${i + 1}place", tool, ${x}, ${y}, ${r});`);
     if ('add' in s) {
-      w(`            parts = mgAdd(context, id + "s${i + 1}add", parts, ${fsString(s.part)}, tool);`);
+      w(`            parts = mgAdd(context, id + "s${i + 1}add", parts, ${recipe.parts[s.part] ? fsString(s.part) : toFeatureScript(s.part, names)}, tool);`);
     } else {
       const from = s.from ? [].concat(s.from) : Object.keys(recipe.parts);
       w(`            mgSubtract(context, id + "s${i + 1}sub", parts, [${from.map(fsString).join(', ')}], tool);`);
@@ -245,7 +246,11 @@ export function compileFeatureScript(recipe, rawValues = {}, { colors = {} } = {
   w('// ---- helpers (shared by all generated features) ----');
   w(FS_COMMON.trim());
   if (Object.values(recipe.parts).some((p) => p.edges)) { w(); w(FS_EDGES.trim()); }
-  const helpers = new Set(recipe.steps.map(stepBlock));
+  const helpers = new Set();
+  for (const b of recipe.steps.map(stepBlock)) {
+    for (const n of BLOCKS[b].fs.needs || []) helpers.add(n);
+    helpers.add(b);
+  }
   for (const b of helpers) {
     w();
     w(BLOCKS[b].fs.helper.trim());

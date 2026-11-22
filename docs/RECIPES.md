@@ -123,7 +123,7 @@ value is the block name, and then common keys plus the block's own arguments.
 | --- | --- |
 | `add` | block to add to `part` |
 | `subtract` | block to cut away from `from` (default: every part) |
-| `part` | part to add to (required for `add`) |
+| `part` | part to add to (required for `add`): a part name, or an expression giving one, e.g. `"borderColor == 'own' ? 'border' : 'accent'"` |
 | `from` | part name or list of part names to cut from |
 | `when` | expression; the step is skipped when false |
 | `x`, `y` | where the block's center goes (default 0) |
@@ -146,6 +146,37 @@ All blocks are centered on the origin before `x`/`y` move them.
 | `radius` | 0 | roundedRect corner radius |
 | `diameter` | 10 | circle; polygon corner-to-corner |
 | `sides` | 6 | polygon, first corner points to +Y |
+
+**`frame`**: a border line along an outline. The outline (same arguments as
+`shape`) is the outer edge; the line goes `lineWidth` inwards, so the inner
+edge is the outline moved inwards (corner radius shrinks with it). A line as
+wide as the shape gives the filled shape.
+
+| arg | default | |
+| --- | --- | --- |
+| `shape` | `rect` | `rect`, `roundedRect`, `circle`, `polygon` (or an expression giving one) |
+| `width`, `height` | 10 | outer size, rect and roundedRect |
+| `radius` | 0 | outer corner radius of roundedRect |
+| `diameter` | 10 | circle; polygon corner-to-corner |
+| `sides` | 6 | polygon |
+| `lineWidth` | 1 | width of the line, measured inwards |
+
+Frames are always solid lines; there are no dashed or dotted frames.
+
+**`line`**: a straight line along X, centered on the origin. Turn it with the
+step's `rotate` (90 for a vertical line).
+
+| arg | default | |
+| --- | --- | --- |
+| `length` | 20 | end to end, including round ends |
+| `lineWidth` | 1 | |
+| `pattern` | `solid` | `solid`, `dashed` or `dotted` |
+| `dash` | 3 | dashed: dash length; stretched a little so the line starts and ends with a full dash |
+| `gap` | 2 | dashed and dotted: space between pieces (at least 0.1) |
+| `ends` | `flat` | `flat` or `round` ends (of the line, or of every dash); dots are always round |
+
+Dots are circles as wide as the line, spread so the first and last sit at the
+ends. Lines and frames narrower than 0.8 mm get a printability warning.
 
 **`qr`**: QR code, dark modules only, no quiet zone.
 
@@ -215,6 +246,37 @@ the heavier fonts and for `bold`; its italic files for `italic`), since Onshape
 has its own font list; sizes match closely but not to the tenth of a
 millimeter, and bold there is Open Sans Bold rather than a grown outline.
 
+## Borders, frames and divider lines
+
+Use `frame` for a border around something (the plate edge, a QR code, a
+label) and `line` for dividers and decorative lines (text has its own
+`underline`). Give people the same styles as
+for text, with one step per style:
+
+```json
+{ "add": "frame", "part": "borderPart", "when": "border && borderStyle != 'engraved'",
+  "shape": "roundedRect", "width": "width - 2 * inset", "height": "height - 2 * inset",
+  "radius": "max(corner - inset, 0)", "lineWidth": "borderWidth",
+  "z": "borderStyle == 'raised' ? thickness : thickness - borderHeight", "thickness": "borderHeight" },
+{ "subtract": "frame", "from": "base", "when": "border && borderStyle == 'engraved'",
+  "shape": "roundedRect", "width": "width - 2 * inset", "height": "height - 2 * inset",
+  "radius": "max(corner - inset, 0)", "lineWidth": "borderWidth",
+  "z": "thickness - borderHeight", "thickness": "borderHeight + 1" }
+```
+
+- Raised sits on top (`z` = plate thickness), flush is an inlay (added at
+  `thickness - height`, which cuts the pocket), engraved is a `subtract`.
+- Color: add the border to the part of the text or code so it prints in that
+  color, or to its own part. A derived value such as
+  `"borderPart": "borderColor == 'own' ? 'border' : 'accent'"` used as the
+  step's `part` lets people choose. A part that gets no geometry is left out
+  of the downloads and the color list, so an extra part costs nothing when
+  the border is off.
+- A raised border in its own color next to raised text is no longer stacked,
+  so only the multi-material 3MF works; add a note that says so.
+- To keep a border clear of other features, make room for it in the derived
+  values (the QR keychain shrinks the code by the borders' width).
+
 ## `notes`
 
 Hints shown in the Download panel. `{expression}` placeholders are filled in.
@@ -259,7 +321,9 @@ Blocks live in `engine/blocks.js`. Each needs:
    origin (or `null` to skip).
 3. `fs.helper`: a FeatureScript function that sketches the same outline on
    `mgPlane(z)` and returns `mgExtrude(...)`, plus `fs.call(fsArgs, jsArgs)` that
-   returns the call expression.
+   returns the call expression (or `{ code, guard, comment }`). A helper may
+   call another block's helper when `fs.needs` lists that block (`frame`
+   reuses `mgShape`).
 4. Optional `warnings(args)` for printability hints.
 
 Then document it here and run `npm run check`.
