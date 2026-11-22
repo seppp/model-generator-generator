@@ -17,6 +17,10 @@
     "accent": {
       "label": "Text and border",
       "color": "#f8fafc"
+    },
+    "lettering": {
+      "label": "Text",
+      "color": "#fbbf24"
     }
   },
   "params": [
@@ -246,6 +250,47 @@
         }
       ],
       "group": "Text"
+    },
+    {
+      "key": "textBold",
+      "type": "boolean",
+      "label": "Bold",
+      "default": false,
+      "group": "Text",
+      "help": "Bold, italic and underline work with every font."
+    },
+    {
+      "key": "textItalic",
+      "type": "boolean",
+      "label": "Italic",
+      "default": false,
+      "group": "Text"
+    },
+    {
+      "key": "textUnderline",
+      "type": "boolean",
+      "label": "Underline",
+      "default": false,
+      "group": "Text"
+    },
+    {
+      "key": "textColor",
+      "type": "select",
+      "label": "Text color",
+      "default": "same",
+      "group": "Text",
+      "help": "Own color needs the multi-material 3MF.",
+      "showIf": "border",
+      "options": [
+        {
+          "value": "same",
+          "label": "Same as border"
+        },
+        {
+          "value": "own",
+          "label": "Own color"
+        }
+      ]
     },
     {
       "key": "raise",
@@ -484,7 +529,25 @@
       "size": "textSize",
       "font": "font",
       "z": "thickness",
-      "thickness": "raise"
+      "thickness": "raise",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline",
+      "when": "!border || textColor != 'own'"
+    },
+    {
+      "add": "text",
+      "part": "lettering",
+      "text": "text",
+      "size": "textSize",
+      "font": "font",
+      "z": "thickness",
+      "thickness": "raise",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline",
+      "when": "border && textColor == 'own'",
+      "comment": "text in its own color"
     },
     {
       "subtract": "shape",
@@ -507,6 +570,10 @@
     {
       "when": "holes",
       "text": "Wide text runs into the screw holes. Shorten it or widen the sign."
+    },
+    {
+      "when": "border && textColor == 'own'",
+      "text": "Text and border share layers: use the multi-material 3MF for the own text color."
     }
   ]
 }

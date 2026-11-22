@@ -37,7 +37,12 @@ Read `docs/RECIPES.md` first. Use `recipes/qr-keychain.json`,
    - text: give people a `font` select param whose option values are the font
      names in `docs/RECIPES.md`, each with its `group` (copy the list from the
      sign recipe), and use `"font": "font"` on the text steps. The picker sorts
-     fonts alphabetically; `"sort": "recipe"` keeps a hand-picked order
+     fonts alphabetically; `"sort": "recipe"` keeps a hand-picked order.
+     Offer `bold` / `italic` / `underline` as boolean params (default `false`)
+     wired to the text block's arguments of the same names
+   - text in its own color: a separate part for the text and a `textColor`
+     select (same / own) with one text step per choice (see the sign recipe);
+     same-height details in two colors need the multi-material 3MF, so add a note
 4. **Add notes** for print advice that depends on the settings.
 5. **Check it**: `npm run check` builds every recipe with defaults and with each
    option and number extreme. Fix all problems.

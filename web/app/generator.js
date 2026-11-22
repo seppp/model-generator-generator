@@ -214,10 +214,11 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   }
 
   const colorBody = groupEl('Colors', false);
+  const colorRows = {}; // hidden while their part is empty (e.g. an own text color that is off)
   for (const [k, part] of Object.entries(recipe.parts)) {
     const c = h('input', { type: 'color', value: colors[k], id: `c-${k}` });
     c.addEventListener('input', () => { colors[k] = c.value; viewer.show(model?.parts || [], colors); writeHash(); });
-    colorBody.append(h('div', { class: 'row row-color' }, h('label', { for: `c-${k}`, class: 'label' }, part.label || k), c));
+    colorBody.append(colorRows[k] = h('div', { class: 'row row-color' }, h('label', { for: `c-${k}`, class: 'label' }, part.label || k), c));
   }
   {
     const [b, note] = tip('For the preview and image, SVG and OBJ files. Print colors come from your filament.');
@@ -359,6 +360,7 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
     disposeModel(model);
     model = next;
     viewer.show(model.parts, colors);
+    if (model.parts.length) for (const [k, row] of Object.entries(colorRows)) row.hidden = !model.parts.some((p) => p.key === k);
     const ms = Math.round(performance.now() - t0);
     lastMs = ms;
     // the first build also warms up the kernel and fonts, so it doesn't count

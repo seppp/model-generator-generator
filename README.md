@@ -46,6 +46,10 @@ recipes/sign.json         ┘                   dist/index.html?recipe=<id>  web
   alphabetically under style headings. The page loads a font only when it is
   used. Onshape has its own font list, so the FeatureScript draws all of them
   with Open Sans.
+- **Text styles and colors**: bold, italic and underline work with every font
+  (drawn by the engine: grown outline, 12° slant, a printable line). The
+  official generators also let the text take its own color as a separate part
+  (keychain nametag, sign text); the coaster text already has one.
 - **Share links** (`?shared#g=...`) carry the whole recipe, compressed, after
   the `#`, so nothing is stored on a server. A shared version opens with a
   banner saying it is not the official generator.
