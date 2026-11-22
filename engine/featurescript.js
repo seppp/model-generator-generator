@@ -8,6 +8,62 @@
 import { BLOCKS, FS_COMMON } from './blocks.js';
 import { evaluate, fsNumber, fsString, refs, toFeatureScript } from './expr.js';
 import { computeScope, normalizeValues, stepBlock } from './recipe.js';
+import { TOP_EDGES, BOTTOM_EDGES, DEFAULT_PRINTABLE_CHAMFER } from './edges.js';
+
+const FS_EDGES = `
+// Chamfers and fillets on the edges of a part's lowest and highest faces.
+function mgEdge(context is Context, id is Id, edges is Query, kind is string, size is number)
+{
+    if (kind == "chamfer")
+    {
+        opChamfer(context, id, { "entities" : edges, "chamferType" : ChamferType.EQUAL_OFFSETS, "width" : size * millimeter });
+    }
+    else
+    {
+        opFillet(context, id, { "entities" : edges, "radius" : size * millimeter });
+    }
+}
+
+// bottom "printable": a 45 degree chamfer of height c at the bed, then a fillet of radius r
+// where the chamfer meets the wall, so nothing overhangs more than 45 degrees.
+function mgPartEdges(context is Context, id is Id, bodies is array, top is string, topSize is number, bottom is string, bottomSize is number, c is number)
+{
+    if (size(bodies) == 0)
+    {
+        return;
+    }
+    const q = qUnion(bodies);
+    const box = evBox3d(context, { "topology" : q });
+    const z0 = box.minCorner[2] / millimeter;
+    const z1 = box.maxCorner[2] / millimeter;
+    if (top != "none" && topSize > 0)
+    {
+        try silent
+        {
+            mgEdge(context, id + "top", qAdjacent(qCoincidesWithPlane(qOwnedByBody(q, EntityType.FACE), mgPlane(z1)), AdjacencyType.EDGE, EntityType.EDGE), top, topSize);
+        }
+    }
+    if (bottom != "none" && bottomSize > 0)
+    {
+        const bottomFaces = qCoincidesWithPlane(qOwnedByBody(q, EntityType.FACE), mgPlane(z0));
+        try silent
+        {
+            if (bottom == "printable" && c > 0)
+            {
+                opChamfer(context, id + "bch", { "entities" : qAdjacent(bottomFaces, AdjacencyType.EDGE, EntityType.EDGE),
+                        "chamferType" : ChamferType.EQUAL_OFFSETS, "width" : c * millimeter });
+                const chamferFaces = qCreatedBy(id + "bch", EntityType.FACE);
+                const walls = qSubtraction(qOwnedByBody(q, EntityType.FACE), qUnion([chamferFaces, qCoincidesWithPlane(qOwnedByBody(q, EntityType.FACE), mgPlane(z0))]));
+                const ring = qIntersection([qAdjacent(chamferFaces, AdjacencyType.EDGE, EntityType.EDGE), qAdjacent(walls, AdjacencyType.EDGE, EntityType.EDGE)]);
+                opFillet(context, id + "bfi", { "entities" : ring, "radius" : min(bottomSize, c / 0.292893) * millimeter });
+            }
+            else
+            {
+                mgEdge(context, id + "bottom", qAdjacent(bottomFaces, AdjacencyType.EDGE, EntityType.EDGE), bottom == "printable" ? "fillet" : bottom, bottomSize);
+            }
+        }
+    }
+}`;
 
 // Version of the Onshape standard library to import. Onshape keeps old
 // versions working; replace both lines with the header of a fresh Feature
@@ -34,6 +90,9 @@ export function compileFeatureScript(recipe, rawValues = {}, { colors = {} } = {
   const used = new Set();
   const use = (v) => { if (typeof v === 'string') refs(v, used); };
   Object.values(recipe.derived || {}).forEach(use);
+  for (const part of Object.values(recipe.parts)) {
+    for (const [k, v] of Object.entries(part.edges || {})) if (!(k === 'top' && TOP_EDGES.includes(v)) && !(k === 'bottom' && BOTTOM_EDGES.includes(v))) use(v);
+  }
   for (const s of recipe.steps) {
     ['when', 'x', 'y', 'z', 'rotate', 'thickness'].forEach((k) => use(s[k]));
     const block = BLOCKS[stepBlock(s)];
@@ -174,11 +233,18 @@ export function compileFeatureScript(recipe, rawValues = {}, { colors = {} } = {
   for (const [k, part] of Object.entries(recipe.parts)) {
     const rgb = hexToRgb(colors[k] || part.color);
     w(`        mgFinish(context, id + ${fsString('finish_' + k)}, parts[${fsString(k)}], ${fsString(part.label || k)}, [${rgb.join(', ')}]);`);
+    const e = part.edges;
+    if (e) {
+      const kind = (v, options) => (v === undefined ? '"none"' : options.includes(v) ? fsString(v) : toFeatureScript(v, names));
+      const n = (v, d) => (v === undefined ? fsNumber(d) : toFeatureScript(v, names));
+      w(`        mgPartEdges(context, id + ${fsString('edges_' + k)}, parts[${fsString(k)}], ${kind(e.top, TOP_EDGES)}, ${n(e.topSize, 0)}, ${kind(e.bottom, BOTTOM_EDGES)}, ${n(e.bottomSize, 0)}, ${n(e.bottomChamfer, DEFAULT_PRINTABLE_CHAMFER)});`);
+    }
   }
   w('    });');
   w();
   w('// ---- helpers (shared by all generated features) ----');
   w(FS_COMMON.trim());
+  if (Object.values(recipe.parts).some((p) => p.edges)) { w(); w(FS_EDGES.trim()); }
   const helpers = new Set(recipe.steps.map(stepBlock));
   for (const b of helpers) {
     w();

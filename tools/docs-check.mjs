@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import { BLOCKS } from '../engine/blocks.js';
 import { FONTS } from '../engine/fonts.js';
 import { PARAM_TYPES, STEP_KEYS } from '../engine/recipe.js';
+import { EDGE_KEYS, BOTTOM_EDGES } from '../engine/edges.js';
 import { FUNCTIONS, CONSTANTS } from '../engine/expr.js';
 import { chatReference } from '../engine/docs.js';
 
@@ -50,6 +51,7 @@ function referenceProblems(recipes, file) {
   for (const f of Object.keys(FONTS)) need(recipes, code(f), 'the font');
   for (const t of PARAM_TYPES) need(recipes, code(t), 'the param type');
   for (const k of STEP_KEYS) need(recipes, code(k), 'the step key');
+  for (const k of [...EDGE_KEYS, ...BOTTOM_EDGES]) need(recipes, code(k), 'the part edges key or option');
   for (const fn of [...Object.keys(FUNCTIONS), ...Object.keys(CONSTANTS)]) {
     if (!new RegExp(`\\b${fn}\\b`).test(recipes.slice(recipes.indexOf('## Expressions'), recipes.indexOf('## `parts`')))) {
       problems.push(`${file} "Expressions" does not mention the function or constant ${fn}`);

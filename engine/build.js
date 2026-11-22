@@ -2,7 +2,8 @@
 
 import { BLOCKS } from './blocks.js';
 import { template, evaluate } from './expr.js';
-import { computeScope, normalizeValues, planSteps } from './recipe.js';
+import { computeScope, normalizeValues, planSteps, partEdges } from './recipe.js';
+import { edgedExtrude, smoothEdgedExtrude } from './edges.js';
 
 /**
  * @param recipe validated recipe
@@ -46,6 +47,26 @@ export function buildModel(recipe, rawValues, env) {
     } else {
       for (const k of step.from) if (solids[k]) solids[k] = keep(solids[k].subtract(tool));
     }
+  }
+
+  // chamfers and fillets: cut each part to its own outline seen from above,
+  // extruded over its height with the edges broken (outer edges and through-holes)
+  for (const [key, def] of Object.entries(recipe.parts)) {
+    const edges = partEdges(def, scope, key);
+    const m = solids[key];
+    if (!edges || !m || m.isEmpty()) continue;
+    const bb = m.boundingBox();
+    const height = bb.max[2] - bb.min[2];
+    const outline = keep(keep(m.project()).simplify(0.01));
+    // a plain extruded outline (no pockets, no steps in height) is replaced by
+    // the edged outline; anything else is cut to it
+    const prismatic = Math.abs(m.volume() - outline.area() * height) < 1e-3 * m.volume();
+    const smooth = smoothEdgedExtrude(env.wasm, outline, height, edges, prismatic ? 0 : 0.05);
+    const { solid, scaled } = smooth || edgedExtrude(Manifold, outline, height, edges, 0.05);
+    const placed = keep(keep(solid).translate([0, 0, bb.min[2]]));
+    solids[key] = smooth && prismatic ? placed : keep(m.intersect(placed));
+    const w = `${def.label || key}: the chamfers or fillets were taller than the part and were made smaller to fit.`;
+    if (scaled && !warnings.includes(w)) warnings.push(w);
   }
 
   const parts = [];

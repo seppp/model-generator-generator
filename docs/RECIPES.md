@@ -56,6 +56,37 @@ Parts never overlap: adding a tool to one part automatically cuts it out of
 all other parts. That is how a flush inlay works: add the QR code to `code`
 inside the tag and the tag gets the matching pocket.
 
+### Chamfers and fillets (`edges`)
+
+A part can break the edges of its lowest and highest faces:
+
+```json
+"base": { "label": "Tag", "color": "#f8fafc",
+  "edges": { "top": "fillet", "topSize": 0.8, "bottom": "printable", "bottomSize": 1, "bottomChamfer": 1 } }
+```
+
+- `top`: `none`, `chamfer` or `fillet`, with `topSize` (chamfer width or
+  fillet radius, mm).
+- `bottom`: `none`, `chamfer`, `fillet` or `printable`, with `bottomSize`.
+  `printable` is a fillet you can print without supports: a 45° chamfer of
+  height `bottomChamfer` (default 1 mm) at the bed, then a fillet of radius
+  `bottomSize` where the chamfer meets the wall, so nothing overhangs more
+  than 45°. A plain `fillet` on the bottom edge overhangs at the bed.
+- Every value can be an expression, so a select param can offer the choice:
+  `"top": "edgeTop"` with options `none` / `chamfer` / `fillet`.
+- It applies to the whole part after all steps, on its outline seen from
+  above: the outer edges and the edges of holes that go all the way through.
+  Pockets that don't go through keep sharp edges. Pieces added in separate
+  steps get one continuous edge, without a notch where they join.
+- When the two together are taller than the part they are scaled down to fit
+  (the page says so).
+<!-- dev-only -->
+- The website moves rings of the outline inwards (`engine/edges.js`), or
+  stacks slabs about 0.2 mm high where that would fold over (thin text);
+  FeatureScript uses opChamfer / opFillet on the edges of the part's lowest
+  and highest faces (in Onshape that also rounds pocket edges on those faces).
+<!-- /dev-only -->
+
 ## `params`
 
 Shown as the form on the website and as feature inputs in Onshape.

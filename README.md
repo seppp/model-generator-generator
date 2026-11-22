@@ -63,6 +63,11 @@ Each generator has colored parts. The page offers:
   assigned, for MMU / INDX / tool changers (needed for flush inlays).
 - **STL**: all parts in one file or one file per part.
 
+Parts can have **chamfered or filleted** top and bottom edges, including a
+*printable fillet* for the bottom: a 45° chamfer at the bed, then a fillet
+above it, so it prints without supports. The QR keychain, coaster and sign
+offer these under *Edges*.
+
 ## Other downloads
 
 The *Download* panel (right column on wide screens, the *Download* button on
