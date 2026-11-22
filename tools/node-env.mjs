@@ -6,21 +6,21 @@ import opentype from 'opentype.js';
 
 const require = createRequire(import.meta.url);
 
-export const FONT_FILES = {
-  regular: 'open-sans-latin-400-normal.woff',
-  bold: 'open-sans-latin-700-normal.woff',
-};
+import { FONTS, fontFile } from '../engine/fonts.js';
 
-export function fontPath(file) {
-  return require.resolve(`@fontsource/open-sans/files/${file}`);
+/** Path of a bundled font (engine/fonts.js name) in node_modules. */
+export function fontPath(name) {
+  return require.resolve(`@fontsource/${FONTS[name].pkg}/files/${fontFile(name)}`);
 }
+
+export const BUNDLED_FONTS = Object.keys(FONTS).filter((n) => fontFile(n));
 
 export async function nodeEnv() {
   const wasm = await Module();
   wasm.setup();
   const fonts = {};
-  for (const [k, file] of Object.entries(FONT_FILES)) {
-    const b = fs.readFileSync(fontPath(file));
+  for (const k of BUNDLED_FONTS) {
+    const b = fs.readFileSync(fontPath(k));
     fonts[k] = opentype.parse(b.buffer.slice(b.byteOffset, b.byteOffset + b.length));
   }
   return { wasm, fonts };

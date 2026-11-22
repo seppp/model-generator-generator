@@ -54,7 +54,22 @@ function steps(len, tol) {
 export function textPolygons(font, text, capHeight) {
   const capUnits = font.tables.os2?.sCapHeight || font.unitsPerEm * 0.7;
   const fontSize = font.unitsPerEm; // work in font units, scale afterwards
-  const path = font.getPath(text, 0, 0, fontSize);
+  let commands;
+  try {
+    commands = font.getPath(text, 0, 0, fontSize).commands;
+  } catch {
+    // some fonts use OpenType substitutions opentype.js can't apply: lay out glyph by glyph
+    commands = [];
+    let x = 0;
+    let prev = null;
+    for (const ch of text) {
+      const g = font.charToGlyph(ch);
+      if (prev) x += font.getKerningValue(prev, g);
+      commands.push(...g.getPath(x, 0, fontSize).commands);
+      x += g.advanceWidth || 0;
+      prev = g;
+    }
+  }
   const scale = capHeight / capUnits;
-  return flatten(path.commands, scale, 0.25);
+  return flatten(commands, scale, 0.25);
 }

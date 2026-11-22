@@ -38,6 +38,11 @@ recipes/sign.json         ┘                   dist/index.html?recipe=<id>  web
   browser (localStorage, `?mine=<id>`). *Export all to a file* writes them to
   one `my-generators.json` in the same format as the site's `generators.json`,
   and *Import a file* reads either back.
+- **Fonts**: text can use nine open-licensed fonts (Open Sans regular and
+  bold, rounded, slab, serif, tall condensed, stencil, script, monospace) or a
+  font file you choose (kept in your browser). The page loads a font only when
+  it is used. Onshape has its own font list, so the FeatureScript draws all of
+  them with Open Sans.
 - **Share links** (`?shared#g=...`) carry the whole recipe, compressed, after
   the `#`, so nothing is stored on a server. A shared version opens with a
   banner saying it is not the official generator.

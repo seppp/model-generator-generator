@@ -150,10 +150,52 @@
       "group": "Text"
     },
     {
-      "key": "bold",
-      "type": "boolean",
-      "label": "Bold",
-      "default": true,
+      "key": "font",
+      "type": "select",
+      "label": "Font",
+      "default": "bold",
+      "options": [
+        {
+          "value": "regular",
+          "label": "Open Sans"
+        },
+        {
+          "value": "bold",
+          "label": "Open Sans Bold"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        },
+        {
+          "value": "slab",
+          "label": "Slab serif"
+        },
+        {
+          "value": "serif",
+          "label": "Serif"
+        },
+        {
+          "value": "condensed",
+          "label": "Tall condensed (capitals)"
+        },
+        {
+          "value": "stencil",
+          "label": "Stencil"
+        },
+        {
+          "value": "script",
+          "label": "Script"
+        },
+        {
+          "value": "mono",
+          "label": "Monospace"
+        },
+        {
+          "value": "custom",
+          "label": "Your own font file"
+        }
+      ],
       "group": "Text"
     },
     {
@@ -252,7 +294,7 @@
       "when": "labelStyle == 'raised'",
       "text": "label",
       "size": "labelSize",
-      "font": "bold ? 'bold' : 'regular'",
+      "font": "font",
       "z": "thickness",
       "thickness": "labelDepth"
     },
@@ -262,7 +304,7 @@
       "when": "labelStyle == 'flush'",
       "text": "label",
       "size": "labelSize",
-      "font": "bold ? 'bold' : 'regular'",
+      "font": "font",
       "z": "thickness - labelDepth",
       "thickness": "labelDepth"
     },
@@ -272,7 +314,7 @@
       "when": "labelStyle == 'engraved'",
       "text": "label",
       "size": "labelSize",
-      "font": "bold ? 'bold' : 'regular'",
+      "font": "font",
       "z": "thickness - labelDepth",
       "thickness": "labelDepth + 1"
     }
