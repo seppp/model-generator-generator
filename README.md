@@ -27,7 +27,9 @@ recipes/sign.json         ┘                   dist/index.html?recipe=<id>  web
   loads every generator from one collection file, `generators.json`, which the
   build makes from `recipes/`. Pick a generator at the top (`?recipe=<id>`);
   the page builds the form from the recipe's params, rebuilds the model on
-  every change and shows it with three.js. Settings live in the URL, so links
+  every change (*Live update* while typing or dragging; it pauses itself when a
+  rebuild takes over 300 ms) and shows it with three.js in a preview that stays
+  in view while you scroll. Settings live in the URL, so links
   are shareable. Nothing is uploaded anywhere. Old per-generator links
   (`/<id>/`, `/lab.html`) redirect.
 - Under the generator, the collapsible **Change this generator** section is a
