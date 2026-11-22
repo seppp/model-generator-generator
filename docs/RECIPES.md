@@ -10,8 +10,8 @@ parametric object as **parameters** plus a list of **steps**. Each step takes a
 to a colored **part** or cuts it away. From that single recipe the generator
 generator produces:
 
-- a generator on the website with a form, live 3D preview and STL / 3MF
-  downloads<!-- dev-only --> (`?recipe=<id>`, loaded from `generators.json`)<!-- /dev-only -->
+- a generator on the website with a form, live 3D preview and downloads
+  (STL, 3MF, OBJ, images, SVG / DXF outlines)<!-- dev-only --> (`?recipe=<id>`, loaded from `generators.json`)<!-- /dev-only -->
 - an Onshape FeatureScript custom feature (the *Download .fs* button<!-- dev-only -->, or
   `dist/featurescript/<id>.fs`<!-- /dev-only -->)
 
@@ -171,6 +171,10 @@ Hints shown under the preview. `{expression}` placeholders are filled in.
 - **Multi-material**: always available for 2+ parts: one object, one part per
   color, extruder 1, 2, ... in `parts` order.
 - **STL**: everything, or one file per part.
+
+The page also exports OBJ (with the part colors), images of the current view,
+and each part's outline seen from above as SVG / DXF (for laser cutting).
+Nothing in the recipe is needed for that.
 
 <!-- dev-only -->
 ## Collections (many recipes in one file)

@@ -1,4 +1,5 @@
-// File exports: binary STL and 3MF (with PrusaSlicer part/extruder metadata).
+// File exports: binary STL, 3MF (with PrusaSlicer part/extruder metadata),
+// OBJ (mesh with vertex colors) and the top-view outlines as SVG and DXF.
 
 import { partMesh } from './build.js';
 
@@ -143,6 +144,99 @@ ${codes.join('\n')}
 `]);
   }
   return zip(files);
+}
+
+// ---------------------------------------------------------------- OBJ
+
+const hexRGB = (hex) => {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+  const n = m ? parseInt(m[1], 16) : 0xcccccc;
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => +(v / 255).toFixed(4));
+};
+
+/** Wavefront OBJ, one object per part, vertex colors (read by Blender, MeshLab, most CAD mesh importers). */
+export function toOBJ(parts, { colors = {}, name = 'model' } = {}) {
+  let zMin = Infinity;
+  for (const p of parts) zMin = Math.min(zMin, p.bounds.min[2]);
+  const out = [`# ${name} - model generator generator`, '# units: millimeters'];
+  let base = 1;
+  for (const part of parts) {
+    const { positions, indices } = partMesh(part);
+    const rgb = hexRGB(colors[part.key] || part.color).join(' ');
+    out.push(`o ${part.key}`);
+    for (let k = 0; k < positions.length; k += 3) out.push(`v ${num(positions[k])} ${num(positions[k + 1])} ${num(positions[k + 2] - zMin)} ${rgb}`);
+    for (let k = 0; k < indices.length; k += 3) out.push(`f ${indices[k] + base} ${indices[k + 1] + base} ${indices[k + 2] + base}`);
+    base += positions.length / 3;
+  }
+  return `${out.join('\n')}\n`;
+}
+
+// ---------------------------------------------------------------- 2D outlines (SVG, DXF)
+
+/**
+ * Each part seen from above: [{ key, label, color, polygons: [[[x, y], ...], ...] }].
+ * Holes are separate polygons with opposite winding (use even-odd filling).
+ */
+export function outlines(parts) {
+  return parts.map((part) => {
+    const cs = part.manifold.project();
+    const polygons = cs.toPolygons().map((poly) => poly.map((pt) => (Array.isArray(pt) ? [pt[0], pt[1]] : [pt.x, pt.y])));
+    cs.delete();
+    return { key: part.key, label: part.label, color: part.color, polygons };
+  });
+}
+
+function outlineBounds(shapes) {
+  const min = [Infinity, Infinity];
+  const max = [-Infinity, -Infinity];
+  for (const s of shapes) for (const poly of s.polygons) for (const [x, y] of poly) {
+    min[0] = Math.min(min[0], x); min[1] = Math.min(min[1], y);
+    max[0] = Math.max(max[0], x); max[1] = Math.max(max[1], y);
+  }
+  return Number.isFinite(min[0]) ? { min, max } : { min: [0, 0], max: [0, 0] };
+}
+
+/** SVG in millimeters, one group (layer) per part, filled with the part color. */
+export function toSVG(parts, { colors = {}, name = 'model', margin = 2 } = {}) {
+  const shapes = outlines(parts);
+  const { min, max } = outlineBounds(shapes);
+  const w = max[0] - min[0] + 2 * margin;
+  const hgt = max[1] - min[1] + 2 * margin;
+  // SVG y points down: flip so the drawing matches the top view
+  const pt = ([x, y]) => `${num(x - min[0] + margin)} ${num(max[1] - y + margin)}`;
+  const groups = shapes.map((s) => {
+    const d = s.polygons.map((poly) => `M${poly.map(pt).join('L')}Z`).join('');
+    const color = colors[s.key] || s.color || '#cccccc';
+    return ` <g id="${esc(s.key)}" inkscape:groupmode="layer" inkscape:label="${esc(s.label)}">\n  <path d="${d}" fill="${esc(color)}" fill-rule="evenodd" stroke="#000" stroke-width="0.1"/>\n </g>`;
+  });
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="${num(w)}mm" height="${num(hgt)}mm" viewBox="0 0 ${num(w)} ${num(hgt)}">
+ <title>${esc(name)}</title>
+${groups.join('\n')}
+</svg>
+`;
+}
+
+/** ASCII DXF (R12 entities, millimeters), one layer per part, closed polylines. */
+export function toDXF(parts) {
+  const shapes = outlines(parts);
+  const layer = (s) => s.key.replace(/[^A-Za-z0-9_-]/g, '_').toUpperCase();
+  const L = [];
+  const g = (code, value) => L.push(String(code), String(value));
+  g(0, 'SECTION'); g(2, 'HEADER'); g(9, '$ACADVER'); g(1, 'AC1009'); g(9, '$INSUNITS'); g(70, 4); g(0, 'ENDSEC');
+  g(0, 'SECTION'); g(2, 'TABLES'); g(0, 'TABLE'); g(2, 'LAYER'); g(70, shapes.length);
+  shapes.forEach((s, i) => { g(0, 'LAYER'); g(2, layer(s)); g(70, 0); g(62, (i % 6) + 1); g(6, 'CONTINUOUS'); });
+  g(0, 'ENDTAB'); g(0, 'ENDSEC');
+  g(0, 'SECTION'); g(2, 'ENTITIES');
+  for (const s of shapes) {
+    for (const poly of s.polygons) {
+      g(0, 'POLYLINE'); g(8, layer(s)); g(66, 1); g(10, 0); g(20, 0); g(30, 0); g(70, 1);
+      for (const [x, y] of poly) { g(0, 'VERTEX'); g(8, layer(s)); g(10, num(x)); g(20, num(y)); g(30, 0); }
+      g(0, 'SEQEND'); g(8, layer(s));
+    }
+  }
+  g(0, 'ENDSEC'); g(0, 'EOF');
+  return `${L.join('\n')}\n`;
 }
 
 // ---------------------------------------------------------------- zip (store only)

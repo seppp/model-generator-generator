@@ -18,7 +18,7 @@ function reference() {
 export async function buildPrompt({ recipeText, change, values }) {
   const ref = await reference();
   const wish = change?.trim() || '<<< DESCRIBE THE CHANGE YOU WANT HERE >>>';
-  return `I want to change a parametric 3D-print generator. The generator is defined entirely by a JSON "recipe" (format reference below). A website turns the recipe into the generator: a settings form, a live 3D preview, STL/3MF downloads and an Onshape FeatureScript feature. Please edit the recipe.
+  return `I want to change a parametric 3D-print generator. The generator is defined entirely by a JSON "recipe" (format reference below). A website turns the recipe into the generator: a settings form, a live 3D preview, downloads (STL, 3MF, OBJ, images, SVG/DXF outlines) and an Onshape FeatureScript feature. Please edit the recipe.
 
 ## The change I want
 

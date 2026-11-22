@@ -40,8 +40,8 @@ Read `docs/RECIPES.md` first. Use `recipes/qr-keychain.json`,
 4. **Add notes** for print advice that depends on the settings.
 5. **Check it**: `npm run check` builds every recipe with defaults and with each
    option and number extreme. Fix all problems.
-6. **Look at it**: `npm run export -- <id> key=value ...` writes STL, 3MF and
-   `.fs` files to `out/`; `npm run dev` serves the site at
+6. **Look at it**: `npm run export -- <id> key=value ...` writes STL, 3MF, OBJ,
+   SVG, DXF and `.fs` files to `out/`; `npm run dev` serves the site at
    http://localhost:8080/?recipe=<id>. If you can, take a screenshot with Playwright
    and look at the preview before calling it done.
 7. Commit the recipe (and anything else you changed) and open a PR. Mention

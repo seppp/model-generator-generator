@@ -2,7 +2,7 @@
 // model on every change, previews it and offers the exports.
 import { validateRecipe, normalizeValues, computeScope, isVisible } from '../engine/recipe.js';
 import { buildModel, disposeModel, fontsNeeded } from '../engine/build.js';
-import { toSTL, to3MF, colorChangeLayer } from '../engine/export.js';
+import { toSTL, to3MF, toOBJ, toSVG, toDXF, colorChangeLayer } from '../engine/export.js';
 import { compileFeatureScript } from '../engine/featurescript.js';
 import { browserEnv, ownFont } from './env.js';
 import { Viewer } from './viewer.js';
@@ -40,9 +40,20 @@ function liveToggle(onChange) {
   const cb = h('input', { type: 'checkbox', id: 'live-update', checked: live.get() });
   cb.addEventListener('change', () => { live.set(cb.checked); onChange(cb.checked); });
   liveToggle.cb = cb;
-  return h('div', { class: 'row row-boolean live-row' },
-    h('label', { for: 'live-update', class: 'label', title: 'Rebuild the model while you type or drag. Turn it off if the page feels slow.' }, 'Live update'),
+  return h('div', { class: 'live', title: 'Rebuild the model while you type or drag. Turn it off if the page feels slow.' },
+    h('label', { for: 'live-update' }, 'Live'),
     h('label', { class: 'switch' }, cb, h('span')));
+}
+
+/** A small "i" button that shows or hides `text` (returns [button, note]). */
+function tip(text) {
+  const note = h('small', { class: 'help', hidden: true }, text);
+  const b = h('button', { type: 'button', class: 'info', 'aria-label': 'More info', 'aria-expanded': 'false', title: typeof text === 'string' ? text : null }, 'i');
+  b.addEventListener('click', () => {
+    note.hidden = !note.hidden;
+    b.setAttribute('aria-expanded', String(!note.hidden));
+  });
+  return [b, note];
 }
 
 function readHash() {
@@ -68,17 +79,35 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   let model = null;
 
   // ------------------------------------------------------------ layout
+  // settings | preview | downloads; below 1200px the downloads open as a sheet from the Download button
   const form = h('form', { class: 'params', onsubmit: (e) => e.preventDefault() });
   const viewport = h('div', { class: 'viewport' });
   const status = h('div', { class: 'status' }, 'Loading geometry kernel...');
   const statsEl = h('div', { class: 'stats' });
   const notesEl = h('ul', { class: 'notes' });
   const exportsEl = h('div', { class: 'exports' });
+  const setSheet = (open) => {
+    root.classList.toggle('sheet-open', open);
+    sheetBtn.setAttribute('aria-expanded', String(open));
+    if (open) outputs.querySelector('.close').focus();
+  };
+  const sheetBtn = h('button', { class: 'btn primary sheet-btn', type: 'button', 'aria-expanded': 'false', 'aria-controls': `out-${recipe.id}`, onclick: () => setSheet(true) }, 'Download');
+  const outputs = h('section', { class: 'outputs', id: `out-${recipe.id}`, 'aria-label': 'Download' },
+    h('div', { class: 'panel-head' }, h('h2', {}, 'Download'),
+      h('button', { class: 'icon-btn close', type: 'button', 'aria-label': 'Close', onclick: () => { setSheet(false); sheetBtn.focus(); } }, '×')),
+    notesEl, exportsEl);
+  const onKey = (e) => { if (e.key === 'Escape' && root.classList.contains('sheet-open')) { setSheet(false); sheetBtn.focus(); } };
+  document.addEventListener('keydown', onKey);
   root.append(
-    h('aside', { class: 'sidebar' }, h('p', { class: 'lead' }, recipe.description || ''), liveToggle(() => { paused = false; }), form),
+    h('aside', { class: 'sidebar' },
+      h('div', { class: 'panel-head' }, h('h2', {}, 'Settings'), liveToggle(() => { paused = false; })),
+      recipe.description ? h('p', { class: 'lead' }, recipe.description) : null,
+      form),
     h('section', { class: 'stage' }, h('div', { class: 'view-wrap' }, viewport, statsEl, status,
-      h('button', { class: 'icon-btn fit', type: 'button', title: 'Reset view', 'aria-label': 'Reset view', onclick: () => viewer.fit() }, '⤢'))),
-    h('section', { class: 'outputs' }, notesEl, exportsEl),
+      h('div', { class: 'view-tools' }, sheetBtn,
+        h('button', { class: 'icon-btn', type: 'button', title: 'Reset view', 'aria-label': 'Reset view', onclick: () => viewer.fit() }, '⤢')))),
+    outputs,
+    h('div', { class: 'sheet-backdrop', onclick: () => setSheet(false) }),
   );
   const viewer = new Viewer(viewport);
   if (view) viewer.setView(view);
@@ -92,12 +121,11 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   // ------------------------------------------------------------ form
   const rows = [];
   const groups = new Map();
-  const groupEl = (name) => {
+  const groupEl = (name, open = true) => {
     if (!groups.has(name)) {
       const body = h('div', { class: 'group-body' });
-      const fs = h('fieldset', {}, h('legend', {}, name), body);
+      form.append(h('details', { class: 'group', open }, h('summary', {}, name), body));
       groups.set(name, body);
-      form.append(fs);
     }
     return groups.get(name);
   };
@@ -174,20 +202,25 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
       input.addEventListener('input', () => set(input.value, false));
       input.addEventListener('change', () => set(input.value));
     }
+    const [infoBtn, helpNote] = p.help ? tip(p.help) : [null, null];
     const row = h('div', { class: `row row-${p.type}` },
-      h('label', { for: id, class: 'label' }, p.label || p.key),
+      h('div', { class: 'label-line' }, h('label', { for: id, class: 'label' }, p.label || p.key), infoBtn),
       input,
-      p.help ? h('small', { class: 'help' }, p.help) : null,
+      helpNote,
       p.type === 'select' && p.options.some((o) => o.value === 'custom') ? ownFontPicker(p.key) : null);
     rows.push({ p, row });
     groupEl(p.group || 'Settings').append(row);
   }
 
-  const colorBody = groupEl('Colors (preview)');
+  const colorBody = groupEl('Colors', false);
   for (const [k, part] of Object.entries(recipe.parts)) {
     const c = h('input', { type: 'color', value: colors[k], id: `c-${k}` });
     c.addEventListener('input', () => { colors[k] = c.value; viewer.show(model?.parts || [], colors); writeHash(); });
     colorBody.append(h('div', { class: 'row row-color' }, h('label', { for: `c-${k}`, class: 'label' }, part.label || k), c));
+  }
+  {
+    const [b, note] = tip('Colors are for the preview, images, SVG and OBJ. Printed colors come from the filament you load.');
+    colorBody.prepend(h('div', { class: 'label-line' }, h('span', { class: 'help' }, 'Preview colors'), b), note);
   }
 
   // ------------------------------------------------------------ exports
@@ -200,51 +233,66 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   const layerInput = h('input', { type: 'number', min: 0.05, max: 0.4, step: 0.05, value: layerHeight, class: 'small' });
   layerInput.addEventListener('change', () => { layerHeight = Math.min(0.4, Math.max(0.05, Number(layerInput.value) || 0.2)); layerInput.value = layerHeight; render(); writeHash(); });
 
+  const flash = (el, text) => {
+    const old = el.textContent;
+    el.textContent = text;
+    setTimeout(() => (el.textContent = old), 1500);
+  };
+  const transparent = h('input', { type: 'checkbox', id: `transparent-${recipe.id}` });
+  async function saveImage(type) {
+    const { blob, ext } = await viewer.image({ type, scale: 2, transparent: transparent.checked && type !== 'image/jpeg' });
+    download(`${fileBase()}.${ext}`, blob);
+  }
+  const group = (title, info, ...body) => {
+    const [b, note] = tip(info);
+    return h('div', { class: 'ex-group' }, h('h3', {}, title, b), note, ...body);
+  };
+
   function renderExports() {
     exportsEl.replaceChildren();
     if (!model || !model.parts.length) return;
     const multi = model.parts.length > 1;
     const swap = model.colorChanges;
-    const cards = [];
+    const zero = model.stats.min[2];
+    const fs = () => compileFeatureScript(recipe, values, { colors });
+
+    const print = [];
     if (multi && swap.length) {
-      cards.push(h('div', { class: 'card' },
-        h('h3', {}, '3MF, single nozzle'),
-        h('p', {}, 'PrusaSlicer project with the filament swap (M600) already placed: ',
-          ...swap.map((c, i) => [i ? ', ' : '', h('strong', {}, `${c.label} from layer ${colorChangeLayer(c.z - model.stats.min[2], layerHeight)} mm`)])),
-        h('label', { class: 'inline' }, 'Layer height ', layerInput, ' mm'),
-        btn('Download 3MF (filament swap)', () => download(`${fileBase()}-swap.3mf`, to3MF(model.parts, { name: recipe.name, mode: 'colorchange', changes: swap, layerHeight }), 'model/3mf'), { class: 'btn primary' })));
+      print.push(
+        btn('3MF, filament swap', () => download(`${fileBase()}-swap.3mf`, to3MF(model.parts, { name: recipe.name, mode: 'colorchange', changes: swap, layerHeight }), 'model/3mf'), { class: 'btn primary wide' }),
+        h('div', { class: 'swap-line' },
+          h('span', {}, swap.map((c) => `${c.label} from ${colorChangeLayer(c.z - zero, layerHeight)} mm`).join(', ')),
+          h('label', { class: 'inline' }, 'Layer ', layerInput, ' mm')));
     }
-    if (multi) {
-      cards.push(h('div', { class: 'card' },
-        h('h3', {}, '3MF, multi-material'),
-        h('p', {}, `One object, ${model.parts.length} parts, extruders ${model.parts.map((p, i) => `${i + 1} = ${p.label}`).join(', ')}. For MMU, INDX or tool changers.`),
-        btn('Download 3MF (multi-material)', () => download(`${fileBase()}-mmu.3mf`, to3MF(model.parts, { name: recipe.name, mode: 'mmu' }), 'model/3mf'), { class: swap.length ? 'btn' : 'btn primary' })));
-    }
-    cards.push(h('div', { class: 'card' },
-      h('h3', {}, 'STL'),
-      h('p', {}, multi ? 'All parts in one file, or one file per part to load as parts in any slicer.' : 'Single body.'),
-      h('div', { class: 'btns' },
-        btn(multi ? 'All parts' : 'Download STL', () => download(`${fileBase()}.stl`, toSTL(model.parts), 'model/stl'), multi ? {} : { class: 'btn primary' }),
-        multi ? model.parts.map((p) => btn(p.label, () => download(`${fileBase()}-${p.key}.stl`, toSTL([p]), 'model/stl'))) : null)));
-    cards.push(h('div', { class: 'card' },
-      h('h3', {}, 'Onshape FeatureScript'),
-      h('p', {}, 'A parametric custom feature generated from this recipe, with the current values as defaults. Paste it into a Feature Studio.'),
-      h('div', { class: 'btns' },
-        btn('Download .fs', () => download(`${recipe.id}.fs`, compileFeatureScript(recipe, values, { colors }), 'text/plain')),
-        btn('Copy', async (e) => {
-          await navigator.clipboard.writeText(compileFeatureScript(recipe, values, { colors }));
-          e.target.textContent = 'Copied';
-          setTimeout(() => (e.target.textContent = 'Copy'), 1500);
-        }))));
-    cards.push(h('div', { class: 'card' },
-      h('h3', {}, 'Share'),
-      h('p', {}, shareLink ? 'The link contains this generator and all settings.' : 'The link contains all settings.'),
-      btn('Copy link', async (e) => {
-        await navigator.clipboard.writeText(shareLink ? await shareLink() : location.href);
-        e.target.textContent = 'Copied';
-        setTimeout(() => (e.target.textContent = 'Copy link'), 1500);
-      })));
-    exportsEl.append(...cards);
+    if (multi) print.push(btn('3MF, multi-material', () => download(`${fileBase()}-mmu.3mf`, to3MF(model.parts, { name: recipe.name, mode: 'mmu' }), 'model/3mf'), { class: swap.length ? 'btn wide' : 'btn primary wide' }));
+    print.push(h('div', { class: 'btns' },
+      btn(multi ? 'STL, all parts' : 'STL', () => download(`${fileBase()}.stl`, toSTL(model.parts), 'model/stl'), { class: multi ? 'btn' : 'btn primary' }),
+      multi ? model.parts.map((p) => btn(`STL, ${p.label}`, () => download(`${fileBase()}-${p.key}.stl`, toSTL([p]), 'model/stl'))) : null));
+    const printInfo = [
+      multi && swap.length ? 'Filament swap: a PrusaSlicer project with the color change (M600) already at the right layer for this layer height. One nozzle, no MMU needed.' : null,
+      multi ? `Multi-material: one object with ${model.parts.length} parts on extruders ${model.parts.map((p, i) => `${i + 1} = ${p.label}`).join(', ')}, for MMU, INDX or tool changers.` : null,
+      multi ? 'STL: everything in one file, or one file per part to load as parts in any slicer.' : 'STL: one solid body for any slicer.',
+    ].filter(Boolean).join(' ');
+
+    exportsEl.append(
+      group('3D print', printInfo, ...print),
+      group('Image', 'The current view, at twice the screen resolution. Turn the model first to pick the angle.',
+        h('div', { class: 'btns' },
+          btn('PNG', () => saveImage('image/png')), btn('JPG', () => saveImage('image/jpeg')), btn('WebP', () => saveImage('image/webp'))),
+        h('label', { class: 'inline check' }, transparent, 'Transparent background (PNG, WebP)')),
+      group('Vector', 'Outline of each part seen from above, in millimeters, one layer per part. For laser cutters, vinyl cutters, CNC or drawing programs.',
+        h('div', { class: 'btns' },
+          btn('SVG', () => download(`${fileBase()}.svg`, toSVG(model.parts, { colors, name: recipe.name }), 'image/svg+xml')),
+          btn('DXF', () => download(`${fileBase()}.dxf`, toDXF(model.parts), 'application/dxf')))),
+      group('CAD', 'OBJ is the mesh with colors, for Blender, Fusion, FreeCAD and other mesh importers (3MF and STL work there too). For real CAD geometry, paste the FeatureScript into an Onshape Feature Studio: it becomes a parametric feature with these values as defaults, and Onshape exports STEP, Parasolid and more from it.',
+        h('div', { class: 'btns' },
+          btn('OBJ', () => download(`${fileBase()}.obj`, toOBJ(model.parts, { colors, name: recipe.name }), 'model/obj')),
+          btn('Onshape .fs', () => download(`${recipe.id}.fs`, fs(), 'text/plain')),
+          btn('Copy .fs', async (e) => { await navigator.clipboard.writeText(fs()); flash(e.target, 'Copied'); }))),
+      group('Share', shareLink ? 'A link with this generator and all settings in it.' : 'A link with all settings in it.',
+        h('div', { class: 'btns' },
+          btn('Copy link', async (e) => { await navigator.clipboard.writeText(shareLink ? await shareLink() : location.href); flash(e.target, 'Copied'); }))),
+    );
   }
 
   // ------------------------------------------------------------ rebuild
@@ -340,6 +388,6 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
     get values() { return values; },
     get colors() { return colors; },
     getView: () => viewer.getView(),
-    destroy() { disposeModel(model); viewer.dispose(); },
+    destroy() { document.removeEventListener('keydown', onKey); disposeModel(model); viewer.dispose(); },
   };
 }

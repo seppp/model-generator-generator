@@ -57,7 +57,7 @@ const TEMPLATE = `
 <summary>
   <span class="wb-title">Change this generator</span>
   <span class="state" data-ref="state"></span>
-  <span class="wb-hint">Describe a change for an AI chat, preview it, then save, share or submit it.</span>
+  <span class="wb-hint">Ask an AI chat for a change, preview it, then save, share or submit it.</span>
 </summary>
 <div class="wb-body">
   <div class="draft-notice" data-ref="notice" hidden>
@@ -71,17 +71,16 @@ const TEMPLATE = `
       <textarea data-ref="wish" rows="3" placeholder="e.g. make the keyring hole bigger by default and add an option for a round tag"></textarea>
       <button class="btn primary" type="button" data-ref="prompt">Copy prompt for an AI chat</button>
       <textarea data-ref="prompt-out" rows="4" readonly hidden aria-label="Prompt"></textarea>
-      <small>Paste it into ChatGPT, Claude, Gemini or similar. It contains the recipe, the format rules and your current settings.</small>
+      <small>Paste it into ChatGPT, Claude, Gemini or similar.</small>
     </div>
     <div class="step">
       <h2><span>2</span> Paste the AI's answer</h2>
       <textarea data-ref="answer" rows="3" placeholder="Paste the whole reply here"></textarea>
       <button class="btn primary" type="button" data-ref="apply-answer">Apply to preview</button>
-      <small data-ref="answer-msg" role="status">The recipe is taken from the answer, checked, and loaded into the preview below.</small>
+      <small data-ref="answer-msg" role="status">The recipe is checked and loaded into the preview.</small>
     </div>
     <div class="step">
       <h2><span>3</span> Keep it, share it or submit it</h2>
-      <p>Try it in the preview below. When it looks right:</p>
       <div class="btns">
         <button class="btn primary" type="button" data-ref="save">Save to my generators</button>
         <button class="btn" type="button" data-ref="share">Copy share link</button>
@@ -89,7 +88,7 @@ const TEMPLATE = `
         <button class="btn" type="button" data-ref="remove" hidden>Remove from my generators</button>
       </div>
       <input data-ref="share-out" readonly hidden aria-label="Share link">
-      <small data-ref="keep-msg" role="status">Saved generators stay in this browser; export them all as one file under My generators. A share link holds your version, so anyone can open it, no account needed. Submitting sends it to the site owner for review (needs a free GitHub account).</small>
+      <small data-ref="keep-msg" role="status">Saving keeps it in this browser. A share link works for anyone. Submitting needs a GitHub account.</small>
     </div>
   </section>
   <details class="code" data-ref="code">

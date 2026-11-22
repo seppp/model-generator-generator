@@ -112,6 +112,44 @@ export class Viewer {
     return this.renderer.domElement.toDataURL('image/png');
   }
 
+  /**
+   * The current view as an image file: { blob, ext }. Rendered at `scale` x the
+   * on-screen size; `transparent` leaves out the background and grid (PNG, WebP).
+   * Browsers that can't encode a type (Safari and WebP) hand back PNG.
+   */
+  async image({ type = 'image/png', scale = 2, transparent = false } = {}) {
+    const w = this.container.clientWidth || 800;
+    const h = this.container.clientHeight || 600;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(w * scale);
+    canvas.height = Math.round(h * scale);
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(1);
+    renderer.setSize(canvas.width, canvas.height, false);
+    const bg = this.scene.background;
+    const gridVisible = this.grid.visible;
+    if (transparent) { this.scene.background = null; this.grid.visible = false; renderer.setClearColor(0x000000, 0); }
+    try {
+      renderer.render(this.scene, this.camera);
+      let src = canvas;
+      if (type === 'image/jpeg') { // no alpha in JPEG: paint the background behind it
+        src = document.createElement('canvas');
+        src.width = canvas.width; src.height = canvas.height;
+        const ctx = src.getContext('2d');
+        ctx.fillStyle = `#${(bg || new THREE.Color('#ffffff')).getHexString()}`;
+        ctx.fillRect(0, 0, src.width, src.height);
+        ctx.drawImage(canvas, 0, 0);
+      }
+      const blob = await new Promise((resolve) => src.toBlob(resolve, type, 0.92));
+      return { blob, ext: { 'image/jpeg': 'jpg', 'image/webp': 'webp' }[blob.type] || 'png' };
+    } finally {
+      this.scene.background = bg;
+      this.grid.visible = gridVisible;
+      renderer.dispose();
+      renderer.forceContextLoss();
+    }
+  }
+
   dispose() {
     cancelAnimationFrame(this.raf);
     this.renderer.dispose();

@@ -95,9 +95,7 @@ function renderPicker(route) {
     }
   }
   picker.append(chip('+ New generator', [], { kind: 'new' }, route.kind === 'new', 'new'));
-  $('mine-count').textContent = own.length
-    ? `${own.length} saved in this browser.`
-    : 'None saved yet: use "Save to my generators" below a generator.';
+  $('mine-count').textContent = own.length ? `(${own.length})` : '(none yet)';
   $('export').disabled = !own.length;
 }
 
@@ -105,7 +103,7 @@ function renderPicker(route) {
 const onSave = (recipe, { replaced }) => go({ kind: 'mine', id: recipe.id }, {
   hash: new URLSearchParams([...new URLSearchParams(location.hash.slice(1))].filter(([k]) => k !== 'g')).toString().replace(/^(.)/, '#$1'),
   open: true,
-  message: `${replaced ? 'Updated' : 'Saved'} "${recipe.name}" in My generators (this browser). Export all of them as one file at the top, or share or submit it here.`,
+  message: `${replaced ? 'Updated' : 'Saved'} "${recipe.name}" in My generators (this browser).`,
 });
 const onRemove = () => go({ kind: 'site', id: siteIds[0] });
 
