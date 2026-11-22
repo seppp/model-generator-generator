@@ -87,3 +87,8 @@ profile, extruded by the engine) so every recipe can use them.
 - QR modules at least 1 mm (the page warns below that); keep a margin of at
   least 2 mm around the code.
 - Keyring holes at least 4 mm with at least 2 mm of material around.
+- Rounded edges: use the part's `edges` (docs/RECIPES.md), not stacked steps.
+  A plain fillet on the bottom edge overhangs at the bed; offer `printable`
+  (45° chamfer, then fillet) instead. Generators with a plate usually offer
+  the same five *Edges* params as the QR keychain (`edgeTop`, `edgeTopSize`,
+  `edgeBottom`, `edgeBottomSize`, `edgeBottomChamfer`).

@@ -312,6 +312,7 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   let timer;
   let lastMs = 0;
   let paused = false; // live update paused automatically because builds are slow
+  let builds = 0;
   function changed(commit = true) {
     writeHash();
     if ((!live.get() || paused) && !commit) {
@@ -359,7 +360,9 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
     viewer.show(model.parts, colors);
     const ms = Math.round(performance.now() - t0);
     lastMs = ms;
-    const slow = ms > SLOW_MS && live.get() && !paused;
+    // the first build also warms up the kernel and fonts, so it doesn't count
+    const first = builds++ === 0;
+    const slow = ms > SLOW_MS && live.get() && !paused && !first;
     if (slow) { paused = true; liveToggle.cb.checked = false; }
     status.textContent = slow ? `Each rebuild takes about ${ms} ms here, so live update is paused for this generator. Values apply on Enter or when you release a slider; switch Live update on again to override.`
       : !model.parts.length ? 'Nothing to show with these settings.'

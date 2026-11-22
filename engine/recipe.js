@@ -3,6 +3,7 @@
 
 import { BLOCKS } from './blocks.js';
 import { compile, evaluate, refs, RESERVED } from './expr.js';
+import { EDGE_KEYS, TOP_EDGES, BOTTOM_EDGES, DEFAULT_PRINTABLE_CHAMFER } from './edges.js';
 
 const IDENT = /^[A-Za-z_][A-Za-z0-9_]*$/;
 // FeatureScript keywords that cannot be used as names.
@@ -67,6 +68,21 @@ export function validateRecipe(recipe) {
     if (known.has(k)) err(`derived '${k}' clashes with a param`);
     checkExpr(v, `derived '${k}'`);
     known.add(k);
+  }
+
+  for (const [k, p] of Object.entries(parts)) {
+    if (p.edges === undefined) continue;
+    const where = `part '${k}' edges`;
+    if (!p.edges || typeof p.edges !== 'object' || Array.isArray(p.edges)) { err(`${where} must be an object`); continue; }
+    for (const [ek, v] of Object.entries(p.edges)) {
+      if (!EDGE_KEYS.includes(ek)) { err(`${where}: unknown key '${ek}' (has: ${EDGE_KEYS.join(', ')})`); continue; }
+      const options = ek === 'top' ? TOP_EDGES : ek === 'bottom' ? BOTTOM_EDGES : null;
+      if (options && options.includes(v)) continue; // literal option
+      if (options && typeof v === 'string' && IDENT.test(v) && !known.has(v)) { err(`${where} ${ek}: '${v}' must be one of ${options.join(', ')} (or an expression)`); continue; }
+      checkExpr(v, `${where} ${ek}`);
+    }
+    if (p.edges.top !== undefined && p.edges.topSize === undefined) err(`${where}: "top" needs "topSize"`);
+    if (p.edges.bottom !== undefined && p.edges.bottomSize === undefined) err(`${where}: "bottom" needs "bottomSize"`);
   }
 
   (recipe.steps || []).forEach((s, i) => {
@@ -154,6 +170,26 @@ function evalArg(spec, value, scope) {
   if (spec.type === 'enum' && !spec.options.includes(v)) throw new Error(`'${v}' is not one of ${spec.options.join(', ')}`);
   if (spec.type === 'number' && !Number.isFinite(v)) throw new Error(`argument evaluated to ${v}`);
   return v;
+}
+
+function edgeKind(value, options, scope, where) {
+  if (value === undefined) return 'none';
+  const v = options.includes(value) ? value : evaluate(value, scope);
+  if (!options.includes(v)) throw new Error(`${where}: '${v}' is not one of ${options.join(', ')}`);
+  return v;
+}
+
+/** A part's chamfers and fillets for one set of values, or null when it has none. */
+export function partEdges(part, scope, key = '?') {
+  const e = part.edges;
+  if (!e) return null;
+  const num = (v, d) => (v === undefined ? d : Number(evaluate(v, scope)));
+  const out = {
+    top: { kind: edgeKind(e.top, TOP_EDGES, scope, `part '${key}' edges top`), size: num(e.topSize, 0) },
+    bottom: { kind: edgeKind(e.bottom, BOTTOM_EDGES, scope, `part '${key}' edges bottom`), size: num(e.bottomSize, 0), chamfer: num(e.bottomChamfer, DEFAULT_PRINTABLE_CHAMFER) },
+  };
+  const on = (x) => x.kind !== 'none' && x.size > 0;
+  return on(out.top) || on(out.bottom) ? out : null;
 }
 
 /** Concrete list of operations for one set of values. */

@@ -5,7 +5,14 @@
   "parts": {
     "base": {
       "label": "Tag",
-      "color": "#f5f5f4"
+      "color": "#f5f5f4",
+      "edges": {
+        "top": "edgeTop",
+        "topSize": "edgeTopSize",
+        "bottom": "edgeBottom",
+        "bottomSize": "edgeBottomSize",
+        "bottomChamfer": "edgeBottomChamfer"
+      }
     },
     "code": {
       "label": "QR code",
@@ -428,6 +435,90 @@
       "step": 0.5,
       "group": "Nametag",
       "showIf": "textSide != 'none'"
+    },
+    {
+      "key": "edgeTop",
+      "type": "select",
+      "label": "Top edges",
+      "default": "none",
+      "group": "Edges",
+      "options": [
+        {
+          "value": "none",
+          "label": "Sharp"
+        },
+        {
+          "value": "chamfer",
+          "label": "Chamfer"
+        },
+        {
+          "value": "fillet",
+          "label": "Fillet"
+        }
+      ]
+    },
+    {
+      "key": "edgeTopSize",
+      "type": "number",
+      "unit": "mm",
+      "label": "Top edge size",
+      "default": 0.8,
+      "min": 0.2,
+      "max": 3,
+      "step": 0.1,
+      "group": "Edges",
+      "showIf": "edgeTop != 'none'"
+    },
+    {
+      "key": "edgeBottom",
+      "type": "select",
+      "label": "Bottom edges",
+      "default": "none",
+      "group": "Edges",
+      "help": "Printable fillet: a 45° chamfer at the bed, then a fillet above it, so nothing overhangs more than 45°. A plain fillet at the bed needs supports or droops.",
+      "options": [
+        {
+          "value": "none",
+          "label": "Sharp"
+        },
+        {
+          "value": "chamfer",
+          "label": "Chamfer"
+        },
+        {
+          "value": "fillet",
+          "label": "Fillet"
+        },
+        {
+          "value": "printable",
+          "label": "Printable fillet"
+        }
+      ]
+    },
+    {
+      "key": "edgeBottomSize",
+      "type": "number",
+      "unit": "mm",
+      "label": "Bottom edge size",
+      "default": 1,
+      "min": 0.2,
+      "max": 3,
+      "step": 0.1,
+      "group": "Edges",
+      "help": "Chamfer width or fillet radius.",
+      "showIf": "edgeBottom != 'none'"
+    },
+    {
+      "key": "edgeBottomChamfer",
+      "type": "number",
+      "unit": "mm",
+      "label": "45° chamfer height",
+      "default": 1,
+      "min": 0.2,
+      "max": 3,
+      "step": 0.1,
+      "group": "Edges",
+      "showIf": "edgeBottom == 'printable'"
     }
   ],
   "derived": {
