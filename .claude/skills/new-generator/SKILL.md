@@ -1,6 +1,6 @@
 ---
 name: new-generator
-description: Turn a 3D-print idea (keychain, coaster, sign, tag, holder...) into a new generator for this repo by writing a recipe, and add new building blocks when the idea needs one.
+description: Turn a 3D-print idea (keychain, coaster, sign, tag, holder...) into a new generator for this repo, or change an existing one (new options, fixes), by editing recipes and adding blocks when needed.
 ---
 
 # New generator from an idea
@@ -44,6 +44,15 @@ Read `docs/RECIPES.md` first. Use `recipes/qr-keychain.json`,
 7. Commit the recipe (and anything else you changed) and open a PR. Mention
    that the FeatureScript was generated but not run in Onshape unless someone
    tried it.
+
+## Changing an existing generator
+
+Same loop: edit the recipe, `npm run check`, look at it, commit, PR, merge
+(the owner allows merging once CI is green). Keep existing param `key`s so
+shared links keep working; give new params a default that keeps the current
+look unless the request is to change it. If a new option can produce a broken
+print (e.g. a hole cutting into the QR code), add a `derived` value that
+measures it and a `note` that warns about it.
 
 ## When a block is missing
 
