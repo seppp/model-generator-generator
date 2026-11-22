@@ -80,6 +80,11 @@ an arc of text, a revolve), add a block in `engine/blocks.js` following
 FeatureScript helper, argument schema, and docs. Keep blocks generic (2D
 profile, extruded by the engine) so every recipe can use them.
 
+## Wording
+
+Keep the description, param `help` and notes to one short sentence each
+(help sits behind an info button; notes say what's wrong and what to change).
+
 ## Printability rules of thumb (FDM, 0.4 mm nozzle)
 
 - Walls and raised lines at least 0.8 mm wide; text at least 4 mm cap height.

@@ -1,7 +1,7 @@
 {
   "id": "sign",
   "name": "Name sign",
-  "description": "Rectangular sign with raised text, an optional border and screw holes.",
+  "description": "Sign with raised text, border and screw holes.",
   "parts": {
     "base": {
       "label": "Plate",
@@ -231,7 +231,7 @@
       "label": "Bottom edges",
       "default": "none",
       "group": "Edges",
-      "help": "Printable fillet: a 45° chamfer at the bed, then a fillet above it, so nothing overhangs more than 45°. A plain fillet at the bed needs supports or droops.",
+      "help": "Printable fillet: 45° chamfer, then a fillet. Prints without supports.",
       "options": [
         {
           "value": "none",
@@ -346,7 +346,7 @@
   "notes": [
     {
       "when": "holes",
-      "text": "Screw holes cut through the text if it is wide. Shorten the text or move to a wider sign."
+      "text": "Wide text runs into the screw holes. Shorten it or widen the sign."
     }
   ]
 }

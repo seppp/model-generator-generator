@@ -133,17 +133,17 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   // A select with a 'custom' option (fonts) gets a file picker for your own font.
   const fontPickers = [];
   function ownFontPicker(key) {
-    const note = h('small', { class: 'help' }, ownFont.name() ? `Your font: ${ownFont.name()}` : 'Choose a .ttf, .otf or .woff file. It stays in this browser; Onshape uses Open Sans instead.');
+    const note = h('small', { class: 'help' }, ownFont.name() ? `Your font: ${ownFont.name()}` : 'A .ttf, .otf or .woff file. Onshape uses Open Sans.');
     const file = h('input', { type: 'file', accept: '.ttf,.otf,.woff,font/ttf,font/otf,font/woff', 'aria-label': 'Your own font file' });
     file.addEventListener('change', async () => {
       const f = file.files[0];
       if (!f || !env) return;
       try {
         const { family, kept } = await ownFont.set(f, env);
-        note.textContent = `Your font: ${family}${kept ? '' : ' (too big to keep in this browser; choose it again next visit)'}`;
+        note.textContent = `Your font: ${family}${kept ? '' : ' (too big to keep; choose it again next visit)'}`;
         render();
       } catch {
-        note.textContent = `${f.name} is not a font file this page can read (use .ttf, .otf or .woff).`;
+        note.textContent = `${f.name} isn't a readable font (.ttf, .otf, .woff).`;
       }
     });
     const el = h('div', { class: 'own-font' }, file, note);
@@ -219,7 +219,7 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
     colorBody.append(h('div', { class: 'row row-color' }, h('label', { for: `c-${k}`, class: 'label' }, part.label || k), c));
   }
   {
-    const [b, note] = tip('Colors are for the preview, images, SVG and OBJ. Printed colors come from the filament you load.');
+    const [b, note] = tip('For the preview and image, SVG and OBJ files. Print colors come from your filament.');
     colorBody.prepend(h('div', { class: 'label-line' }, h('span', { class: 'help' }, 'Preview colors'), b), note);
   }
 
@@ -269,27 +269,27 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
       btn(multi ? 'STL, all parts' : 'STL', () => download(`${fileBase()}.stl`, toSTL(model.parts), 'model/stl'), { class: multi ? 'btn' : 'btn primary' }),
       multi ? model.parts.map((p) => btn(`STL, ${p.label}`, () => download(`${fileBase()}-${p.key}.stl`, toSTL([p]), 'model/stl'))) : null));
     const printInfo = [
-      multi && swap.length ? 'Filament swap: a PrusaSlicer project with the color change (M600) already at the right layer for this layer height. One nozzle, no MMU needed.' : null,
-      multi ? `Multi-material: one object with ${model.parts.length} parts on extruders ${model.parts.map((p, i) => `${i + 1} = ${p.label}`).join(', ')}, for MMU, INDX or tool changers.` : null,
-      multi ? 'STL: everything in one file, or one file per part to load as parts in any slicer.' : 'STL: one solid body for any slicer.',
+      multi && swap.length ? 'Filament swap: PrusaSlicer project with the color change (M600) set. One nozzle.' : null,
+      multi ? `Multi-material: extruders ${model.parts.map((p, i) => `${i + 1} = ${p.label}`).join(', ')}, for MMU or tool changers.` : null,
+      multi ? 'STL: one file, or one per part.' : 'STL: for any slicer.',
     ].filter(Boolean).join(' ');
 
     exportsEl.append(
       group('3D print', printInfo, ...print),
-      group('Image', 'The current view, at twice the screen resolution. Turn the model first to pick the angle.',
+      group('Image', 'The current view at 2× resolution.',
         h('div', { class: 'btns' },
           btn('PNG', () => saveImage('image/png')), btn('JPG', () => saveImage('image/jpeg')), btn('WebP', () => saveImage('image/webp'))),
         h('label', { class: 'inline check' }, transparent, 'Transparent background (PNG, WebP)')),
-      group('Vector', 'Outline of each part seen from above, in millimeters, one layer per part. For laser cutters, vinyl cutters, CNC or drawing programs.',
+      group('Vector', 'Top-view outline in mm, one layer per part. For laser, vinyl or CNC.',
         h('div', { class: 'btns' },
           btn('SVG', () => download(`${fileBase()}.svg`, toSVG(model.parts, { colors, name: recipe.name }), 'image/svg+xml')),
           btn('DXF', () => download(`${fileBase()}.dxf`, toDXF(model.parts), 'application/dxf')))),
-      group('CAD', 'OBJ is the mesh with colors, for Blender, Fusion, FreeCAD and other mesh importers (3MF and STL work there too). For real CAD geometry, paste the FeatureScript into an Onshape Feature Studio: it becomes a parametric feature with these values as defaults, and Onshape exports STEP, Parasolid and more from it.',
+      group('CAD', 'OBJ: mesh with colors. For STEP, paste the FeatureScript into Onshape and export from there.',
         h('div', { class: 'btns' },
           btn('OBJ', () => download(`${fileBase()}.obj`, toOBJ(model.parts, { colors, name: recipe.name }), 'model/obj')),
           btn('Onshape .fs', () => download(`${recipe.id}.fs`, fs(), 'text/plain')),
           btn('Copy .fs', async (e) => { await navigator.clipboard.writeText(fs()); flash(e.target, 'Copied'); }))),
-      group('Share', shareLink ? 'A link with this generator and all settings in it.' : 'A link with all settings in it.',
+      group('Share', shareLink ? 'Link with this generator and its settings.' : 'Link with these settings.',
         h('div', { class: 'btns' },
           btn('Copy link', async (e) => { await navigator.clipboard.writeText(shareLink ? await shareLink() : location.href); flash(e.target, 'Copied'); }))),
     );
@@ -316,7 +316,7 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
   function changed(commit = true) {
     writeHash();
     if ((!live.get() || paused) && !commit) {
-      status.textContent = 'Live update is off: press Enter, leave the field or release the slider to rebuild.';
+      status.textContent = 'Live update is off: press Enter or release the slider.';
       status.className = 'status';
       return;
     }
@@ -364,10 +364,10 @@ export async function mountGenerator(root, recipe, { syncUrl = true, initialValu
     const first = builds++ === 0;
     const slow = ms > SLOW_MS && live.get() && !paused && !first;
     if (slow) { paused = true; liveToggle.cb.checked = false; }
-    status.textContent = slow ? `Each rebuild takes about ${ms} ms here, so live update is paused for this generator. Values apply on Enter or when you release a slider; switch Live update on again to override.`
+    status.textContent = slow ? `Rebuilds take ${ms} ms, so Live is paused. Press Enter or release the slider.`
       : !model.parts.length ? 'Nothing to show with these settings.'
-      : fontsUsed.includes('custom') && !env.fonts.custom ? 'Choose your font file under the font setting; showing Open Sans until then.'
-      : fontsUsed.some((f) => !env.fonts[f]) ? 'A font could not be loaded; showing Open Sans instead.' : '';
+      : fontsUsed.includes('custom') && !env.fonts.custom ? 'Choose your font file; showing Open Sans for now.'
+      : fontsUsed.some((f) => !env.fonts[f]) ? 'Font failed to load; showing Open Sans.' : '';
     status.className = 'status';
     const s = model.stats;
     statsEl.textContent = s
