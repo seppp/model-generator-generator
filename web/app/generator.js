@@ -38,14 +38,14 @@ function readHash() {
  * Mounts a generator for `recipe` into `root`.
  * options.syncUrl: keep parameter values in the URL hash (shareable links)
  */
-export async function mountGenerator(root, recipe, { syncUrl = true } = {}) {
+export async function mountGenerator(root, recipe, { syncUrl = true, initialValues, initialColors, view } = {}) {
   validateRecipe(recipe);
   root.replaceChildren();
   root.classList.add('generator');
 
   const initial = syncUrl ? readHash() : {};
-  let values = normalizeValues(recipe, initial);
-  const colors = Object.fromEntries(Object.entries(recipe.parts).map(([k, p]) => [k, initial[`color.${k}`] || p.color || '#cccccc']));
+  let values = normalizeValues(recipe, initialValues || initial);
+  const colors = Object.fromEntries(Object.entries(recipe.parts).map(([k, p]) => [k, initialColors?.[k] || initial[`color.${k}`] || p.color || '#cccccc']));
   let layerHeight = Number(initial.layer) || 0.2;
   let model = null;
 
@@ -63,6 +63,7 @@ export async function mountGenerator(root, recipe, { syncUrl = true } = {}) {
     h('section', { class: 'outputs' }, notesEl, exportsEl),
   );
   const viewer = new Viewer(viewport);
+  if (view) viewer.setView(view);
   const applyTheme = () => {
     const css = getComputedStyle(document.documentElement);
     viewer.setTheme(css.getPropertyValue('--view-bg').trim(), css.getPropertyValue('--view-grid').trim());
@@ -252,6 +253,8 @@ export async function mountGenerator(root, recipe, { syncUrl = true } = {}) {
   return {
     get model() { return model; },
     get values() { return values; },
+    get colors() { return colors; },
+    getView: () => viewer.getView(),
     destroy() { disposeModel(model); viewer.dispose(); },
   };
 }

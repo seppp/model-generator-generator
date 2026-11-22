@@ -6,6 +6,7 @@ import path from 'node:path';
 import { loadRecipes, FONT_FILES, fontPath } from './node-env.mjs';
 import { validateRecipe } from '../engine/recipe.js';
 import { compileFeatureScript } from '../engine/featurescript.js';
+import { formatRecipe } from '../engine/format.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const dist = path.join(root, 'dist');
@@ -48,7 +49,7 @@ const write = (rel, data) => {
 const index = [];
 for (const recipe of loadRecipes()) {
   validateRecipe(recipe);
-  write(`recipes/${recipe.id}.json`, JSON.stringify(recipe, null, 2));
+  write(`recipes/${recipe.id}.json`, formatRecipe(recipe));
   write(`${recipe.id}/index.html`, page('generator.html', recipe));
   write(`featurescript/${recipe.id}.fs`, compileFeatureScript(recipe));
   index.push({

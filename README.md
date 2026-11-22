@@ -45,10 +45,14 @@ Generators are never edited directly: change the recipe and everything is
 regenerated (web page, exports, FeatureScript).
 
 1. Change `recipes/<id>.json`, for example add a param and use it in a step.
-   Easiest: ask Claude ("on the QR keychain, make the corner hole position
-   adjustable"); it uses the `new-generator` skill. Or open the generator in
-   the **Recipe lab**, edit, check the preview, download the JSON and replace
-   the file on GitHub.
+   - **Try it first in the Recipe lab** (the *Edit in lab* button on every
+     generator page): edit the recipe and the generator rebuilds live in your
+     browser, keeping your settings and camera. *Changes* shows the diff
+     against the published version, drafts survive a reload, and
+     *Edit on GitHub* copies the recipe and opens the file so you can paste it
+     and start a pull request.
+   - Or ask Claude ("on the QR keychain, make the corner hole position
+     adjustable"); it uses the `new-generator` skill.
 2. `npm run check` (CI runs it too) builds the recipe with every option and
    extreme value.
 3. Merge to `main`. GitHub Actions rebuilds and redeploys the site within a
@@ -88,6 +92,7 @@ npm install
 npm run check                 # validate + build every recipe in Node
 npm run dev                   # build to dist/ and serve on http://localhost:8080
 npm run build                 # build dist/ only
+npm run format                # canonical JSON formatting for recipes (check enforces it)
 npm run export -- qr-keychain content=https://example.com style=flush   # files to out/
 ```
 

@@ -3,73 +3,44 @@
 <head>
 {{head}}
 <title>Recipe lab · Print generators</title>
-<meta name="description" content="Write a generator recipe and preview it live.">
+<meta name="description" content="Change a generator's recipe and preview the result live before publishing.">
 </head>
 <body>
 {{header}}
 <main class="lab">
   <div class="page-title">
     <h1>Recipe lab</h1>
-    <div class="lab-actions">
-      <label>Start from <select id="start"></select></label>
-      <button class="btn" type="button" id="dl">Download recipe</button>
+    <label class="pick">Generator <select id="pick" aria-label="Generator to edit"></select></label>
+  </div>
+  <p class="lead">Change a recipe and the generator on the right is rebuilt from it as you type, right here in your browser. Nothing is published until the changed recipe lands in the repository. Your edits are kept as a draft in this browser. Reference: <a href="https://github.com/seppp/model-generator-generator/blob/main/docs/RECIPES.md">recipe format</a>.</p>
+  <div class="lab-bar">
+    <span id="state" class="state"></span>
+    <div class="btns">
+      <button class="btn" type="button" id="changes" aria-pressed="false">Changes</button>
+      <button class="btn" type="button" id="reset">Reset to published</button>
+      <button class="btn" type="button" id="copy">Copy recipe</button>
+      <button class="btn" type="button" id="download">Download</button>
+      <button class="btn primary" type="button" id="github">Edit on GitHub</button>
     </div>
   </div>
-  <p class="lead">Edit the recipe on the left; the generator on the right is rebuilt from it as you type. See <a href="https://github.com/seppp/model-generator-generator/blob/main/docs/RECIPES.md">the recipe reference</a> for all blocks and options.</p>
+  <details class="publish-help">
+    <summary>How to publish a change</summary>
+    <ol>
+      <li><strong>Edit on GitHub</strong> copies the recipe and opens the file on GitHub (or a new file for a new id).</li>
+      <li>There, select everything in the editor, paste, and choose <em>Commit changes → Create a new branch and start a pull request</em>.</li>
+      <li>The pull request runs the checks; merging it publishes the updated generator here within a couple of minutes.</li>
+    </ol>
+    <p>Or paste the recipe (or just the changes) into a chat with Claude and ask it to apply them.</p>
+  </details>
   <div class="lab-grid">
     <div class="editor">
-      <textarea id="src" spellcheck="false" aria-label="Recipe JSON"></textarea>
+      <textarea id="src" spellcheck="false" wrap="off" aria-label="Recipe JSON"></textarea>
       <pre id="problems" class="problems" hidden></pre>
+      <div id="diff" class="diff" hidden></div>
     </div>
     <div id="app"></div>
   </div>
 </main>
-<script type="module">
-  import { mountGenerator } from './app/generator.js';
-  import { loadIndex, loadRecipe } from './app/env.js';
-  const src = document.getElementById('src');
-  const problems = document.getElementById('problems');
-  const app = document.getElementById('app');
-  const start = document.getElementById('start');
-  let current;
-  for (const r of await loadIndex()) start.append(new Option(r.name, r.id));
-  const SAVE = 'mgg-lab-recipe';
-
-  async function apply() {
-    let recipe;
-    try {
-      recipe = JSON.parse(src.value);
-    } catch (e) {
-      problems.hidden = false;
-      problems.textContent = `JSON: ${e.message}`;
-      return;
-    }
-    try {
-      current?.destroy();
-      current = await mountGenerator(app, recipe, { syncUrl: false });
-      problems.hidden = true;
-      try { localStorage.setItem(SAVE, src.value); } catch {}
-    } catch (e) {
-      problems.hidden = false;
-      problems.textContent = e.message;
-    }
-  }
-  async function load(id) {
-    src.value = JSON.stringify(await loadRecipe(id), null, 2);
-    apply();
-  }
-  let t;
-  src.addEventListener('input', () => { clearTimeout(t); t = setTimeout(apply, 400); });
-  start.addEventListener('change', () => load(start.value));
-  document.getElementById('dl').addEventListener('click', () => {
-    let id = 'recipe';
-    try { id = JSON.parse(src.value).id || id; } catch {}
-    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([src.value], { type: 'application/json' })), download: `${id}.json` });
-    a.click();
-  });
-  let saved = null;
-  try { saved = localStorage.getItem(SAVE); } catch {}
-  if (saved) { src.value = saved; apply(); } else load(start.value);
-</script>
+<script type="module" src="app/lab.js"></script>
 </body>
 </html>
