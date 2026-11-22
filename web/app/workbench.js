@@ -26,6 +26,31 @@ export async function shareLink(recipe, settingsHash = '') {
   return `${location.origin}${location.pathname}?shared#g=${await encodeShare(recipe)}${rest ? `&${rest}` : ''}`;
 }
 
+/** Plain-words summary of a recipe, or of what changed compared to `before`. */
+export function describeChange(before, after) {
+  if (!before) {
+    return `New generator "${after.name || after.id}": ${after.description || 'no description'} (${after.params.length} settings, parts: ${Object.values(after.parts || {}).map((p) => p.label).join(', ')}).`;
+  }
+  const lines = [];
+  const old = Object.fromEntries(before.params.map((p) => [p.key, p]));
+  const now = Object.fromEntries(after.params.map((p) => [p.key, p]));
+  const label = (p) => p.label || p.key;
+  for (const p of after.params) {
+    const o = old[p.key];
+    if (!o) { lines.push(`Added setting "${label(p)}" (default ${JSON.stringify(p.default)})`); continue; }
+    if (JSON.stringify(o.default) !== JSON.stringify(p.default)) lines.push(`"${label(p)}" default ${JSON.stringify(o.default)} -> ${JSON.stringify(p.default)}`);
+    if (o.min !== p.min || o.max !== p.max) lines.push(`"${label(p)}" range ${o.min}-${o.max} -> ${p.min}-${p.max}`);
+    if (JSON.stringify(o.options) !== JSON.stringify(p.options)) lines.push(`"${label(p)}" options changed`);
+  }
+  for (const o of before.params) if (!now[o.key]) lines.push(`Removed setting "${label(o)}"`);
+  if (JSON.stringify(before.steps) !== JSON.stringify(after.steps)) lines.push('Geometry steps changed');
+  if (JSON.stringify(before.derived) !== JSON.stringify(after.derived)) lines.push('Derived values changed');
+  if (JSON.stringify(before.notes) !== JSON.stringify(after.notes)) lines.push('Print notes changed');
+  if (before.name !== after.name || before.description !== after.description) lines.push('Name or description changed');
+  if (JSON.stringify(before.parts) !== JSON.stringify(after.parts)) lines.push('Parts or colors changed');
+  return lines.length ? `Changes to "${before.name}":\n${lines.map((l) => `- ${l}`).join('\n')}` : `No changes to "${before.name}" (same as the published version).`;
+}
+
 const MAX_URL = 8000; // GitHub refuses much longer new-issue links
 
 const TEMPLATE = `
@@ -102,7 +127,7 @@ const TEMPLATE = `
  * @param opts.onRemove  called with the id after a saved generator was removed
  */
 export async function mountWorkbench(container, {
-  kind = 'site', base = null, baseLabel = 'published', start = '', draftKey = null, siteIds = [],
+  kind = 'site', base = null, baseLabel = 'published', start = '', draftKey = null, siteIds = [], siteRecipes = [],
   syncUrl = true, open = false, message = '', onSave = () => {}, onRemove = () => {},
 } = {}) {
   container.replaceChildren();
@@ -119,6 +144,7 @@ export async function mountWorkbench(container, {
   const say = (text, ok = true) => { keepMsg.className = ok ? 'ok' : 'bad'; keepMsg.textContent = text; };
 
   const baseText = base ? formatRecipe(base) : '';
+  const siteRecipe = (id) => siteRecipes.find((r) => r.id === id) || null;
   let current = null;
   let lastRecipe = null;
   let keep = null;
@@ -304,7 +330,8 @@ export async function mountWorkbench(container, {
       template: 'generator.yml',
       title: `${change ? 'Change' : 'New generator'}: ${recipe.name || recipe.id}`,
       'based-on': change ? recipe.id : 'new',
-      what: ref('wish').value.trim(),
+      // the form requires a description: the user's wish, else an automatic summary
+      what: [ref('wish').value.trim(), describeChange(change ? siteRecipe(recipe.id) : null, recipe)].filter(Boolean).join('\n\n'),
       link,
     });
     const url = () => `https://github.com/${REPO}/issues/new?${q}`;
@@ -312,7 +339,7 @@ export async function mountWorkbench(container, {
     if (url().length > MAX_URL) q.delete('recipe'); // the share link holds the recipe anyway
     if (url().length > MAX_URL) { say('This recipe is too large to submit by link. Download it (Recipe code > Download .json) and attach it to a new issue on GitHub.', false); return; }
     window.open(url(), '_blank', 'noopener');
-    say(`GitHub opened a submission form with your ${change ? 'change' : 'generator'} filled in. Describe it in a sentence if you like, then click "Create". The owner reviews it and, if it fits, adds it to the site.`);
+    say(`GitHub opened a submission form with your ${change ? 'change' : 'generator'} filled in. The description is filled in from your wish and a summary of the changes; edit it if you like, then click "Create". The owner reviews it and, if it fits, adds it to the site.`);
   });
 
   let removeArmed = false;

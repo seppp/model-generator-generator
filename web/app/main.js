@@ -115,7 +115,7 @@ async function show(route, { open = false, message = '' } = {}) {
   bench?.generator?.destroy();
   banner.hidden = true;
   startWrap.hidden = route.kind !== 'new';
-  const common = { siteIds, onSave, onRemove, message };
+  const common = { siteIds, siteRecipes: site, onSave, onRemove, message };
   const setTitle = (t) => { title.textContent = t; document.title = `${t} · Generator Generator`; };
 
   if (route.kind === 'new') {
