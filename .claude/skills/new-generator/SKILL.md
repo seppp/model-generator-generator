@@ -23,7 +23,7 @@ Read `docs/RECIPES.md` first. Use `recipes/qr-keychain.json`,
    happen, bottom first) and the **params** (only what people actually change,
    with realistic `min`/`max` and `group`s for the form).
 3. **Express the geometry as steps** using the existing blocks (`shape`, `qr`,
-   `text`). Typical patterns:
+   `text`; see `docs/RECIPES.md` for the current list). Typical patterns:
    - plate: `add shape` to `base` from `z: 0`
    - raised detail: `add` to an accent part at `z: "thickness"` (stacked, so a
      single-nozzle filament swap works)
@@ -34,6 +34,9 @@ Read `docs/RECIPES.md` first. Use `recipes/qr-keychain.json`,
    - rims and frames: `add` an outline, then `subtract` a smaller one at the
      same `z`
    - options: use `when` on steps and `showIf` on params
+   - text: give people a `font` select param whose option values are the font
+     names in `docs/RECIPES.md` (as coaster and sign do) and use
+     `"font": "font"` on the text steps
 4. **Add notes** for print advice that depends on the settings.
 5. **Check it**: `npm run check` builds every recipe with defaults and with each
    option and number extreme. Fix all problems.
@@ -53,6 +56,13 @@ shared links keep working; give new params a default that keeps the current
 look unless the request is to change it. If a new option can produce a broken
 print (e.g. a hole cutting into the QR code), add a `derived` value that
 measures it and a `note` that warns about it.
+
+## When you change the engine or the site
+
+A new block, block argument, font, param field or website feature is not done
+until `docs/RECIPES.md` (it is pasted into the website's AI prompt), the rules
+in `web/app/prompt.js`, this skill, `review-submissions` and `README.md` say so.
+`npm run check` catches missing names in `docs/RECIPES.md`, not stale wording.
 
 ## When a block is missing
 

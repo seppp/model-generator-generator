@@ -3,6 +3,7 @@
 import { nodeEnv, loadRecipes } from './node-env.mjs';
 import { formatRecipe } from '../engine/format.js';
 import { verifyRecipe } from './verify.mjs';
+import { docsProblems } from './docs-check.mjs';
 
 const env = await nodeEnv();
 let failed = 0;
@@ -22,6 +23,9 @@ for (const recipe of recipes) {
   if (results.length) console.log(`✓ ${recipe.id}: ${results.length} variations built`);
   if (process.argv.includes('-v')) results.forEach((r) => console.log(`    ${r}`));
 }
+
+for (const p of docsProblems()) { console.error(`✗ docs: ${p}`); failed++; }
+if (!failed) console.log('✓ docs cover every block, option, font, param type, step key and function');
 
 if (failed) {
   console.error(`\n${failed} problem(s)`);

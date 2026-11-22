@@ -6,7 +6,8 @@ parametric object as **parameters** plus a list of **steps**. Each step takes a
 to a colored **part** or cuts it away. From that single file the generator
 generator produces:
 
-- a page on the website with a form, live 3D preview and STL / 3MF downloads
+- a generator on the website (`?recipe=<id>`, loaded from `generators.json`)
+  with a form, live 3D preview and STL / 3MF downloads
 - an Onshape FeatureScript custom feature (`dist/featurescript/<id>.fs`, or the
   *Download .fs* button on the page)
 
