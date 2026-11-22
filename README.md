@@ -9,7 +9,7 @@ produced from short JSON **recipes**.
 ```
 recipes/qr-keychain.json ─┐
 recipes/coaster.json      ├─ npm run build ─▶ dist/generators.json        all generators in one collection file
-recipes/sign.json         ┘                   dist/index.html?recipe=<id>  web generator (form, 3D preview, STL / 3MF)
+recipes/sign.json         ┘                   dist/index.html?recipe=<id>  web generator (form, 3D preview, downloads)
                                               dist/featurescript/<id>.fs   Onshape custom feature
 ```
 
@@ -20,8 +20,8 @@ recipes/sign.json         ┘                   dist/index.html?recipe=<id>  web
   are small expressions like `"width - 2 * margin"`. See
   [docs/RECIPES.md](docs/RECIPES.md).
 - The **engine** (`engine/`) runs a recipe with [manifold-3d](https://github.com/elalish/manifold)
-  (WASM, watertight booleans) in the browser or Node, and exports binary STL and
-  3MF. The same recipe is compiled to **FeatureScript** with every expression
+  (WASM, watertight booleans) in the browser or Node, and exports binary STL,
+  3MF, OBJ and top-view outlines as SVG / DXF. The same recipe is compiled to **FeatureScript** with every expression
   translated, so the Onshape feature stays parametric.
 - The **website** (`web/`) is a single page, the *Generator Generator*. It
   loads every generator from one collection file, `generators.json`, which the
@@ -62,6 +62,20 @@ Each generator has colored parts. The page offers:
 - **3MF, multi-material**: one object with one part per color and extruders
   assigned, for MMU / INDX / tool changers (needed for flush inlays).
 - **STL**: all parts in one file or one file per part.
+
+## Other downloads
+
+The *Download* panel (right column on wide screens, the *Download* button on
+the preview on smaller screens and phones) also offers:
+
+- **Image**: the current view as PNG, JPG or WebP at twice the screen
+  resolution, optionally with a transparent background.
+- **Vector**: each part's outline seen from above as SVG or DXF, in mm, one
+  layer per part, for laser cutters, vinyl cutters or CNC.
+- **CAD**: OBJ (mesh with colors) and the Onshape FeatureScript. STEP is not
+  generated in the browser: it needs exact curved surfaces that a mesh engine
+  doesn't have. Paste the FeatureScript into Onshape and export STEP,
+  Parasolid and more from there.
 
 ## Changing a generator
 
@@ -122,7 +136,7 @@ npm install
 npm run check                 # validate + build every recipe in Node
 npm run dev                   # build to dist/ and serve on http://localhost:8080
 npm run build                 # build dist/ only
-npm run export -- <id|file.json> [key=value]  # STL / 3MF / FS to out/
+npm run export -- <id|file.json> [key=value]  # STL / 3MF / OBJ / SVG / DXF / FS to out/
 npm run submission < body.md  # check a submitted generator (issue body)
 npm run format                # canonical JSON formatting for recipes (check enforces it)
 ```
