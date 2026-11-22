@@ -4,11 +4,13 @@
 // engine (npm run check fails when RECIPES.md misses a block, option or font).
 import { BLOCKS } from '../engine/blocks.js';
 import { FONTS } from '../engine/fonts.js';
+import { chatReference } from '../engine/docs.js';
 
 let referencePromise;
 function reference() {
   referencePromise ??= fetch(new URL('docs/RECIPES.md', document.baseURI))
     .then((r) => (r.ok ? r.text() : ''))
+    .then(chatReference)
     .catch(() => '');
   return referencePromise;
 }
@@ -30,6 +32,7 @@ ${wish}
 - Number params need "min" and "max", and the default must lie between them. Select option values must be identifiers.
 - Keep existing param "key"s and the recipe "id" unless the change requires otherwise (shared links use the keys).
 - Text fonts: ${Object.keys(FONTS).map((f) => `'${f}'`).join(', ')}. To let people choose, add a select param whose option values are these names and set the text step's "font" to that param.
+- Text is one centered line per text step and its width is unknown in expressions, so alignment to an edge can only be approximated; say so instead of pretending it is exact.
 - Keep it printable on an FDM printer with a 0.4 mm nozzle (walls and raised lines >= 0.8 mm, text >= 4 mm tall, QR modules >= 1 mm).
 - After the JSON block, list what you changed in 2 to 4 short bullet points.
 

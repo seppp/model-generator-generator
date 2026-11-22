@@ -1,15 +1,19 @@
 # Recipe reference
 
-A recipe is one JSON file in `recipes/`, named after its `id`. It describes a
+<!-- Parts between dev-only markers are left out of the website's AI-chat
+prompt (they only make sense in the repo); a chat marker's text is used
+there instead. See engine/docs.js. -->
+
+A recipe is one JSON object<!-- dev-only --> (in the repo: a file in `recipes/`, named after its `id`)<!-- /dev-only -->. It describes a
 parametric object as **parameters** plus a list of **steps**. Each step takes a
 2D **block** (an outline, a QR code, some text), extrudes it and either adds it
-to a colored **part** or cuts it away. From that single file the generator
+to a colored **part** or cuts it away. From that single recipe the generator
 generator produces:
 
-- a generator on the website (`?recipe=<id>`, loaded from `generators.json`)
-  with a form, live 3D preview and STL / 3MF downloads
-- an Onshape FeatureScript custom feature (`dist/featurescript/<id>.fs`, or the
-  *Download .fs* button on the page)
+- a generator on the website with a form, live 3D preview and STL / 3MF
+  downloads<!-- dev-only --> (`?recipe=<id>`, loaded from `generators.json`)<!-- /dev-only -->
+- an Onshape FeatureScript custom feature (the *Download .fs* button<!-- dev-only -->, or
+  `dist/featurescript/<id>.fs`<!-- /dev-only -->)
 
 ```json
 {
@@ -125,13 +129,20 @@ smaller than 1 mm.
 
 **`text`**: one line of text, centered on its bounding box.
 
+What text can't do: it is always a single line centered on its `x`/`y`, and
+its rendered width is not available in expressions. So left or right
+alignment, fitting text to a width, or keeping it clear of other features can
+only be approximated (for example with a param the user adjusts, or by
+assuming roughly 0.6 × `size` per character). There is no multi-line text and
+no text along a curve. Rotation works with the step's `rotate`.
+
 | arg | default | |
 | --- | --- | --- |
 | `text` | | the string |
 | `size` | 8 | capital letter height in mm |
 | `font` | `regular` | a font name, see below |
 
-Fonts (open-licensed, in `engine/fonts.js`; the browser loads each only when used):
+Fonts (open-licensed<!-- dev-only -->, in `engine/fonts.js`<!-- /dev-only -->; the browser loads each only when used):
 `regular` (Open Sans), `bold` (Open Sans Bold), `rounded` (Varela Round),
 `slab` (Roboto Slab Bold), `serif` (Noto Serif Bold), `condensed` (Bebas Neue,
 capitals only), `stencil` (Allerta Stencil), `script` (Pacifico), `mono`
@@ -161,6 +172,7 @@ Hints shown under the preview. `{expression}` placeholders are filled in.
   color, extruder 1, 2, ... in `parts` order.
 - **STL**: everything, or one file per part.
 
+<!-- dev-only -->
 ## Collections (many recipes in one file)
 
 The site loads its generators from `generators.json`, and *My generators* are
@@ -186,3 +198,10 @@ Blocks live in `engine/blocks.js`. Each needs:
 4. Optional `warnings(args)` for printability hints.
 
 Then document it here and run `npm run check`.
+<!-- /dev-only -->
+<!-- chat: ## Missing features
+
+If a change needs something the blocks above can't express (an SVG logo, curved
+or multi-line text, a revolved or freeform shape...), say so plainly and offer
+the closest result that works with these blocks. Never invent new blocks,
+arguments or recipe fields: the website rejects them. -->
