@@ -45,7 +45,13 @@ Generators are never edited directly: change the recipe and everything is
 regenerated (web page, exports, FeatureScript).
 
 1. Change `recipes/<id>.json`, for example add a param and use it in a step.
-   - **Try it first in the Recipe lab** (the *Edit in lab* button on every
+   - **No setup, any AI chat:** click *Change this generator* on a generator
+     page. In the Recipe lab, describe the change, click *Copy prompt for an AI
+     chat* (it contains the recipe, the format reference and your current
+     settings), paste it into ChatGPT, Claude, Gemini..., paste the answer back
+     and click *Apply to preview*. The lab extracts and checks the recipe and
+     tells you what to send back to the AI if something is wrong.
+   - **Try it first in the Recipe lab** (*Change this generator* on every
      generator page): edit the recipe and the generator rebuilds live in your
      browser, keeping your settings and camera. *Changes* shows the diff
      against the published version, drafts survive a reload, and

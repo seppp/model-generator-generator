@@ -5,6 +5,7 @@ import { mountGenerator } from './generator.js';
 import { loadIndex, loadRecipe, REPO } from './env.js';
 import { formatRecipe } from '../engine/format.js';
 import { validateRecipe } from '../engine/recipe.js';
+import { buildPrompt, extractRecipe } from './prompt.js';
 
 const $ = (id) => document.getElementById(id);
 const src = $('src');
@@ -39,6 +40,7 @@ let current = null; // mounted generator
 let applyCount = 0;
 let lastRecipe = null;
 let keep = null; // settings and camera carried over between rebuilds
+let opened = false;
 
 const draftKey = () => `mgg-lab:${sourceId || NEW}`;
 const store = {
@@ -157,7 +159,8 @@ async function open(id) {
   history.replaceState(null, '', url);
   current?.destroy();
   current = null;
-  keep = null;
+  if (opened) keep = null;
+  opened = true;
   updateState();
   await apply();
 }
@@ -234,9 +237,57 @@ src.addEventListener('keydown', (e) => {
 });
 pick.addEventListener('change', () => open(pick.value));
 
+// ------------------------------------------------------------ AI chat hand-off
+
+$('prompt').addEventListener('click', async (e) => {
+  const text = await buildPrompt({ recipeText: src.value, change: $('wish').value, values: current?.values });
+  try {
+    await navigator.clipboard.writeText(text);
+    flash(e.target, 'Copied: paste it into your AI chat');
+  } catch {
+    // clipboard blocked: show the prompt so it can be copied by hand
+    const out = $('prompt-out');
+    out.hidden = false;
+    out.value = text;
+    out.select();
+    flash(e.target, 'Copy the text below');
+  }
+});
+
+$('apply-answer').addEventListener('click', () => {
+  const msg = $('answer-msg');
+  let recipe;
+  try {
+    recipe = extractRecipe($('answer').value);
+    validateRecipe(recipe);
+  } catch (err) {
+    msg.className = 'bad';
+    msg.textContent = err.problems
+      ? `The AI's recipe has problems. Send these lines back to the AI and ask for a corrected complete recipe:\n${err.problems.map((p) => `- ${p}`).join('\n')}`
+      : err.message;
+    return;
+  }
+  src.value = formatRecipe(recipe);
+  saveDraft();
+  updateState();
+  diffEl.hidden = false;
+  $('changes').setAttribute('aria-pressed', 'true');
+  msg.className = 'ok';
+  msg.textContent = sourceId && recipe.id !== sourceId
+    ? `Loaded. Note: the AI changed the id to '${recipe.id}', so this becomes a new generator.`
+    : 'Loaded into the preview. Check it, then publish (step 3).';
+  apply();
+});
+
 const index = await loadIndex();
 for (const r of index) pick.append(new Option(r.name, r.id));
 pick.append(new Option('New recipe...', NEW));
 const wanted = new URL(location.href).searchParams.get('recipe');
+// settings handed over from a generator page (lab.html?recipe=id#key=value...)
+const handed = Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
+if (Object.keys(handed).length) {
+  keep = { initialValues: Object.fromEntries(Object.entries(handed).filter(([k]) => !k.startsWith('color.') && k !== 'layer')) };
+  history.replaceState(null, '', location.pathname + location.search);
+}
 const first = wanted === 'new' ? NEW : index.some((r) => r.id === wanted) ? wanted : index[0]?.id || NEW;
 await open(first);

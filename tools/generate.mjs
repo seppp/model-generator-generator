@@ -33,6 +33,7 @@ for (const f of Object.values(FONT_FILES)) copy(fontPath(f), `vendor/fonts/${f}`
 copy(path.join(root, 'engine'), 'engine');
 copy(path.join(root, 'web/app'), 'app');
 copy(path.join(root, 'web/style.css'), 'style.css');
+copy(path.join(root, 'docs/RECIPES.md'), 'docs/RECIPES.md'); // included in the AI prompt
 
 const partial = (name) => fs.readFileSync(path.join(root, 'web', name), 'utf8').trim();
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
