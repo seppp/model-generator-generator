@@ -1,7 +1,7 @@
 {
   "id": "qr-keychain",
   "name": "QR code keychain",
-  "description": "Square tag with a QR code (raised, engraved or flush inlay) and a keyring hole.",
+  "description": "Tag with a QR code (raised, engraved or flush inlay), variable keyring hole with optional 2D fillets, and optional custom nametag.",
   "parts": {
     "base": {
       "label": "Tag",
@@ -126,9 +126,13 @@
       "key": "holeStyle",
       "type": "select",
       "label": "Keyring hole",
-      "default": "tab",
+      "default": "perimeter",
       "group": "Keyring",
       "options": [
+        {
+          "value": "perimeter",
+          "label": "Anywhere on perimeter"
+        },
         {
           "value": "tab",
           "label": "Tab on top"
@@ -142,6 +146,71 @@
           "label": "None"
         }
       ]
+    },
+    {
+      "key": "holePos",
+      "type": "number",
+      "unit": "deg",
+      "label": "Perimeter position",
+      "default": 0,
+      "min": 0,
+      "max": 360,
+      "step": 1,
+      "group": "Keyring",
+      "help": "0° = top, 90° = right, 180° = bottom, 270° = left.",
+      "showIf": "holeStyle == 'perimeter'"
+    },
+    {
+      "key": "holeDirMode",
+      "type": "select",
+      "label": "Tab direction",
+      "default": "outward",
+      "group": "Keyring",
+      "showIf": "holeStyle == 'perimeter'",
+      "options": [
+        {
+          "value": "outward",
+          "label": "Straight out from edge"
+        },
+        {
+          "value": "radial",
+          "label": "Away from center"
+        },
+        {
+          "value": "inward",
+          "label": "Toward center"
+        },
+        {
+          "value": "custom",
+          "label": "Custom angle"
+        }
+      ]
+    },
+    {
+      "key": "holeCustomAngle",
+      "type": "number",
+      "unit": "deg",
+      "label": "Custom tab direction",
+      "default": 0,
+      "min": 0,
+      "max": 360,
+      "step": 1,
+      "group": "Keyring",
+      "help": "0° = up, 90° = right, 180° = down, 270° = left.",
+      "showIf": "holeStyle == 'perimeter' && holeDirMode == 'custom'"
+    },
+    {
+      "key": "holeExtend",
+      "type": "number",
+      "unit": "mm",
+      "label": "Hole distance from edge",
+      "default": 5.5,
+      "min": -10,
+      "max": 20,
+      "step": 0.5,
+      "group": "Keyring",
+      "help": "Distance along the tab direction from the tag edge to the hole center.",
+      "showIf": "holeStyle == 'perimeter'"
     },
     {
       "key": "holeDia",
@@ -179,17 +248,278 @@
       "group": "Keyring",
       "help": "How far the hole sits inside the tag's corner. Negative values move it out onto the ear, away from the code.",
       "showIf": "holeStyle == 'corner'"
+    },
+    {
+      "key": "holeFillet",
+      "type": "boolean",
+      "label": "Fillet tab/ear corners",
+      "default": true,
+      "group": "Keyring",
+      "help": "Rounds the inside corners where the tab or ear meets the tag's straight edges.",
+      "showIf": "holeStyle != 'none'"
+    },
+    {
+      "key": "holeFilletR",
+      "type": "number",
+      "unit": "mm",
+      "label": "Fillet radius",
+      "default": 2,
+      "min": 0.5,
+      "max": 10,
+      "step": 0.5,
+      "group": "Keyring",
+      "showIf": "holeStyle != 'none' && holeFillet"
+    },
+    {
+      "key": "textSide",
+      "type": "select",
+      "label": "Nametag side",
+      "default": "none",
+      "group": "Nametag",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        },
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "key": "tagText",
+      "type": "text",
+      "label": "Nametag text",
+      "default": "SCAN ME",
+      "group": "Nametag",
+      "showIf": "textSide != 'none'"
+    },
+    {
+      "key": "textFont",
+      "type": "select",
+      "label": "Font",
+      "default": "bold",
+      "group": "Nametag",
+      "showIf": "textSide != 'none'",
+      "options": [
+        {
+          "value": "regular",
+          "label": "Regular (Open Sans)"
+        },
+        {
+          "value": "bold",
+          "label": "Bold (Open Sans)"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded (Varela)"
+        },
+        {
+          "value": "slab",
+          "label": "Slab (Roboto Slab)"
+        },
+        {
+          "value": "serif",
+          "label": "Serif (Noto Serif)"
+        },
+        {
+          "value": "condensed",
+          "label": "Condensed (Bebas Neue)"
+        },
+        {
+          "value": "stencil",
+          "label": "Stencil (Allerta)"
+        },
+        {
+          "value": "script",
+          "label": "Script (Pacifico)"
+        },
+        {
+          "value": "mono",
+          "label": "Mono (Roboto Mono)"
+        },
+        {
+          "value": "custom",
+          "label": "Custom font file"
+        }
+      ]
+    },
+    {
+      "key": "textSize",
+      "type": "number",
+      "unit": "mm",
+      "label": "Font size",
+      "default": 6,
+      "min": 4,
+      "max": 24,
+      "step": 0.5,
+      "group": "Nametag",
+      "help": "Capital letter height. Keep script and stencil at 8 mm or larger.",
+      "showIf": "textSide != 'none'"
+    },
+    {
+      "key": "textGap",
+      "type": "number",
+      "unit": "mm",
+      "label": "Distance to QR code",
+      "default": 3,
+      "min": 1,
+      "max": 20,
+      "step": 0.5,
+      "group": "Nametag",
+      "showIf": "textSide != 'none'"
+    },
+    {
+      "key": "textEdge",
+      "type": "number",
+      "unit": "mm",
+      "label": "Distance to outer edge",
+      "default": 3,
+      "min": 1,
+      "max": 20,
+      "step": 0.5,
+      "group": "Nametag",
+      "showIf": "textSide != 'none'"
+    },
+    {
+      "key": "textAlign",
+      "type": "select",
+      "label": "Alignment (approx.)",
+      "default": "center",
+      "group": "Nametag",
+      "help": "Approximate shift along the side; use Fine offset to adjust.",
+      "showIf": "textSide != 'none'",
+      "options": [
+        {
+          "value": "left",
+          "label": "Start / Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "End / Right"
+        }
+      ]
+    },
+    {
+      "key": "textOffset",
+      "type": "number",
+      "unit": "mm",
+      "label": "Fine offset along side",
+      "default": 0,
+      "min": -40,
+      "max": 40,
+      "step": 0.5,
+      "group": "Nametag",
+      "showIf": "textSide != 'none'"
     }
   ],
   "derived": {
     "qrSize": "width - 2 * margin",
     "earDia": "holeDia + 2 * holeRim",
-    "holeX": "holeStyle == 'corner' ? width / 2 - holeInset : 0",
-    "holeY": "holeStyle == 'corner' ? width / 2 - holeInset : width / 2 + earDia / 2",
-    "holeClearance": "sqrt(2) * (margin - holeInset) - holeDia / 2",
+    "textBand": "textGap + textSize + textEdge",
+    "textExtra": "textSide != 'none' ? max(textBand - margin, 0) : 0",
+    "tagW": "(textSide == 'left' || textSide == 'right') ? width + textExtra : width",
+    "tagH": "(textSide == 'top' || textSide == 'bottom') ? width + textExtra : width",
+    "hx": "tagW / 2",
+    "hy": "tagH / 2",
+    "qrX": "textSide == 'right' ? -textExtra / 2 : (textSide == 'left' ? textExtra / 2 : 0)",
+    "qrY": "textSide == 'top' ? -textExtra / 2 : (textSide == 'bottom' ? textExtra / 2 : 0)",
+    "textAlongShift": "(textAlign == 'left' ? -qrSize / 4 : (textAlign == 'right' ? qrSize / 4 : 0)) + textOffset",
+    "textX": "textSide == 'left' ? -hx + textEdge + textSize / 2 : (textSide == 'right' ? hx - textEdge - textSize / 2 : textAlongShift)",
+    "textY": "textSide == 'bottom' ? -hy + textEdge + textSize / 2 : (textSide == 'top' ? hy - textEdge - textSize / 2 : textAlongShift)",
+    "textRot": "textSide == 'left' ? 90 : (textSide == 'right' ? -90 : 0)",
+    "ux": "sin(holePos)",
+    "uy": "cos(holePos)",
+    "perimScale": "min(hx / max(abs(ux), 0.0001), hy / max(abs(uy), 0.0001))",
+    "perimX": "ux * perimScale",
+    "perimY": "uy * perimScale",
+    "outwardAngle": "abs(perimY - hy) < 0.01 && abs(perimX) < hx - 0.01 ? 0 : (abs(perimX - hx) < 0.01 && abs(perimY) < hy - 0.01 ? 90 : (abs(perimY + hy) < 0.01 && abs(perimX) < hx - 0.01 ? 180 : (abs(perimX + hx) < 0.01 && abs(perimY) < hy - 0.01 ? 270 : holePos)))",
+    "tabAngle": "holeDirMode == 'outward' ? outwardAngle : (holeDirMode == 'radial' ? holePos : (holeDirMode == 'inward' ? (holePos + 180) % 360 : holeCustomAngle))",
+    "dx": "sin(tabAngle)",
+    "dy": "cos(tabAngle)",
+    "nx": "sin(outwardAngle)",
+    "ny": "cos(outwardAngle)",
+    "tx": "cos(outwardAngle)",
+    "ty": "-sin(outwardAngle)",
+    "dirDot": "dx * nx + dy * ny",
+    "pSin": "dx * tx + dy * ty",
+    "pHoleX": "perimX + dx * holeExtend",
+    "pHoleY": "perimY + dy * holeExtend",
+    "pEarMid": "(holeExtend - earDia / 2) / 2",
+    "pEarLen": "abs(holeExtend + earDia / 2) + earDia",
+    "pEarX": "perimX + dx * pEarMid",
+    "pEarY": "perimY + dy * pEarMid",
+    "pOnStraight": "outwardAngle == 0 || outwardAngle == 90 || outwardAngle == 180 || outwardAngle == 270",
+    "pFilletOk": "holeStyle == 'perimeter' && pOnStraight && dirDot > 0.35 && holeExtend > 0",
+    "pCosSafe": "max(dirDot, 0.35)",
+    "pEdgePos": "perimX * tx + perimY * ty",
+    "pEdgeHalf": "(outwardAngle == 0 || outwardAngle == 180) ? hx - corner : hy - corner",
+    "pT0": "earDia / (2 * pCosSafe)",
+    "pSpaceR": "pEdgeHalf - (pEdgePos + pT0)",
+    "pSpaceL": "pEdgeHalf + (pEdgePos - pT0)",
+    "pFilletMaxR": "pFilletOk ? max(min(pSpaceR, holeExtend - (earDia / 2) * (pSin / pCosSafe)) * pCosSafe / (1 + pSin), 0) : 0",
+    "pFilletMaxL": "pFilletOk ? max(min(pSpaceL, holeExtend + (earDia / 2) * (pSin / pCosSafe)) * pCosSafe / (1 - pSin), 0) : 0",
+    "pFilletR": "holeFillet ? min(holeFilletR, pFilletMaxR) : 0",
+    "pFilletL": "holeFillet ? min(holeFilletR, pFilletMaxL) : 0",
+    "pAR": "pFilletR * (1 + pSin) / pCosSafe",
+    "pHR": "pFilletR * (1 + pSin)",
+    "pMinTR": "pT0 + min(0, pHR * pSin / pCosSafe)",
+    "pMaxTR": "pT0 + pAR",
+    "pRectWR": "max(pMaxTR - pMinTR, 0.1)",
+    "pRectHR": "pHR + 0.5",
+    "pRectMidTR": "(pMinTR + pMaxTR) / 2",
+    "pRectMidNR": "(pHR - 0.5) / 2",
+    "pRectXR": "perimX + tx * pRectMidTR + nx * pRectMidNR",
+    "pRectYR": "perimY + ty * pRectMidTR + ny * pRectMidNR",
+    "pCircXR": "perimX + tx * pMaxTR + nx * pFilletR",
+    "pCircYR": "perimY + ty * pMaxTR + ny * pFilletR",
+    "pAL": "pFilletL * (1 - pSin) / pCosSafe",
+    "pHL": "pFilletL * (1 - pSin)",
+    "pMinTL": "-pT0 - pAL",
+    "pMaxTL": "-pT0 + max(0, pHL * pSin / pCosSafe)",
+    "pRectWL": "max(pMaxTL - pMinTL, 0.1)",
+    "pRectHL": "pHL + 0.5",
+    "pRectMidTL": "(pMinTL + pMaxTL) / 2",
+    "pRectMidNL": "(pHL - 0.5) / 2",
+    "pRectXL": "perimX + tx * pRectMidTL + nx * pRectMidNL",
+    "pRectYL": "perimY + ty * pRectMidTL + ny * pRectMidNL",
+    "pCircXL": "perimX + tx * pMinTL + nx * pFilletL",
+    "pCircYL": "perimY + ty * pMinTL + ny * pFilletL",
     "earAnchor": "earDia / 2",
     "earLen": "abs(earAnchor - holeInset) * sqrt(2) + earDia",
-    "earC": "width / 2 - (earAnchor + holeInset) / 2"
+    "earCX": "hx - (earAnchor + holeInset) / 2",
+    "earCY": "hy - (earAnchor + holeInset) / 2",
+    "cMeet": "earDia / sqrt(2)",
+    "tabFilletMax": "max(min(earDia / 2, hx - corner - earDia / 2), 0)",
+    "cornerFilletMax": "max(min((earDia / 2 - holeInset * sqrt(2)) / (sqrt(2) - 1), min(tagW - corner - cMeet, tagH - corner - cMeet) / (sqrt(2) - 1)), 0)",
+    "filletMax": "holeStyle == 'tab' ? tabFilletMax : (holeStyle == 'corner' ? cornerFilletMax : 0)",
+    "filletR": "holeFillet ? min(holeFilletR, filletMax) : 0",
+    "cFilT": "filletR * (sqrt(2) - 1)",
+    "cFilStep": "cFilT / sqrt(2)",
+    "holeX": "holeStyle == 'perimeter' ? pHoleX : (holeStyle == 'corner' ? hx - holeInset : 0)",
+    "holeY": "holeStyle == 'perimeter' ? pHoleY : (holeStyle == 'corner' ? hy - holeInset : hy + earDia / 2)",
+    "holeClearance": "sqrt(2) * (margin - holeInset) - holeDia / 2",
+    "qrDx": "max(abs(holeX - qrX) - qrSize / 2, 0)",
+    "qrDy": "max(abs(holeY - qrY) - qrSize / 2, 0)",
+    "holeQrGap": "sqrt(qrDx * qrDx + qrDy * qrDy) - holeDia / 2",
+    "goesInward": "holeStyle == 'perimeter' && ((dirDot < -0.05 && holeExtend > 0) || (dirDot > 0.05 && holeExtend < 0))"
   },
   "steps": [
     {
@@ -197,8 +527,8 @@
       "part": "base",
       "comment": "tag body",
       "shape": "roundedRect",
-      "width": "width",
-      "height": "width",
+      "width": "tagW",
+      "height": "tagH",
       "radius": "corner",
       "thickness": "thickness"
     },
@@ -211,8 +541,54 @@
       "width": "earDia",
       "height": "earDia * 2",
       "radius": "earDia / 2",
-      "y": "width / 2",
+      "y": "hy",
       "thickness": "thickness"
+    },
+    {
+      "add": "shape",
+      "part": "base",
+      "when": "holeStyle == 'tab' && holeFillet && filletR >= 0.2",
+      "comment": "tab right inside fillet material",
+      "shape": "rect",
+      "width": "filletR + 0.5",
+      "height": "filletR + 0.5",
+      "x": "earDia / 2 + filletR / 2 - 0.25",
+      "y": "hy + filletR / 2 - 0.25",
+      "thickness": "thickness"
+    },
+    {
+      "add": "shape",
+      "part": "base",
+      "when": "holeStyle == 'tab' && holeFillet && filletR >= 0.2",
+      "comment": "tab left inside fillet material",
+      "shape": "rect",
+      "width": "filletR + 0.5",
+      "height": "filletR + 0.5",
+      "x": "-earDia / 2 - filletR / 2 + 0.25",
+      "y": "hy + filletR / 2 - 0.25",
+      "thickness": "thickness"
+    },
+    {
+      "subtract": "shape",
+      "from": "base",
+      "when": "holeStyle == 'tab' && holeFillet && filletR >= 0.2",
+      "comment": "tab right inside fillet cutout",
+      "shape": "circle",
+      "diameter": "filletR * 2",
+      "x": "earDia / 2 + filletR",
+      "y": "hy + filletR",
+      "through": true
+    },
+    {
+      "subtract": "shape",
+      "from": "base",
+      "when": "holeStyle == 'tab' && holeFillet && filletR >= 0.2",
+      "comment": "tab left inside fillet cutout",
+      "shape": "circle",
+      "diameter": "filletR * 2",
+      "x": "-earDia / 2 - filletR",
+      "y": "hy + filletR",
+      "through": true
     },
     {
       "add": "shape",
@@ -223,10 +599,118 @@
       "width": "earDia",
       "height": "earLen",
       "radius": "earDia / 2",
-      "x": "earC",
-      "y": "earC",
+      "x": "earCX",
+      "y": "earCY",
       "rotate": -45,
       "thickness": "thickness"
+    },
+    {
+      "add": "shape",
+      "part": "base",
+      "when": "holeStyle == 'corner' && holeFillet && filletR >= 0.2",
+      "comment": "corner ear top inside fillet material",
+      "shape": "rect",
+      "width": "cFilT + cFilStep",
+      "height": "cFilStep + 0.5",
+      "x": "hx - cMeet + (cFilStep - cFilT) / 2",
+      "y": "hy + cFilStep / 2 - 0.25",
+      "thickness": "thickness"
+    },
+    {
+      "add": "shape",
+      "part": "base",
+      "when": "holeStyle == 'corner' && holeFillet && filletR >= 0.2",
+      "comment": "corner ear right inside fillet material",
+      "shape": "rect",
+      "width": "cFilStep + 0.5",
+      "height": "cFilT + cFilStep",
+      "x": "hx + cFilStep / 2 - 0.25",
+      "y": "hy - cMeet + (cFilStep - cFilT) / 2",
+      "thickness": "thickness"
+    },
+    {
+      "subtract": "shape",
+      "from": "base",
+      "when": "holeStyle == 'corner' && holeFillet && filletR >= 0.2",
+      "comment": "corner ear top inside fillet cutout",
+      "shape": "circle",
+      "diameter": "filletR * 2",
+      "x": "hx - cMeet - cFilT",
+      "y": "hy + filletR",
+      "through": true
+    },
+    {
+      "subtract": "shape",
+      "from": "base",
+      "when": "holeStyle == 'corner' && holeFillet && filletR >= 0.2",
+      "comment": "corner ear right inside fillet cutout",
+      "shape": "circle",
+      "diameter": "filletR * 2",
+      "x": "hx + filletR",
+      "y": "hy - cMeet - cFilT",
+      "through": true
+    },
+    {
+      "add": "shape",
+      "part": "base",
+      "when": "holeStyle == 'perimeter'",
+      "comment": "variable perimeter keyring ear",
+      "shape": "roundedRect",
+      "width": "earDia",
+      "height": "pEarLen",
+      "radius": "earDia / 2",
+      "x": "pEarX",
+      "y": "pEarY",
+      "rotate": "-tabAngle",
+      "thickness": "thickness"
+    },
+    {
+      "add": "shape",
+      "part": "base",
+      "when": "holeStyle == 'perimeter' && holeFillet && pFilletR >= 0.2",
+      "comment": "perimeter tab right inside fillet material",
+      "shape": "rect",
+      "width": "pRectWR",
+      "height": "pRectHR",
+      "x": "pRectXR",
+      "y": "pRectYR",
+      "rotate": "-outwardAngle",
+      "thickness": "thickness"
+    },
+    {
+      "add": "shape",
+      "part": "base",
+      "when": "holeStyle == 'perimeter' && holeFillet && pFilletL >= 0.2",
+      "comment": "perimeter tab left inside fillet material",
+      "shape": "rect",
+      "width": "pRectWL",
+      "height": "pRectHL",
+      "x": "pRectXL",
+      "y": "pRectYL",
+      "rotate": "-outwardAngle",
+      "thickness": "thickness"
+    },
+    {
+      "subtract": "shape",
+      "from": "base",
+      "when": "holeStyle == 'perimeter' && holeFillet && pFilletR >= 0.2",
+      "comment": "perimeter tab right inside fillet cutout",
+      "shape": "circle",
+      "diameter": "pFilletR * 2",
+      "x": "pCircXR",
+      "y": "pCircYR",
+      "through": true
+    },
+    {
+      "subtract": "shape",
+      "from": "base",
+      "when": "holeStyle == 'perimeter' && holeFillet && pFilletL >= 0.2",
+      "comment": "perimeter tab left inside fillet cutout",
+      "shape": "circle",
+      "diameter": "pFilletL * 2",
+      "x": "pCircXL",
+      "y": "pCircYL",
+      "through": true
     },
     {
       "subtract": "shape",
@@ -245,6 +729,8 @@
       "content": "content",
       "ecc": "ecc",
       "size": "qrSize",
+      "x": "qrX",
+      "y": "qrY",
       "z": "thickness",
       "thickness": "codeHeight"
     },
@@ -256,6 +742,8 @@
       "content": "content",
       "ecc": "ecc",
       "size": "qrSize",
+      "x": "qrX",
+      "y": "qrY",
       "z": "thickness - codeHeight",
       "thickness": "codeHeight"
     },
@@ -266,6 +754,50 @@
       "content": "content",
       "ecc": "ecc",
       "size": "qrSize",
+      "x": "qrX",
+      "y": "qrY",
+      "z": "thickness - codeHeight",
+      "thickness": "codeHeight + 1"
+    },
+    {
+      "add": "text",
+      "part": "code",
+      "when": "textSide != 'none' && style == 'raised'",
+      "comment": "raised nametag text",
+      "text": "tagText",
+      "size": "textSize",
+      "font": "textFont",
+      "x": "textX",
+      "y": "textY",
+      "rotate": "textRot",
+      "z": "thickness",
+      "thickness": "codeHeight"
+    },
+    {
+      "add": "text",
+      "part": "code",
+      "when": "textSide != 'none' && style == 'flush'",
+      "comment": "flush inlay nametag text",
+      "text": "tagText",
+      "size": "textSize",
+      "font": "textFont",
+      "x": "textX",
+      "y": "textY",
+      "rotate": "textRot",
+      "z": "thickness - codeHeight",
+      "thickness": "codeHeight"
+    },
+    {
+      "subtract": "text",
+      "from": "base",
+      "when": "textSide != 'none' && style == 'engraved'",
+      "comment": "engraved nametag text",
+      "text": "tagText",
+      "size": "textSize",
+      "font": "textFont",
+      "x": "textX",
+      "y": "textY",
+      "rotate": "textRot",
       "z": "thickness - codeHeight",
       "thickness": "codeHeight + 1"
     }
@@ -290,6 +822,26 @@
     {
       "when": "holeStyle == 'corner' && holeClearance < 0.5",
       "text": "The keyring hole is too close to the QR code ({holeClearance} mm gap). Move it further out (lower 'Hole position from corner') or increase the margin."
+    },
+    {
+      "when": "holeFillet && (holeStyle == 'tab' || holeStyle == 'corner') && filletR < holeFilletR - 0.01",
+      "text": "Keyring fillet radius was reduced to {filletR} mm to fit between the tab/ear and the tag's straight edge."
+    },
+    {
+      "when": "holeFillet && holeStyle == 'perimeter' && (pFilletR < holeFilletR - 0.01 || pFilletL < holeFilletR - 0.01)",
+      "text": "Perimeter fillet radius was reduced or skipped on one or both sides ({pFilletL} mm / {pFilletR} mm) to fit the straight edge and tab angle."
+    },
+    {
+      "when": "goesInward",
+      "text": "Warning: the keyring tab is pointing inward into the tag body. Switch 'Tab direction' to 'Straight out from edge' or 'Away from center', or adjust the custom angle."
+    },
+    {
+      "when": "holeStyle == 'perimeter' && holeQrGap < 0.8",
+      "text": "Warning: the keyring hole is too close to or overlaps the QR code ({holeQrGap} mm gap). Increase 'Hole distance from edge' or adjust the tab direction."
+    },
+    {
+      "when": "textSide != 'none' && (textFont == 'script' || textFont == 'stencil') && textSize < 8",
+      "text": "Script and stencil fonts have thin strokes; use a font size of at least 8 mm for reliable 0.4 mm nozzle printing."
     }
   ]
 }
