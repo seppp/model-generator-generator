@@ -39,7 +39,7 @@ Read `docs/RECIPES.md` first. Use `recipes/qr-keychain.json`,
    option and number extreme. Fix all problems.
 6. **Look at it**: `npm run export -- <id> key=value ...` writes STL, 3MF and
    `.fs` files to `out/`; `npm run dev` serves the site at
-   http://localhost:8080/<id>/. If you can, take a screenshot with Playwright
+   http://localhost:8080/?recipe=<id>. If you can, take a screenshot with Playwright
    and look at the preview before calling it done.
 7. Commit the recipe (and anything else you changed) and open a PR. Mention
    that the FeatureScript was generated but not run in Onshape unless someone
