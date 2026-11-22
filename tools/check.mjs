@@ -5,6 +5,7 @@ import { validateRecipe, defaultValues } from '../engine/recipe.js';
 import { buildModel, disposeModel } from '../engine/build.js';
 import { compileFeatureScript } from '../engine/featurescript.js';
 import { to3MF, toSTL } from '../engine/export.js';
+import { formatRecipe } from '../engine/format.js';
 
 const env = await nodeEnv();
 let failed = 0;
@@ -26,6 +27,10 @@ function variations(recipe) {
 }
 
 for (const recipe of loadRecipes()) {
+  if (recipe.__text !== formatRecipe(recipe)) {
+    console.error(`✗ recipes/${recipe.id}.json is not canonically formatted: run npm run format`);
+    failed++;
+  }
   try {
     validateRecipe(recipe);
   } catch (e) {

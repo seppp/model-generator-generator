@@ -7,6 +7,8 @@ const FONT_FILES = {
   bold: 'vendor/fonts/open-sans-latin-700-normal.woff',
 };
 
+export const REPO = 'seppp/model-generator-generator';
+
 let envPromise;
 
 export function browserEnv() {

@@ -83,6 +83,16 @@ export class Viewer {
     }
   }
 
+  getView() {
+    return { position: this.camera.position.toArray(), target: this.controls.target.toArray() };
+  }
+
+  setView(v) {
+    this.camera.position.fromArray(v.position);
+    this.controls.target.fromArray(v.target);
+    this.fitted = true;
+  }
+
   fit() {
     const box = new THREE.Box3().setFromObject(this.group);
     if (box.isEmpty()) return;

@@ -32,7 +32,9 @@ export function loadRecipes(dir = new URL('../recipes/', import.meta.url)) {
     .filter((f) => f.endsWith('.json'))
     .sort()
     .map((f) => {
-      const recipe = JSON.parse(fs.readFileSync(new URL(f, dir), 'utf8'));
+      const text = fs.readFileSync(new URL(f, dir), 'utf8');
+      const recipe = JSON.parse(text);
+      Object.defineProperty(recipe, '__text', { value: text, enumerable: false });
       if (recipe.id !== f.replace(/\.json$/, '')) throw new Error(`recipes/${f}: id must match the file name`);
       return recipe;
     });
