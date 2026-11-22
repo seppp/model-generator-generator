@@ -194,7 +194,7 @@ export function compileFeatureScript(recipe, rawValues = {}, { colors = {} } = {
     for (const [k, spec] of Object.entries(block.args)) {
       const v = s[k];
       if (spec.baked) js[k] = v === undefined ? spec.default : evaluate(v, scope);
-      if (v === undefined) f[k] = typeof spec.default === 'number' ? fsNumber(spec.default) : fsString(spec.default);
+      if (v === undefined) f[k] = typeof spec.default === 'number' ? fsNumber(spec.default) : typeof spec.default === 'boolean' ? String(spec.default) : fsString(spec.default);
       else if (spec.type === 'enum' && spec.options.includes(v)) f[k] = fsString(v);
       else f[k] = toFeatureScript(v, names);
     }

@@ -17,6 +17,10 @@
     "code": {
       "label": "QR code",
       "color": "#111827"
+    },
+    "nametag": {
+      "label": "Nametag",
+      "color": "#dc2626"
     }
   },
   "params": [
@@ -526,6 +530,50 @@
       ]
     },
     {
+      "key": "textBold",
+      "type": "boolean",
+      "label": "Bold",
+      "default": false,
+      "group": "Nametag",
+      "showIf": "textSide != 'none'",
+      "help": "Bold, italic and underline work with every font."
+    },
+    {
+      "key": "textItalic",
+      "type": "boolean",
+      "label": "Italic",
+      "default": false,
+      "group": "Nametag",
+      "showIf": "textSide != 'none'"
+    },
+    {
+      "key": "textUnderline",
+      "type": "boolean",
+      "label": "Underline",
+      "default": false,
+      "group": "Nametag",
+      "showIf": "textSide != 'none'"
+    },
+    {
+      "key": "textColor",
+      "type": "select",
+      "label": "Nametag color",
+      "default": "same",
+      "group": "Nametag",
+      "help": "Own color needs the multi-material 3MF.",
+      "showIf": "textSide != 'none' && style != 'engraved'",
+      "options": [
+        {
+          "value": "same",
+          "label": "Same as QR code"
+        },
+        {
+          "value": "own",
+          "label": "Own color"
+        }
+      ]
+    },
+    {
       "key": "textSize",
       "type": "number",
       "unit": "mm",
@@ -1014,7 +1062,7 @@
     {
       "add": "text",
       "part": "code",
-      "when": "textSide != 'none' && style == 'raised'",
+      "when": "textSide != 'none' && style == 'raised' && textColor != 'own'",
       "comment": "raised nametag text",
       "text": "tagText",
       "size": "textSize",
@@ -1023,12 +1071,32 @@
       "y": "textY",
       "rotate": "textRot",
       "z": "thickness",
-      "thickness": "codeHeight"
+      "thickness": "codeHeight",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline"
+    },
+    {
+      "add": "text",
+      "part": "nametag",
+      "when": "textSide != 'none' && style == 'raised' && textColor == 'own'",
+      "comment": "raised nametag text in its own color",
+      "text": "tagText",
+      "size": "textSize",
+      "font": "textFont",
+      "x": "textX",
+      "y": "textY",
+      "rotate": "textRot",
+      "z": "thickness",
+      "thickness": "codeHeight",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline"
     },
     {
       "add": "text",
       "part": "code",
-      "when": "textSide != 'none' && style == 'flush'",
+      "when": "textSide != 'none' && style == 'flush' && textColor != 'own'",
       "comment": "flush inlay nametag text",
       "text": "tagText",
       "size": "textSize",
@@ -1037,7 +1105,27 @@
       "y": "textY",
       "rotate": "textRot",
       "z": "thickness - codeHeight",
-      "thickness": "codeHeight"
+      "thickness": "codeHeight",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline"
+    },
+    {
+      "add": "text",
+      "part": "nametag",
+      "when": "textSide != 'none' && style == 'flush' && textColor == 'own'",
+      "comment": "flush inlay nametag text in its own color",
+      "text": "tagText",
+      "size": "textSize",
+      "font": "textFont",
+      "x": "textX",
+      "y": "textY",
+      "rotate": "textRot",
+      "z": "thickness - codeHeight",
+      "thickness": "codeHeight",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline"
     },
     {
       "subtract": "text",
@@ -1051,12 +1139,15 @@
       "y": "textY",
       "rotate": "textRot",
       "z": "thickness - codeHeight",
-      "thickness": "codeHeight + 1"
+      "thickness": "codeHeight + 1",
+      "bold": "textBold",
+      "italic": "textItalic",
+      "underline": "textUnderline"
     }
   ],
   "notes": [
     {
-      "when": "style == 'raised'",
+      "when": "style == 'raised' && (textSide == 'none' || textColor != 'own')",
       "text": "Light tag, swap to dark at {thickness} mm. The filament swap 3MF does it for you."
     },
     {
@@ -1094,6 +1185,10 @@
     {
       "when": "textSide != 'none' && (textFont == 'script' || textFont == 'stencil') && textSize < 8",
       "text": "Script and stencil need 8 mm text or more."
+    },
+    {
+      "when": "textSide != 'none' && style == 'raised' && textColor == 'own'",
+      "text": "A filament swap colors the code and nametag alike. Use the multi-material 3MF for the own nametag color."
     }
   ]
 }

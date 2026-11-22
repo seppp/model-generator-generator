@@ -44,7 +44,8 @@ Then look at it yourself:
   >= 0.8 mm, text >= 4 mm, script and stencil fonts >= 8 mm, QR modules
   >= 1 mm, holes >= 4 mm). Fonts must be names from `docs/RECIPES.md`; a
   `custom` font only works in the submitter's browser, so offer the font
-  choice with a bundled default.
+  choice with a bundled default. Bold, italic and underline are block
+  arguments (`bold`, `italic`, `underline`), not separate fonts.
 - For a change: are existing param `key`s kept (shared links rely on them),
   and does the default still look like before unless that was the point?
 - For a new generator: is the `id` new, short and descriptive? Does it

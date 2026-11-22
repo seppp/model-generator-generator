@@ -207,6 +207,7 @@ function evalArg(spec, value, scope) {
   const v = evaluate(value, scope);
   if (spec.type === 'enum' && !spec.options.includes(v)) throw new Error(`'${v}' is not one of ${spec.options.join(', ')}`);
   if (spec.type === 'number' && !Number.isFinite(v)) throw new Error(`argument evaluated to ${v}`);
+  if (spec.type === 'boolean') return !!v;
   return v;
 }
 
